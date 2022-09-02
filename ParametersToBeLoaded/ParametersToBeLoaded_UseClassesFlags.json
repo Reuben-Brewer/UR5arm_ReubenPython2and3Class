@@ -5,7 +5,7 @@
     "USE_MYPRINT_FLAG":1,
     "USE_UR5arm_FLAG":1,
     "USE_ZEDasHandController_FLAG":1,
-    "USE_RobotiqGripper2F85_FLAG":0,
+    "USE_RobotiqGripper2F85_FLAG":1,
     "USE_JOYSTICK_FLAG":1,
     "USE_PLOTTER_FLAG":0,
     "SAVE_PROGRAM_LOGS_FLAG": 0,
