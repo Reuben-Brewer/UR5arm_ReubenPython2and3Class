@@ -1,0 +1,10 @@
+{
+    "Joystick_Directions": "Joystick_IntegerIDdesired = -1 means that we don't care about the IntegerID.",
+    "Joystick_NameDesired":"VKBsim Gladiator",
+    "Joystick_IntegerIDdesired":-1,
+    "Joystick_ShowJustDotMovingFlag":0,
+    "Joystick_Axis_Index_ToDisplayAsHorizontalAxisOn2DdotDisplay":0,
+    "Joystick_Axis_Index_ToDisplayAsVerticalAxisOn2DdotDisplay":1,
+    "Joystick_Button_Index_ToDisplayAsDotColorOn2DdotDisplay":13,
+    "Joystick_PrintInfoForAllDetectedJoysticksFlag":0
+}

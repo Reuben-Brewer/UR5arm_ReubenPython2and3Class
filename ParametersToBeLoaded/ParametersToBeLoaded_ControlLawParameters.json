@@ -1,0 +1,12 @@
+{
+    "ControlLawParameters_UserNotes": "CAN DISABLE AN AXIS OF THE ZED BY SETTING ITS GAIN TO 0.",
+    "ControlType_StartingValue":"KeyboardControl",
+    "ControlType_AcceptableValues": ["KeyboardControl", "JoystickControl", "ZEDcontrol"],
+    "Teleop_UR5arm_MainThread_TimeToSleepEachLoop":0.008,
+    "KeyPressResponse_IncrementOrDecrementURtoolTipAllAxes_IncrementSize": 0.020,
+    "Joystick_AllAxes_IncrementSize": 0.020,
+    "ZEDasHandController_PositionList_ScalingFactorList": [0.07, 0.07, 0.07],
+    "ZEDasHandController_RollPitchYaw_AbtXYZ_List_ScalingFactorList": [0.005, 0.005, 0.005],
+    "KeyPressResponse_RobotiqGripper2F85_IncrementSize": 2.00
+}
+
