@@ -1,6 +1,6 @@
 {
     "UR5arm_Directions": "MoveL MAX speed/accel settings are 1.5 m/s and 150 m/s^2 respectively",
-    "UR5arm_ArmNameToUse": "CB3_K",
+    "UR5arm_ArmNameToUse": "CB3_S",
     "UR5arm_Arm_Specific_Details":
     {
         "CB2_S":
@@ -48,7 +48,7 @@
 
     "UR5arm_PositionControl_ServoJ_MoveThroughListOfPoses_SafeReturnToStartingPoseFromAnywhere":
         [
-            {"JointAngleList_Deg": [88.310, -115.040, 88.510, 21.571, 82.274, 41.313], "TimeDurationSec": 5.0}
+            {"JointAngleList_Deg": [-12.463, -78.767, 79.495, -89.215, -89.185, -24.887], "TimeDurationSec": 5.0}
         ],
 
     "UR5arm_EnableTx_State_AtStartupFlag": 1,

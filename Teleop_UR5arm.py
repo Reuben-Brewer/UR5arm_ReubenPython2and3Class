@@ -62,6 +62,7 @@ import json
 import keyboard #"sudo pip install keyboard" https://pypi.org/project/keyboard/, https://github.com/boppreh/keyboard
 import subprocess #for beep command line call
 import numpy
+import re
 #########################################################
 
 #########################################################
@@ -198,6 +199,24 @@ def LoadAndParseJSONfile_RobotiqGripper2F85():
     #def LoadAndParseJSONfile_AddDictKeysToGlobalsDict(GlobalsDict, JSONfilepathFull, USE_PassThrough0and1values_ExitProgramOtherwise_FOR_FLAGS = 0, PrintResultsFlag = 0):
     ParametersToBeLoaded_RobotiqGripper2F85_Dict = LoadAndParseJSONfile_AddDictKeysToGlobalsDict(globals(), JSONfilepathFull_RobotiqGripper2F85, 1, 1)
     #################################
+
+#######################################################################################################################
+#######################################################################################################################
+
+#######################################################################################################################
+#######################################################################################################################
+def LoadAndParseJSONfile_Keyboard():
+    global ParametersToBeLoaded_Keyboard_Dict
+    global Keyboard_KeysToTeleopControlsMapping_DictOfDicts_FormattedAsNicelyPrintedString
+
+    #################################
+    JSONfilepathFull_Keyboard = ParametersToBeLoaded_Directory_TO_BE_USED + "//ParametersToBeLoaded_Keyboard.json"
+
+    #def LoadAndParseJSONfile_AddDictKeysToGlobalsDict(GlobalsDict, JSONfilepathFull, USE_PassThrough0and1values_ExitProgramOtherwise_FOR_FLAGS = 0, PrintResultsFlag = 0):
+    ParametersToBeLoaded_Keyboard_Dict = LoadAndParseJSONfile_AddDictKeysToGlobalsDict(globals(), JSONfilepathFull_Keyboard, 1, 1)
+    #################################
+
+    Keyboard_KeysToTeleopControlsMapping_DictOfDicts_FormattedAsNicelyPrintedString = ConvertDictToProperlyFormattedStringForPrinting(Keyboard_KeysToTeleopControlsMapping_DictOfDicts, NumberOfDecimalsPlaceToUse = 2, NumberOfEntriesPerLine = 1, NumberOfTabsBetweenItems = 1)
 
 #######################################################################################################################
 #######################################################################################################################
@@ -847,49 +866,22 @@ def DedicatedKeyboardListeningThread():
 
     SharedGlobals_Teleop_UR5arm.StartingTime_CalculatedFromDedicatedKeyboardListeningThread = getPreciseSecondsTimeStampString()
 
-    ###############################################
-    #IT LOOKS LIKE WINDOWS CAN HANDLE SHIFT+KEY, BUT RASPBERRY PI CAN'T
-    #keyboard.on_release_key(keyboard.KeyCode.from_dead('~'), KeyPressResponse_RecordNewWaypoint_JointSpace)
-    keyboard.on_release_key("w", KeyPressResponse_RecordNewWaypoint_JointSpace)
-    keyboard.on_release_key("l", KeyPressResponse_RecordNewWaypoint_CartesianSpace)
-    ###############################################
+    ###################################################
+    for AxisNameAsKey in SharedGlobals_Teleop_UR5arm.Keyboard_KeysToTeleopControlsMapping_DictOfDicts:
 
-    ###############################################
-    keyboard.on_press_key("t", KeyPressResponse_ZEDcontrolClutch_START)
-    keyboard.on_release_key("t", KeyPressResponse_ZEDcontrolClutch_STOP)
-    ###############################################
+            KeyToTeleopControlsMappingDict = SharedGlobals_Teleop_UR5arm.Keyboard_KeysToTeleopControlsMapping_DictOfDicts[AxisNameAsKey]
 
-    ###############################################
-    keyboard.on_press_key("a", KeyPressResponse_IncrementURtoolTipInX_START)
-    keyboard.on_release_key("a", KeyPressResponse_IncrementURtoolTipInX_STOP)
+            KeyName = KeyToTeleopControlsMappingDict["KeyName"]
+            OnPressCallbackFunctionNameString = KeyToTeleopControlsMappingDict["OnPressCallbackFunctionNameString"]
+            OnReleaseCallbackFunctionNameString = KeyToTeleopControlsMappingDict["OnReleaseCallbackFunctionNameString"]
 
-    keyboard.on_press_key("z", KeyPressResponse_DecrementURtoolTipInX_START)
-    keyboard.on_release_key("z", KeyPressResponse_DecrementURtoolTipInX_STOP)
-    ###############################################
+            if OnPressCallbackFunctionNameString in globals():
+                keyboard.on_press_key(KeyName, globals()[OnPressCallbackFunctionNameString])
 
-    ###############################################
-    keyboard.on_press_key("s", KeyPressResponse_IncrementURtoolTipInY_START)
-    keyboard.on_release_key("s", KeyPressResponse_IncrementURtoolTipInY_STOP)
+            if OnReleaseCallbackFunctionNameString in globals():
+                keyboard.on_release_key(KeyName, globals()[OnReleaseCallbackFunctionNameString])
 
-    keyboard.on_press_key("x", KeyPressResponse_DecrementURtoolTipInY_START)
-    keyboard.on_release_key("x", KeyPressResponse_DecrementURtoolTipInY_STOP)
-    ###############################################
-
-    ###############################################
-    keyboard.on_press_key("d", KeyPressResponse_IncrementURtoolTipInZ_START)
-    keyboard.on_release_key("d", KeyPressResponse_IncrementURtoolTipInZ_STOP)
-
-    keyboard.on_press_key("c", KeyPressResponse_DecrementURtoolTipInZ_START)
-    keyboard.on_release_key("c", KeyPressResponse_DecrementURtoolTipInZ_STOP)
-    ###############################################
-
-    ###############################################
-    keyboard.on_press_key("v", KeyPressResponse_OpenRobotiqGripper2F85_START)
-    keyboard.on_release_key("v", KeyPressResponse_OpenRobotiqGripper2F85_STOP)
-
-    keyboard.on_press_key("f", KeyPressResponse_CloseRobotiqGripper2F85_START)
-    keyboard.on_release_key("f", KeyPressResponse_CloseRobotiqGripper2F85_STOP)
-    ###############################################
+    ###################################################
 
     ###############################################
     while SharedGlobals_Teleop_UR5arm.EXIT_PROGRAM_FLAG == 0:
@@ -1190,16 +1182,21 @@ def GUI_update_clock():
     global ZEDasHandController_PositionList_ScalingFactorList
     global ZEDasHandController_RotationMatrixListsOfLists
     global ZEDasHandController_RollPitchYaw_AbtXYZ_List_ScalingFactorList
+    global ZEDasHandControllerInfo_Label
 
     global RobotiqGripper2F85_ReubenPython2and3ClassObject
     global RobotiqGripper2F85_OPEN_FLAG
     global SHOW_IN_GUI_RobotiqGripper2F85_FLAG
+
+    global KeyboardInfo_Label
+    global Keyboard_KeysToTeleopControlsMapping_DictOfDicts_FormattedAsNicelyPrintedString
 
     global JoystickHID_ReubenPython2and3ClassObject
     global JOYSTICK_OPEN_FLAG
     global SHOW_IN_GUI_JOYSTICK_FLAG
     global Joystick_AddToUR5armCurrentPositionList
     global Joystick_AxisHatButtonOrBallTo6DOFposeMapping_ListOfDicts_FormattedAsNicelyPrintedString
+    global JoystickInfo_Label
 
     global MyPrint_ReubenPython2and3ClassObject
     global MYPRINT_OPEN_FLAG
@@ -1212,10 +1209,8 @@ def GUI_update_clock():
     global ControlType_StartingValue
     global ControlType_AcceptableValues
     global SharedGlobals_Teleop_UR5arm_MainThread_TimeToSleepEachLoop
-    global KeyPressResponse_IncrementOrDecrementURtoolTipAllAxes_IncrementSize
     global ZEDasHandController_PositionList_ScalingFactorList
     global ZEDasHandController_RollPitchYaw_AbtXYZ_List_ScalingFactorList
-    global KeyPressResponse_RobotiqGripper2F85_IncrementSize
 
     global LoopCounter_CalculatedFromGUIthread
     global CurrentTime_CalculatedFromGUIthread
@@ -1252,7 +1247,16 @@ def GUI_update_clock():
                             "\nUR5arm_MostRecentDict_JointAngleList_Rad: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_JointAngleList_Rad, 0, 5) +\
                             "\nUR5, ToolVectorActual: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual, 0, 5) +\
                             "\nUR5, ToolVectorActual_ToBeSet: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(UR5arm_ToolVectorActual_ToBeSet, 0, 5) +\
-                            "\nKeyboard flags: " + str([SharedGlobals_Teleop_UR5arm.KeyPressResponse_DecrementURtoolTipInX_NeedsToBeChangedFlag,
+                            "\nRobotiqGripper2F85, Position Speed Force: " + str([RobotiqGripper2F85_Position_ToBeSet, RobotiqGripper2F85_Speed_ToBeSet, RobotiqGripper2F85_Force_ToBeSet]) + \
+                            "\nCSVfileForTrajectoryData_SaveFlag: " + str(CSVfileForTrajectoryData_SaveFlag) +\
+                            "\nDifference UR5arm for CSV writing: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(UR5arm_MostRecentDict_ToolVectorActual_MotionFromSnapshotAtTimeOfCreatingCSVfileForTrajectoryData, 0, 3)
+
+            #########################################################
+            #########################################################
+
+            #########################################################
+            #########################################################
+            KeyboardInfo_Label["text"] = "Keyboard flags: " + str([SharedGlobals_Teleop_UR5arm.KeyPressResponse_DecrementURtoolTipInX_NeedsToBeChangedFlag,
                                                         SharedGlobals_Teleop_UR5arm.KeyPressResponse_IncrementURtoolTipInX_NeedsToBeChangedFlag,
                                                         SharedGlobals_Teleop_UR5arm.KeyPressResponse_DecrementURtoolTipInY_NeedsToBeChangedFlag,
                                                         SharedGlobals_Teleop_UR5arm.KeyPressResponse_IncrementURtoolTipInY_NeedsToBeChangedFlag,
@@ -1260,18 +1264,27 @@ def GUI_update_clock():
                                                         SharedGlobals_Teleop_UR5arm.KeyPressResponse_IncrementURtoolTipInZ_NeedsToBeChangedFlag,
                                                         SharedGlobals_Teleop_UR5arm.KeyPressResponse_OpenRobotiqGripper2F85_NeedsToBeChangedFlag,
                                                         SharedGlobals_Teleop_UR5arm.KeyPressResponse_CloseRobotiqGripper2F85_NeedsToBeChangedFlag]) + \
-                            "\nZEDasHandController_PositionList_ScalingFactorList: " + str(ZEDasHandController_PositionList_ScalingFactorList) + \
+                            "\nKeyboard_AddToUR5armCurrentPositionList: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(SharedGlobals_Teleop_UR5arm.Keyboard_AddToUR5armCurrentPositionList, 0, 3) +\
+                            "\nKeyboard_KeysToTeleopControlsMapping_DictOfDicts: " + \
+                            "\n" + Keyboard_KeysToTeleopControlsMapping_DictOfDicts_FormattedAsNicelyPrintedString
+            #########################################################
+            #########################################################
+
+            #########################################################
+            #########################################################
+            JoystickInfo_Label["text"] = "Joystick_AddToUR5armCurrentPositionList: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(Joystick_AddToUR5armCurrentPositionList, 0, 3) +\
+                            "\nJoystick_AxisHatButtonOrBallTo6DOFposeMapping_ListOfDicts: " + \
+                            "\n" + Joystick_AxisHatButtonOrBallTo6DOFposeMapping_ListOfDicts_FormattedAsNicelyPrintedString
+            #########################################################
+            #########################################################
+
+            #########################################################
+            #########################################################
+            ZEDasHandControllerInfo_Label["text"] = "\nZEDasHandController_PositionList_ScalingFactorList: " + str(ZEDasHandController_PositionList_ScalingFactorList) + \
                             "\nZEDasHandController_RollPitchYaw_AbtXYZ_List_ScalingFactorList: " + str(ZEDasHandController_RollPitchYaw_AbtXYZ_List_ScalingFactorList) + \
                             "\nZEDasHandController_RotationMatrixListsOfLists: " + str(ZEDasHandController_RotationMatrixListsOfLists) + \
                             "\nZEDasHandController_AddToUR5armCurrentPositionList: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(ZEDasHandController_AddToUR5armCurrentPositionList, 0, 3) + \
-                            "\nZEDasHandController_Trigger_State: " + str(ZEDasHandController_Trigger_State) + \
-                            "\nKeyPressResponse_IncrementOrDecrementURtoolTipAllAxes_IncrementSize: " + str(KeyPressResponse_IncrementOrDecrementURtoolTipAllAxes_IncrementSize) + \
-                            "\nRobotiqGripper2F85, Position Speed Force: " + str([RobotiqGripper2F85_Position_ToBeSet, RobotiqGripper2F85_Speed_ToBeSet, RobotiqGripper2F85_Force_ToBeSet]) + \
-                            "\nCSVfileForTrajectoryData_SaveFlag: " + str(CSVfileForTrajectoryData_SaveFlag) +\
-                            "\nDifference UR5arm for CSV writing: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(UR5arm_MostRecentDict_ToolVectorActual_MotionFromSnapshotAtTimeOfCreatingCSVfileForTrajectoryData, 0, 3) + \
-                            "\nJoystick_AddToUR5armCurrentPositionList: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(Joystick_AddToUR5armCurrentPositionList, 0, 3) +\
-                            "\nJoystick_AxisHatButtonOrBallTo6DOFposeMapping_ListOfDicts: " + \
-                            "\n" + Joystick_AxisHatButtonOrBallTo6DOFposeMapping_ListOfDicts_FormattedAsNicelyPrintedString
+                            "\nZEDasHandController_Trigger_State: " + str(ZEDasHandController_Trigger_State)
 
             #########################################################
             #########################################################
@@ -1386,9 +1399,10 @@ def GUI_Thread():
     global TabControlObject
     global Tab_MainControls
     global Tab_UR5arm
-    global Tab_ZEDasHandController
     global Tab_RobotiqGripper2F85
+    global Tab_KEYBOARD
     global Tab_JOYSTICK
+    global Tab_ZEDasHandController
     global Tab_MyPrint
 
     TabControlObject = ttk.Notebook(root)
@@ -1399,14 +1413,17 @@ def GUI_Thread():
     Tab_UR5arm = ttk.Frame(TabControlObject)
     TabControlObject.add(Tab_UR5arm, text=' UR5arm ')
 
-    Tab_ZEDasHandController = ttk.Frame(TabControlObject)
-    TabControlObject.add(Tab_ZEDasHandController, text=' ZEDasHandController ')
-
     Tab_RobotiqGripper2F85 = ttk.Frame(TabControlObject)
     TabControlObject.add(Tab_RobotiqGripper2F85, text=' Robotiq ')
 
+    Tab_KEYBOARD = ttk.Frame(TabControlObject)
+    TabControlObject.add(Tab_KEYBOARD, text=' Keyboard ')
+
     Tab_JOYSTICK = ttk.Frame(TabControlObject)
     TabControlObject.add(Tab_JOYSTICK, text=' Joystick ')
+
+    Tab_ZEDasHandController = ttk.Frame(TabControlObject)
+    TabControlObject.add(Tab_ZEDasHandController, text=' ZEDasHandController ')
 
     Tab_MyPrint = ttk.Frame(TabControlObject)
     TabControlObject.add(Tab_MyPrint, text=' MyPrint ')
@@ -1452,8 +1469,32 @@ def GUI_Thread():
     ###########################################################
     ###########################################################
     global DebuggingInfo_Label
-    DebuggingInfo_Label = Label(ExtraProgramControlGuiFrame, text="Device Info", width=120, font=("Helvetica", 10))  #
+    DebuggingInfo_Label = Label(ExtraProgramControlGuiFrame, text="DebuggingInfo_Label", width=120, font=("Helvetica", 10))  #
     DebuggingInfo_Label.grid(row=1, column=0, padx=GUIbuttonPadX, pady=GUIbuttonPadY, columnspan=10, rowspan=1)
+    ###########################################################
+    ###########################################################
+
+    ###########################################################
+    ###########################################################
+    global KeyboardInfo_Label
+    KeyboardInfo_Label = Label(Tab_KEYBOARD, text="KeyboardInfo_Label", width=120, font=("Helvetica", 10))
+    KeyboardInfo_Label.grid(row=0, column=0, padx=GUIbuttonPadX, pady=GUIbuttonPadY, columnspan=10, rowspan=1)
+    ###########################################################
+    ###########################################################
+
+    ###########################################################
+    ###########################################################
+    global JoystickInfo_Label
+    JoystickInfo_Label = Label(Tab_JOYSTICK, text="JoystickInfo_Label", width=120, font=("Helvetica", 10))
+    JoystickInfo_Label.grid(row=1, column=0, padx=GUIbuttonPadX, pady=GUIbuttonPadY, columnspan=10, rowspan=1)
+    ###########################################################
+    ###########################################################
+
+    ###########################################################
+    ###########################################################
+    global ZEDasHandControllerInfo_Label
+    ZEDasHandControllerInfo_Label = Label(Tab_ZEDasHandController, text="ZEDasHandControllerInfo_Label", width=120, font=("Helvetica", 10))
+    ZEDasHandControllerInfo_Label.grid(row=1, column=0, padx=GUIbuttonPadX, pady=GUIbuttonPadY, columnspan=10, rowspan=1)
     ###########################################################
     ###########################################################
 
@@ -2027,20 +2068,6 @@ if __name__ == '__main__':
     #################################################
 
     #################################################
-    global ZEDasHandController_Directions
-    global ZEDasHandController_ZEDcoordinateSystem
-    global ZEDasHandController_ZEDresolution
-    global ZEDasHandController_ZEDfps
-    global ZEDasHandController_MainThread_TimeToSleepEachLoop
-    global ZEDasHandController_Position_ExponentialFilterLambda
-    global ZEDasHandController_Rotation_ExponentialFilterLambda
-    global ZEDasHandController_DataCollectionDurationInSecondsForZeroing
-    global ZEDasHandController_RotationMatrixListsOfLists
-
-    LoadAndParseJSONfile_ZEDasHandController()
-    #################################################
-
-    #################################################
     global RobotiqGripper2F85_Directions
     global RobotiqGripper2F85_DesiredSerialNumber
     global RobotiqGripper2F85_DesiredSlaveID
@@ -2050,6 +2077,15 @@ if __name__ == '__main__':
     global RobotiqGripper2F85_Force_Starting
 
     LoadAndParseJSONfile_RobotiqGripper2F85()
+    #################################################
+
+    #################################################
+    global Keyboard_Directions
+    global Keyboard_KeysToTeleopControlsMapping_DictOfDicts
+
+    LoadAndParseJSONfile_Keyboard()
+
+    SharedGlobals_Teleop_UR5arm.Keyboard_KeysToTeleopControlsMapping_DictOfDicts = Keyboard_KeysToTeleopControlsMapping_DictOfDicts
     #################################################
 
     #################################################
@@ -2066,12 +2102,25 @@ if __name__ == '__main__':
     #################################################
 
     #################################################
+    global ZEDasHandController_Directions
+    global ZEDasHandController_ZEDcoordinateSystem
+    global ZEDasHandController_ZEDresolution
+    global ZEDasHandController_ZEDfps
+    global ZEDasHandController_MainThread_TimeToSleepEachLoop
+    global ZEDasHandController_Position_ExponentialFilterLambda
+    global ZEDasHandController_Rotation_ExponentialFilterLambda
+    global ZEDasHandController_DataCollectionDurationInSecondsForZeroing
+    global ZEDasHandController_RotationMatrixListsOfLists
+    global ZEDasHandController_PositionList_ScalingFactorList
+    global ZEDasHandController_RollPitchYaw_AbtXYZ_List_ScalingFactorList
+
+    LoadAndParseJSONfile_ZEDasHandController()
+    #################################################
+
+    #################################################
     global ControlType_StartingValue
     global ControlType_AcceptableValues
     global Teleop_UR5arm_MainThread_TimeToSleepEachLoop
-    global KeyPressResponse_IncrementOrDecrementURtoolTipAllAxes_IncrementSize
-    global ZEDasHandController_PositionList_ScalingFactorList
-    global ZEDasHandController_RollPitchYaw_AbtXYZ_List_ScalingFactorList
 
     LoadAndParseJSONfile_ControlLawParameters()
 
@@ -2088,6 +2137,7 @@ if __name__ == '__main__':
     global Tab_ZEDasHandController
     global Tab_UR5arm
     global Tab_RobotiqGripper2F85
+    global Tab_KEYBOARD
     global Tab_JOYSTICK
     global Tab_MyPrint
 
@@ -2446,6 +2496,7 @@ if __name__ == '__main__':
         Tab_UR5arm = None
         Tab_RobotiqGripper2F85 = None
         Tab_ZEDasHandController = None
+        Tab_KEYBOARD = None
         Tab_JOYSTICK = None
         Tab_MyPrint = None
     #################################################
@@ -2645,7 +2696,7 @@ if __name__ == '__main__':
     #################################################
     global JoystickHID_ReubenPython2and3ClassObject_GUIparametersDict
     JoystickHID_ReubenPython2and3ClassObject_GUIparametersDict = dict([("USE_GUI_FLAG", USE_GUI_FLAG and SHOW_IN_GUI_JOYSTICK_FLAG),
-                                    ("root", Tab_JOYSTICK), #root Tab_JOYSTICK
+                                    ("root", Tab_JOYSTICK),
                                     ("EnableInternal_MyPrint_Flag", 1),
                                     ("NumberOfPrintLines", 10),
                                     ("UseBorderAroundThisGuiObjectFlag", 0),
@@ -2800,6 +2851,7 @@ if __name__ == '__main__':
             LoadAndParseJSONfile_GUIsettings()
             LoadAndParseJSONfile_UR5()
             LoadAndParseJSONfile_ControlLawParameters()
+            LoadAndParseJSONfile_Keyboard()
             LoadAndParseJSONfile_Joystick()
             LoadAndParseJSONfile_ZEDasHandController()
 
@@ -2962,7 +3014,7 @@ if __name__ == '__main__':
             ###################################################
             ###################################################
             if SharedGlobals_Teleop_UR5arm.KeyPressResponse_OpenRobotiqGripper2F85_NeedsToBeChangedFlag  == 1:
-                RobotiqGripper2F85_Position_ToBeSet = LimitNumber_FloatOutputOnly(0.0, 255.0, RobotiqGripper2F85_Position_ToBeSet + KeyPressResponse_RobotiqGripper2F85_IncrementSize)
+                RobotiqGripper2F85_Position_ToBeSet = LimitNumber_FloatOutputOnly(0.0, 255.0, RobotiqGripper2F85_Position_ToBeSet + SharedGlobals_Teleop_UR5arm.Keyboard_KeysToTeleopControlsMapping_DictOfDicts["OpenRobotiqGripper2F85"]["IncrementSize"])
 
                 RobotiqGripper2F85_PositionSpeedOrForce_NeedsToBeChangedFlag = 1
                 #SharedGlobals_Teleop_UR5arm.KeyPressResponse_OpenRobotiqGripper2F85_NeedsToBeChangedFlag = 0 #HANDLED INSTEAD BY THE REVERSE KEY-PRESS
@@ -2972,7 +3024,7 @@ if __name__ == '__main__':
             ###################################################
             ###################################################
             if SharedGlobals_Teleop_UR5arm.KeyPressResponse_CloseRobotiqGripper2F85_NeedsToBeChangedFlag  == 1:
-                RobotiqGripper2F85_Position_ToBeSet = LimitNumber_FloatOutputOnly(0.0, 255.0, RobotiqGripper2F85_Position_ToBeSet - KeyPressResponse_RobotiqGripper2F85_IncrementSize)
+                RobotiqGripper2F85_Position_ToBeSet = LimitNumber_FloatOutputOnly(0.0, 255.0, RobotiqGripper2F85_Position_ToBeSet + SharedGlobals_Teleop_UR5arm.Keyboard_KeysToTeleopControlsMapping_DictOfDicts["CloseRobotiqGripper2F85"]["IncrementSize"])
 
                 RobotiqGripper2F85_PositionSpeedOrForce_NeedsToBeChangedFlag = 1
                 #SharedGlobals_Teleop_UR5arm.KeyPressResponse_CloseRobotiqGripper2F85_NeedsToBeChangedFlag = 0 #HANDLED INSTEAD BY THE REVERSE KEY-PRESS
@@ -2992,37 +3044,37 @@ if __name__ == '__main__':
 
                 if SharedGlobals_Teleop_UR5arm.KeyPressResponse_IncrementURtoolTipInX_NeedsToBeChangedFlag == 1:
                     UR5arm_ToolVectorActual_ToBeSet = list(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual)
-                    UR5arm_ToolVectorActual_ToBeSet[0] = UR5arm_ToolVectorActual_ToBeSet[0] + KeyPressResponse_IncrementOrDecrementURtoolTipAllAxes_IncrementSize
+                    UR5arm_ToolVectorActual_ToBeSet[0] = UR5arm_ToolVectorActual_ToBeSet[0] + SharedGlobals_Teleop_UR5arm.Keyboard_KeysToTeleopControlsMapping_DictOfDicts["Xincrement"]["IncrementSize"]
                     UR5arm_PositionControl_NeedsToBeChangedFlag = 1
                     #SharedGlobals_Teleop_UR5arm.KeyPressResponse_IncrementURtoolTipInX_NeedsToBeChangedFlag = 0 #HANDLED INSTEAD BY THE REVERSE KEY-PRESS
 
                 if SharedGlobals_Teleop_UR5arm.KeyPressResponse_DecrementURtoolTipInX_NeedsToBeChangedFlag == 1:
                     UR5arm_ToolVectorActual_ToBeSet = list(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual)
-                    UR5arm_ToolVectorActual_ToBeSet[0] = UR5arm_ToolVectorActual_ToBeSet[0] - KeyPressResponse_IncrementOrDecrementURtoolTipAllAxes_IncrementSize
+                    UR5arm_ToolVectorActual_ToBeSet[0] = UR5arm_ToolVectorActual_ToBeSet[0] + SharedGlobals_Teleop_UR5arm.Keyboard_KeysToTeleopControlsMapping_DictOfDicts["Xdecrement"]["IncrementSize"]
                     UR5arm_PositionControl_NeedsToBeChangedFlag = 1
                     #SharedGlobals_Teleop_UR5arm.KeyPressResponse_DecrementURtoolTipInX_NeedsToBeChangedFlag = 0 #HANDLED INSTEAD BY THE REVERSE KEY-PRESS
 
                 if SharedGlobals_Teleop_UR5arm.KeyPressResponse_IncrementURtoolTipInY_NeedsToBeChangedFlag == 1:
                     UR5arm_ToolVectorActual_ToBeSet = list(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual)
-                    UR5arm_ToolVectorActual_ToBeSet[1] = UR5arm_ToolVectorActual_ToBeSet[1] + KeyPressResponse_IncrementOrDecrementURtoolTipAllAxes_IncrementSize
+                    UR5arm_ToolVectorActual_ToBeSet[1] = UR5arm_ToolVectorActual_ToBeSet[1] + SharedGlobals_Teleop_UR5arm.Keyboard_KeysToTeleopControlsMapping_DictOfDicts["Yincrement"]["IncrementSize"]
                     UR5arm_PositionControl_NeedsToBeChangedFlag = 1
                     #SharedGlobals_Teleop_UR5arm.KeyPressResponse_IncrementURtoolTipInY_NeedsToBeChangedFlag = 0 #HANDLED INSTEAD BY THE REVERSE KEY-PRESS
 
                 if SharedGlobals_Teleop_UR5arm.KeyPressResponse_DecrementURtoolTipInY_NeedsToBeChangedFlag == 1:
                     UR5arm_ToolVectorActual_ToBeSet = list(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual)
-                    UR5arm_ToolVectorActual_ToBeSet[1] = UR5arm_ToolVectorActual_ToBeSet[1] - KeyPressResponse_IncrementOrDecrementURtoolTipAllAxes_IncrementSize
+                    UR5arm_ToolVectorActual_ToBeSet[1] = UR5arm_ToolVectorActual_ToBeSet[1] + SharedGlobals_Teleop_UR5arm.Keyboard_KeysToTeleopControlsMapping_DictOfDicts["Ydecrement"]["IncrementSize"]
                     UR5arm_PositionControl_NeedsToBeChangedFlag = 1
                     #SharedGlobals_Teleop_UR5arm.KeyPressResponse_DecrementURtoolTipInY_NeedsToBeChangedFlag = 0 #HANDLED INSTEAD BY THE REVERSE KEY-PRESS
 
                 if SharedGlobals_Teleop_UR5arm.KeyPressResponse_IncrementURtoolTipInZ_NeedsToBeChangedFlag == 1:
                     UR5arm_ToolVectorActual_ToBeSet = list(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual)
-                    UR5arm_ToolVectorActual_ToBeSet[2] = UR5arm_ToolVectorActual_ToBeSet[2] + KeyPressResponse_IncrementOrDecrementURtoolTipAllAxes_IncrementSize
+                    UR5arm_ToolVectorActual_ToBeSet[2] = UR5arm_ToolVectorActual_ToBeSet[2] + SharedGlobals_Teleop_UR5arm.Keyboard_KeysToTeleopControlsMapping_DictOfDicts["Zincrement"]["IncrementSize"]
                     UR5arm_PositionControl_NeedsToBeChangedFlag = 1
                     #SharedGlobals_Teleop_UR5arm.KeyPressResponse_IncrementURtoolTipInZ_NeedsToBeChangedFlag = 0 #HANDLED INSTEAD BY THE REVERSE KEY-PRESS
 
                 if SharedGlobals_Teleop_UR5arm.KeyPressResponse_DecrementURtoolTipInZ_NeedsToBeChangedFlag == 1:
                     UR5arm_ToolVectorActual_ToBeSet = list(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual)
-                    UR5arm_ToolVectorActual_ToBeSet[2] = UR5arm_ToolVectorActual_ToBeSet[2] - KeyPressResponse_IncrementOrDecrementURtoolTipAllAxes_IncrementSize
+                    UR5arm_ToolVectorActual_ToBeSet[2] = UR5arm_ToolVectorActual_ToBeSet[2] + SharedGlobals_Teleop_UR5arm.Keyboard_KeysToTeleopControlsMapping_DictOfDicts["Zdecrement"]["IncrementSize"]
                     UR5arm_PositionControl_NeedsToBeChangedFlag = 1
                     #SharedGlobals_Teleop_UR5arm.KeyPressResponse_DecrementURtoolTipInZ_NeedsToBeChangedFlag = 0 #HANDLED INSTEAD BY THE REVERSE KEY-PRESS
 

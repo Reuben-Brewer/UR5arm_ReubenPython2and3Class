@@ -1,0 +1,73 @@
+{
+    "Keyboard_Directions": "Keyboard_IntegerIDdesired = -1 means that we don't care about the IntegerID.",
+    "Keyboard_KeysToTeleopControlsMapping_DictOfDicts":
+    {
+            "Xincrement":
+
+                {"KeyName":"x",
+                "OnPressCallbackFunctionNameString": "KeyPressResponse_IncrementURtoolTipInX_START",
+                "OnReleaseCallbackFunctionNameString": "KeyPressResponse_IncrementURtoolTipInX_STOP",
+                "IncrementSize": 0.020},
+
+            "Xdecrement":
+                {"KeyName":"s",
+                "OnPressCallbackFunctionNameString": "KeyPressResponse_DecrementURtoolTipInX_START",
+                "OnReleaseCallbackFunctionNameString": "KeyPressResponse_DecrementURtoolTipInX_STOP",
+                "IncrementSize": -0.020},
+
+            "Yincrement":
+                {"KeyName":"a",
+                "OnPressCallbackFunctionNameString": "KeyPressResponse_IncrementURtoolTipInY_START",
+                "OnReleaseCallbackFunctionNameString": "KeyPressResponse_IncrementURtoolTipInY_STOP",
+                "IncrementSize": 0.020},
+
+            "Ydecrement":
+                {"KeyName":"z",
+                "OnPressCallbackFunctionNameString": "KeyPressResponse_DecrementURtoolTipInY_START",
+                "OnReleaseCallbackFunctionNameString": "KeyPressResponse_DecrementURtoolTipInY_STOP",
+                "IncrementSize": -0.020},
+
+            "Zincrement":
+                {"KeyName":"d",
+                "OnPressCallbackFunctionNameString": "KeyPressResponse_IncrementURtoolTipInZ_START",
+                "OnReleaseCallbackFunctionNameString": "KeyPressResponse_IncrementURtoolTipInZ_STOP",
+                "IncrementSize": 0.020},
+
+            "Zdecrement":
+                {"KeyName":"c",
+                "OnPressCallbackFunctionNameString": "KeyPressResponse_DecrementURtoolTipInZ_START",
+                "OnReleaseCallbackFunctionNameString": "KeyPressResponse_DecrementURtoolTipInZ_STOP",
+                "IncrementSize": -0.020},
+
+            "OpenRobotiqGripper2F85":
+                {"KeyName":"v",
+                "OnPressCallbackFunctionNameString": "KeyPressResponse_OpenRobotiqGripper2F85_START",
+                "OnReleaseCallbackFunctionNameString": "KeyPressResponse_OpenRobotiqGripper2F85_STOP",
+                "IncrementSize": 3.00},
+
+            "CloseRobotiqGripper2F85":
+                {"KeyName":"f",
+                "OnPressCallbackFunctionNameString": "KeyPressResponse_CloseRobotiqGripper2F85_START",
+                "OnReleaseCallbackFunctionNameString": "KeyPressResponse_CloseRobotiqGripper2F85_STOP",
+                "IncrementSize": -3.00},
+
+            "ZEDcontrolClutch":
+                {"KeyName":"t",
+                "OnPressCallbackFunctionNameString": "KeyPressResponse_ZEDcontrolClutch_START",
+                "OnReleaseCallbackFunctionNameString": "KeyPressResponse_ZEDcontrolClutch_STOP",
+                "IncrementSize": -11111.0},
+
+            "KeyPressResponse_RecordNewWaypoint_JointSpace":
+                {"KeyName":"w",
+                "OnPressCallbackFunctionNameString": "",
+                "OnReleaseCallbackFunctionNameString": "KeyPressResponse_RecordNewWaypoint_JointSpace",
+                "IncrementSize": -11111.0},
+
+            "KeyPressResponse_RecordNewWaypoint_CartesianSpace":
+                {"KeyName":"l",
+                "OnPressCallbackFunctionNameString": "",
+                "OnReleaseCallbackFunctionNameString": "KeyPressResponse_RecordNewWaypoint_CartesianSpace",
+                "IncrementSize": -11111.0}
+
+        }
+}

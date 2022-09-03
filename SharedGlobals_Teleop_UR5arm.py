@@ -100,11 +100,17 @@ KeyPressResponse_IncrementURtoolTipInZ_NeedsToBeChangedFlag = 0
 global KeyPressResponse_DecrementURtoolTipInZ_NeedsToBeChangedFlag
 KeyPressResponse_DecrementURtoolTipInZ_NeedsToBeChangedFlag = 0
 
+global Keyboard_AddToUR5armCurrentPositionList
+Keyboard_AddToUR5armCurrentPositionList = [-11111.0]*6
+
 global KeyPressResponse_OpenRobotiqGripper2F85_NeedsToBeChangedFlag
 KeyPressResponse_OpenRobotiqGripper2F85_NeedsToBeChangedFlag = 0
 
 global KeyPressResponse_CloseRobotiqGripper2F85_NeedsToBeChangedFlag
 KeyPressResponse_CloseRobotiqGripper2F85_NeedsToBeChangedFlag = 0
+
+global Keyboard_KeysToTeleopControlsMapping_DictOfDicts
+Keyboard_KeysToTeleopControlsMapping_DictOfDicts = dict()
 #################################################
 
 print("SharedGlobals_Teleop_UR5arm.py, finished loading!")

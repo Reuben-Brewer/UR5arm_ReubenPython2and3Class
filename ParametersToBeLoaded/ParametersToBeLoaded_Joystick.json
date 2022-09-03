@@ -8,11 +8,11 @@
     "Joystick_Button_Index_ToDisplayAsDotColorOn2DdotDisplay":13,
     "Joystick_PrintInfoForAllDetectedJoysticksFlag":0,
     "Joystick_AxisHatButtonOrBallTo6DOFposeMapping_ListOfDicts":
-        [{"AxisName":"X", "AxisHatButtonOrBallType":"AXIS", "PrimaryAxisHatButtonOrBallIndex": 0, "SecondaryAxisHatButtonOrBallIndex": -1, "IncrementSize": -0.020},
-        {"AxisName":"Y", "AxisHatButtonOrBallType":"AXIS", "PrimaryAxisHatButtonOrBallIndex": 1, "SecondaryAxisHatButtonOrBallIndex": -1, "IncrementSize": 0.020},
+        [{"AxisName":"X", "AxisHatButtonOrBallType":"AXIS", "PrimaryAxisHatButtonOrBallIndex": 1, "SecondaryAxisHatButtonOrBallIndex": -1, "IncrementSize": 0.020},
+        {"AxisName":"Y", "AxisHatButtonOrBallType":"AXIS", "PrimaryAxisHatButtonOrBallIndex": 0, "SecondaryAxisHatButtonOrBallIndex": -1, "IncrementSize": 0.020},
         {"AxisName":"Z", "AxisHatButtonOrBallType":"HAT", "PrimaryAxisHatButtonOrBallIndex": 0, "SecondaryAxisHatButtonOrBallIndex": 1, "IncrementSize": 0.020},
         {"AxisName":"RX", "AxisHatButtonOrBallType":"AXIS", "PrimaryAxisHatButtonOrBallIndex": -1, "SecondaryAxisHatButtonOrBallIndex": -1, "IncrementSize": 0.000},
         {"AxisName":"RY", "AxisHatButtonOrBallType":"AXIS", "PrimaryAxisHatButtonOrBallIndex": -1, "SecondaryAxisHatButtonOrBallIndex": -1, "IncrementSize": 0.000},
-        {"AxisName":"RZ", "AxisHatButtonOrBallType":"AXIS", "PrimaryAxisHatButtonOrBallIndex": -1, "SecondaryAxisHatButtonOrBallIndex": -1, "IncrementSize": 0.000},
+        {"AxisName":"RZ", "AxisHatButtonOrBallType":"AXIS", "PrimaryAxisHatButtonOrBallIndex": 3, "SecondaryAxisHatButtonOrBallIndex": -1, "IncrementSize": -0.200},
         {"AxisName":"Robotiq", "AxisHatButtonOrBallType":"AXIS", "PrimaryAxisHatButtonOrBallIndex": 3, "SecondaryAxisHatButtonOrBallIndex": -1, "IncrementSize": 6.000}]
 }
