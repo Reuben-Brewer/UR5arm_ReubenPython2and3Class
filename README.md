@@ -34,7 +34,7 @@ the UR5 is performing inverse-kinematics internally. If the desired TCP pose is 
 
 ########################### Python module installation instructions, all OS's
 
-###
+######
 
 UR5arm_ReubenPython2and3Class, ListOfModuleDependencies: ['future.builtins']
 
@@ -44,9 +44,9 @@ UR5arm_ReubenPython2and3Class, ListOfModuleDependencies_NestedLayers: ['future.b
 
 UR5arm_ReubenPython2and3Class, ListOfModuleDependencies_All: ['future.builtins', 'MyPrint_ReubenPython2and3Class']
 
-###
+######
 
-###
+######
 
 IMPORTANT: Teleop_UR5arm.py run via command:
 
@@ -72,7 +72,7 @@ pip install pyserial
 
 pip install ftd2xx #PROBABLY SKIP THIS IN UBUNTU AS IT'S VERY PAINFUL AND BUGGY
 
-#Install pyzed module
+###Install pyzed module
 
 Ubuntu: cd "/usr/local/zed/"
 
@@ -84,15 +84,15 @@ Windows: cd "C:\Program Files (x86)\ZED SDK\"
 
 python get_python_api.py
 
-#End install pyzed module
+###End install pyzed module
 
-###
+######
 
-###
+######
 
 ExcelPlot_CSVfileForTrajectoryData.py, ListOfModuleDependencies_All:['pandas', 'win32com.client', 'xlrd', 'xlsxwriter', 'xlutils.copy', 'xlwt']
 
-###
+######
 
 ###########################
 
