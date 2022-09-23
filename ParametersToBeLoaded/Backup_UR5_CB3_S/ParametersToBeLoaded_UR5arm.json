@@ -1,0 +1,56 @@
+{
+    "UR5arm_Directions": "MoveL MAX speed/accel settings are 1.5 m/s and 150 m/s^2 respectively",
+    "UR5arm_ArmNameToUse": "CB3_S",
+    "UR5arm_Arm_Specific_Details":
+    {
+        "CB2_S":
+        {
+            "UR5arm_ControllerBoxVersion":2,
+            "UR5arm_RealTimeClientInterfaceVersionNumberString": "<3.0",
+            "UR5arm_IPV4Address": "192.168.1.100",
+            "UR5arm_ServoJtimeDurationSeconds":0.04,
+            "UR5arm_ServoJlookAheadTimeSeconds":0.2,
+            "UR5arm_ServoJgain":100
+        },
+        "CB3_K":
+        {
+            "UR5arm_ControllerBoxVersion":3,
+            "UR5arm_RealTimeClientInterfaceVersionNumberString": 3.8,
+            "UR5arm_IPV4Address": "192.168.1.12",
+            "UR5arm_ServoJtimeDurationSeconds":0.04,
+            "UR5arm_ServoJlookAheadTimeSeconds":0.2,
+            "UR5arm_ServoJgain":100
+        },
+        "CB3_S":
+        {
+            "UR5arm_ControllerBoxVersion":3,
+            "UR5arm_RealTimeClientInterfaceVersionNumberString": "5.10",
+            "UR5arm_IPV4Address": "192.168.0.110",
+            "UR5arm_ServoJtimeDurationSeconds":0.04,
+            "UR5arm_ServoJlookAheadTimeSeconds":0.2,
+            "UR5arm_ServoJgain":100
+        }
+    },
+
+    "UR5arm_IPV4_NumberOfRxMessagesToBuffers": 50,
+    "UR5arm_DedicatedTxThread_MaximumTxMessagesPerSecondFrequency": 110,
+    "UR5arm_DedicatedTxThread_TxMessageToSend_Queue_MaxSize": 1,
+    "UR5arm_Payload_MassKG_ToBeCommanded": 1.661,
+    "UR5arm_Payload_CoGmetersList_ToBeCommanded": [0.001, 0.019, 0.199],
+    "UR5arm_Velocity":1.25,
+    "UR5arm_Acceleration":1.05,
+    "UR5arm_MultiprocessingQueue_Rx_MaxSize": 1,
+    "UR5arm_MultiprocessingQueue_Tx_MaxSize": 1,
+    "UR5arm_MoveToHomeAtStartOfProgramFlag":1,
+    "UR5arm_WatchdogTimerDurationSeconds_ExpirationWillEndStandAloneProcess": 2.0,
+    "UR5am_StandAloneProcess_TimeToSleepEachLoop":0.005,
+    "UR5arm_TimeDurationToWaitBetweenCreatingClassObjectAndReadingData_Seconds": 7.0,
+
+    "UR5arm_PositionControl_ServoJ_MoveThroughListOfPoses_SafeReturnToStartingPoseFromAnywhere":
+        [
+            {"JointAngleList_Deg": [-12.463, -78.767, 79.495, -89.215, -89.185, -24.887], "TimeDurationSec": 5.0}
+        ],
+
+    "UR5arm_EnableTx_State_AtStartupFlag": 1,
+    "UR5arm_Zero_UR5arm_MostRecentDict_ToolVectorActual_WhenCreatingCSVfileForTrajectoryData_Flag": 1
+}

@@ -1,0 +1,13 @@
+{
+    "ZEDasHandController_Directions": "",
+    "ZEDasHandController_ZEDcoordinateSystem": "RIGHT_HANDED_Z_UP",
+    "ZEDasHandController_ZEDresolution": "HD720",
+    "ZEDasHandController_ZEDfps": 60,
+    "ZEDasHandController_MainThread_TimeToSleepEachLoop": 0.001,
+    "ZEDasHandController_Position_ExponentialFilterLambda": 0.9,
+    "ZEDasHandController_Rotation_ExponentialFilterLambda": 0.9,
+    "ZEDasHandController_DataCollectionDurationInSecondsForZeroing": 1.0,
+    "ZEDasHandController_RotationMatrixListsOfLists": [[-1,0,0],[0,-1,0],[0,0,1]],
+    "ZEDasHandController_PositionList_ScalingFactorList": [0.25, 0.25, 0.25],
+    "ZEDasHandController_RollPitchYaw_AbtXYZ_List_ScalingFactorList": [0.005, 0.005, 0.005]
+}

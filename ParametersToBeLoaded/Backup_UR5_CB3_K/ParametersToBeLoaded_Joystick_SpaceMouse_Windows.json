@@ -1,0 +1,18 @@
+{
+    "Joystick_Directions": "Joystick_NameDesired = '' means we don't care about NameDresired. Joystick_IntegerIDdesired = -1 means that we don't care about the IntegerID.",
+    "Joystick_NameDesired":"Tetherscript Virtual Joystick",
+    "Joystick_IntegerIDdesired":-1,
+    "Joystick_ShowJustDotMovingFlag":0,
+    "Joystick_Axis_Index_ToDisplayAsHorizontalAxisOn2DdotDisplay":0,
+    "Joystick_Axis_Index_ToDisplayAsVerticalAxisOn2DdotDisplay":1,
+    "Joystick_Clutch_Button_Index_ToDisplayAsDotColorOn2DdotDisplay":13,
+    "Joystick_PrintInfoForAllDetectedJoysticksFlag":0,
+    "Joystick_AxisHatButtonOrBallTo6DOFposeMapping_ListOfDicts":
+        [{"AxisName":"X", "AxisHatButtonOrBallType":"AXIS", "PrimaryAxisHatButtonOrBallIndex": 0, "SecondaryAxisHatButtonOrBallIndex": -1, "IncrementSize": -0.040},
+        {"AxisName":"Y", "AxisHatButtonOrBallType":"AXIS", "PrimaryAxisHatButtonOrBallIndex": 1, "SecondaryAxisHatButtonOrBallIndex": -1, "IncrementSize": -0.040},
+        {"AxisName":"Z", "AxisHatButtonOrBallType":"AXIS", "PrimaryAxisHatButtonOrBallIndex": 2, "SecondaryAxisHatButtonOrBallIndex": 1, "IncrementSize": 0.040},
+        {"AxisName":"RX", "AxisHatButtonOrBallType":"AXIS", "PrimaryAxisHatButtonOrBallIndex": 4, "SecondaryAxisHatButtonOrBallIndex": -1, "IncrementSize": 0.000},
+        {"AxisName":"RY", "AxisHatButtonOrBallType":"AXIS", "PrimaryAxisHatButtonOrBallIndex": 5, "SecondaryAxisHatButtonOrBallIndex": -1, "IncrementSize": 0.000},
+        {"AxisName":"RZ", "AxisHatButtonOrBallType":"AXIS", "PrimaryAxisHatButtonOrBallIndex": 6, "SecondaryAxisHatButtonOrBallIndex": -1, "IncrementSize": 0.000}],
+    "Joystick_UseClutchFlag": 0
+}
