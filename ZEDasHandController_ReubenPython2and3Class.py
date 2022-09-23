@@ -6,9 +6,9 @@ reuben.brewer@gmail.com
 www.reubotics.com
 
 Apache 2 License
-Software Revision D, 08/29/2022
+Software Revision E, 09/21/2022
 
-Verified working on: Python 3.8 for Windows 10 64-bit.
+Verified working on: Python 3.8 for Windows 10 64-bit and Ubuntu 20.04.
 '''
 
 __author__ = 'reuben.brewer'
@@ -31,8 +31,20 @@ import threading
 import traceback
 
 import numpy
-from scipy.spatial.transform import Rotation #For ConvertQuaterionsToEulerAngles_RollPitchYawAbtXYZ_ScipyCalculation and ConvertRotationMatrixToEulerAngles_RollPitchYawAbtXYZ
+#########################################################
 
+#########################################################
+'''
+#### Install pyzed module
+Ubuntu: cd "/usr/local/zed/"
+
+Windows: cd "C:\Program Files (x86)\ZED SDK\"
+#Make sure you have admin access to run it in the Program Files folder, otherwise, you will have a Permission denied error.
+#You can still copy the file into another location to run it without permissions.
+
+python get_python_api.py
+####
+'''
 import pyzed.sl as StereoLabs #Stereolabs ZED, https://github.com/stereolabs/zed-python-api, https://www.stereolabs.com/docs/api/python/
 #########################################################
 

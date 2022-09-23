@@ -6,9 +6,13 @@ reuben.brewer@gmail.com
 www.reubotics.com
 
 Apache 2 License
-Software Revision E, 08/29/2022
+Software Revision F, 09/21/2022
 
-Verified working on: Python 2.7, 3.8 for Windows 8.1, 10 64-bit and Raspberry Pi Buster (no Mac testing yet).
+Verified working on: Python 2.7, 3.8 for Windows 8.1, 10 64-bit, Ubuntu 20.04*, and Raspberry Pi Buster (no Mac testing yet).
+
+*Note: This code mostly works in Ubuntu 20.04, but the hat yields strange values for some models of joystick
+(such as the VKBsim Gladiator). Running jstest-gtk (sudo apt-get install jstest-gtk) will show you what the
+actual values are that are streaming from the joystick without going through JoystickHID_ReubenPython2and3Class.*
 '''
 
 __author__ = 'reuben.brewer'

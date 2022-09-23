@@ -6,9 +6,9 @@ reuben.brewer@gmail.com
 www.reubotics.com
 
 Apache 2 License
-Software Revision C, 08/29/2022
+Software Revision D, 09/21/2022
 
-Verified working on: Python 3.8 for Windows 10 64-bit and Raspberry Pi Buster (no Mac testing yet).
+Verified working on: Python 3.8 for Windows 10 64-bit (haven't tested on Ubuntu, Raspberry Pi, or Mac yet).
 '''
 
 __author__ = 'reuben.brewer'
@@ -22,6 +22,7 @@ import datetime
 from collections import OrderedDict
 from copy import deepcopy
 import glob #For getting a list of files in a directory with a certain extension
+
 import pandas
 #########################################################
 
@@ -56,13 +57,6 @@ import xlrd
 #"pip install xlsxwriter==0.9.6" verified working, but doesn't support setting the chart size.
 #"pip install xlsxwriter==1.3.3" INSTALLED 08/28/20 (had to manually delete older version from /lib/site-packages because it was distutils-managed. Works overall, but the function ".set_size" doesn't do anything.
 import xlsxwriter
-#########################################################
-
-#########################################################
-from mpl_toolkits import mplot3d
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
 #########################################################
 
 ##########################################################################################################

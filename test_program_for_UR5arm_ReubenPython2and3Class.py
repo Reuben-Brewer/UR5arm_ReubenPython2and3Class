@@ -6,9 +6,9 @@ reuben.brewer@gmail.com
 www.reubotics.com
 
 Apache 2 License
-Software Revision C, 08/29/2022
+Software Revision D, 09/21/2022
 
-Verified working on: Python 3.8 for Windows 10 64-bit and Raspberry Pi Buster (no Mac testing yet).
+Verified working on: Python 3.8 for Windows 10 64-bit, Ubuntu 20.04, and Raspberry Pi Buster (no Mac testing yet).
 '''
 
 __author__ = 'reuben.brewer'
@@ -665,8 +665,8 @@ if __name__ == '__main__':
 
     #    #''' CB3_S
     global UR5arm_PositionControl_MoveJ_MoveThroughListOfPoses_SafeReturnToStartingPoseFromAnywhere
-    UR5arm_PositionControl_MoveJ_MoveThroughListOfPoses_SafeReturnToStartingPoseFromAnywhere = list([dict([("JointAngleList_Deg", [-12.463, -78.767, 79.495, -89.215, -89.185, -24.887]), ("TimeDurationSec", 5.0)]),
-                                                                                                dict([("JointAngleList_Deg", [-12.463, -78.767, 79.495, -89.215, -89.185, -24.887]), ("TimeDurationSec", 5.0)])])
+    UR5arm_PositionControl_MoveJ_MoveThroughListOfPoses_SafeReturnToStartingPoseFromAnywhere = list([dict([("JointAngleList_Deg", [180.0, -81.95056, 94.05708, -188.0, 1.29492, 0.0]), ("TimeDurationSec", 5.0)]),
+                                                                                                dict([("JointAngleList_Deg", [180.0, -81.95056, 94.05708, -188.0, 1.29492, 0.0]), ("TimeDurationSec", 5.0)])])
     #'''
 
     ''' CB3_K
@@ -692,9 +692,9 @@ if __name__ == '__main__':
     global UR5arm_ReubenPython2and3ClassObject_setup_dict
     UR5arm_ReubenPython2and3ClassObject_setup_dict = dict([("GUIparametersDict", UR5arm_ReubenPython2and3ClassObject_GUIparametersDict),
                                                         ("NameToDisplay_UserSet", "Reuben's UR5arm test"),
-                                                        ("RealTimeClientInterfaceVersionNumberString","5.10"), #'<3.0' for test UR5CB2, '3.8' for test URCB3_K, '5.10' for CB3_S
-                                                        ("ControllerBoxVersion", 3), #2, #3
-                                                        ("IPV4_address", "192.168.0.110",), #"192.168.1.100" for CB2_S, "192.168.1.12" for CB3_K, #"192.168.0.110" for CB3_S
+                                                        ("RealTimeClientInterfaceVersionNumberString", "<3.0"), #'<3.0' for test UR5CB2, '3.8' for test URCB3_K, '5.10' for CB3_S
+                                                        ("ControllerBoxVersion", 2), #2, #3
+                                                        ("IPV4_address", "192.168.1.100",), #"192.168.1.100" for CB2_S, "192.168.1.12" for CB3_K, #"192.168.0.110" for CB3_S
                                                         ("IPV4_NumberOfRxMessagesToBuffers", 50),
                                                         ("IPV4_TimeoutDurationSeconds", 5.0),
                                                         ("DedicatedRxThread_TimeToSleepEachLoop", 0.001),

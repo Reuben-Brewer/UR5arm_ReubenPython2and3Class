@@ -6,7 +6,7 @@
     "SHOW_IN_GUI_UR5arm_ServoJparameterEntries_FLAG":0,
     "SHOW_IN_GUI_ZEDasHandController_FLAG":1,
     "SHOW_IN_GUI_RobotiqGripper2F85_FLAG": 1,
-    "SHOW_IN_GUI_JOYSTICK_FLAG":0,
+    "SHOW_IN_GUI_JOYSTICK_FLAG":1,
     "GUItitleString": "Teleop_UR5arm",
     "GUI_RootAfterCallbackInterval_Milliseconds": 30,
     "root_Xpos": 950,

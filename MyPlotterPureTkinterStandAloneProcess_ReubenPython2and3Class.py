@@ -6,11 +6,11 @@ reuben.brewer@gmail.com,
 www.reubotics.com
 
 Apache 2 License
-Software Revision H, 08/29/2022
+Software Revision J, 09/21/2022
 
-Verified working on: Python 3.8 for Windows 8.1, 10 64-bit and Raspberry Pi Buster (no Mac testing yet).
+Verified working on: Python 3.8 for Windows 8.1, 10 64-bit, Ubuntu 20.04, and Raspberry Pi Buster (no Mac testing yet).
 THE SEPARATE-PROCESS-SPAWNING COMPONENT OF THIS CLASS IS NOT AVAILABLE IN PYTHON 2 DUE TO LIMITATION OF
-"multiprocessing.set_start_method('spawn')" ONLY BEING AVAILABLE IN PYTHON 3. PLOTTING WITHIN A SINGLE PROCESS STILL WORKS.
+"multiprocessing.set_start_method('spawn', force=True)" ONLY BEING AVAILABLE IN PYTHON 3. PLOTTING WITHIN A SINGLE PROCESS STILL WORKS.
 '''
 
 __author__ = 'reuben.brewer'
@@ -92,11 +92,11 @@ class MyPlotterPureTkinterStandAloneProcess_ReubenPython2and3Class(Frame): #Subc
                 multiprocessing_StartMethod = multiprocessing.get_start_method()
                 print("MyPlotterPureTkinterStandAloneProcess_ReubenPython2and3Class __init__: multiprocessing.get_start_method(): " + str(multiprocessing_StartMethod))
                 if multiprocessing_StartMethod != "spawn":
-                    print("MyPlotterPureTkinterStandAloneProcess_ReubenPython2and3Class __init__: Issuing multiprocessing.set_start_method('spawn').")
-                    multiprocessing.set_start_method('spawn') #fork  spawn #THIS IS THE MAGIC LINE THAT ALLOWS WORKING ON RASPBERRY-PI
+                    print("MyPlotterPureTkinterStandAloneProcess_ReubenPython2and3Class __init__: Issuing multiprocessing.set_start_method('spawn', force=True).")
+                    multiprocessing.set_start_method('spawn', force=True) #'spawn' is required for all Linux flavors, with 'force=True' required specicially by Ubuntu (not Raspberry Pi).
             except:
                 exceptions = sys.exc_info()[0]
-                print("MyPlotterPureTkinterStandAloneProcess_ReubenPython2and3Class __init__: multiprocessing.set_start_method('spawn') Exceptions: %s" % exceptions)
+                print("MyPlotterPureTkinterStandAloneProcess_ReubenPython2and3Class __init__: multiprocessing.set_start_method('spawn', force=True) Exceptions: %s" % exceptions)
 
             '''
             From: https://docs.python.org/3/library/multiprocessing.html#multiprocessing-programming

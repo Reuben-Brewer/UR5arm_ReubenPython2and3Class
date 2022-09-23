@@ -6,9 +6,9 @@ reuben.brewer@gmail.com
 www.reubotics.com
 
 Apache 2 License
-Software Revision C, 08/29/2022
+Software Revision D, 09/21/2022
 
-Verified working on: Python 3.8 for Windows 10 64-bit and Raspberry Pi Buster (no Mac testing yet).
+Verified working on: Python 3.8 for Windows 10 64-bit, Ubuntu 20.04, and Raspberry Pi Buster (no Mac testing yet).
 '''
 
 __author__ = 'reuben.brewer'
@@ -38,15 +38,32 @@ try:
     ParentModuleName = sys.modules['.'.join(__name__.split('.')[:-1]) or '__main__'].__file__
     if ParentModuleName.find("Teleop_UR5arm.py") != -1:
 
-        # https://github.com/Reuben-Brewer/ZEDasHandController_ReubenPython2and3Class
-        from ZEDasHandController_ReubenPython2and3Class import *
+        ############################
+        try:
+            #https://github.com/Reuben-Brewer/ZEDasHandController_ReubenPython2and3Class
+            from ZEDasHandController_ReubenPython2and3Class import *
+            print("@@@@@@@@@@ ParentModuleName: " + str(ParentModuleName) + " successfully imported ZEDasHandController_ReubenPython2and3Class @@@@@@@@@@")
 
-        # https://github.com/Reuben-Brewer/RobotiqGripper2F85_ReubenPython2and3Class
-        from RobotiqGripper2F85_ReubenPython2and3Class import *
+        except:
+            exceptions = sys.exc_info()[0]
+            print("@@@@@@@@@@ ParentModuleName: " + str(ParentModuleName) + " FAILED to import ZEDasHandController_ReubenPython2and3Class @@@@@@@@@@, Exceptions: %s" % exceptions)
+        ############################
 
-        print("@@@@@@@@@@ ParentModuleName: " + str(ParentModuleName) + " is importing ZEDasHandController_ReubenPython2and3Class and RobotiqGripper2F85_ReubenPython2and3Class @@@@@@@@@@")
+        ############################
+        try:
+            #https://github.com/Reuben-Brewer/RobotiqGripper2F85_ReubenPython2and3Class
+            from RobotiqGripper2F85_ReubenPython2and3Class import *
+            print("@@@@@@@@@@ ParentModuleName: " + str(ParentModuleName) + " successfully imported RobotiqGripper2F85_ReubenPython2and3Class @@@@@@@@@@")
+
+        except:
+            exceptions = sys.exc_info()[0]
+            print("@@@@@@@@@@ ParentModuleName: " + str(ParentModuleName) + " FAILED to import RobotiqGripper2F85_ReubenPython2and3Class @@@@@@@@@@, Exceptions: %s" % exceptions)
+        ############################
+
 except:
-    pass
+    exceptions = sys.exc_info()[0]
+    print("@@@@@@@@@@ ParentModuleName imports failed, Exceptions: %s" % exceptions)
+
 #########################################################
 
 #########################################################
@@ -208,6 +225,7 @@ def LoadAndParseJSONfile_RobotiqGripper2F85():
 def LoadAndParseJSONfile_Keyboard():
     global ParametersToBeLoaded_Keyboard_Dict
     global Keyboard_KeysToTeleopControlsMapping_DictOfDicts_FormattedAsNicelyPrintedString
+    global Keyboard_KeysToTeleopControlsMapping_DictOfDicts
 
     #################################
     JSONfilepathFull_Keyboard = ParametersToBeLoaded_Directory_TO_BE_USED + "//ParametersToBeLoaded_Keyboard.json"
@@ -217,6 +235,8 @@ def LoadAndParseJSONfile_Keyboard():
     #################################
 
     Keyboard_KeysToTeleopControlsMapping_DictOfDicts_FormattedAsNicelyPrintedString = ConvertDictToProperlyFormattedStringForPrinting(Keyboard_KeysToTeleopControlsMapping_DictOfDicts, NumberOfDecimalsPlaceToUse = 2, NumberOfEntriesPerLine = 1, NumberOfTabsBetweenItems = 1)
+
+    SharedGlobals_Teleop_UR5arm.Keyboard_KeysToTeleopControlsMapping_DictOfDicts = Keyboard_KeysToTeleopControlsMapping_DictOfDicts
 
 #######################################################################################################################
 #######################################################################################################################
@@ -859,14 +879,11 @@ def IsTheTimeCurrentlyAM():
 
 #######################################################################################################################
 #######################################################################################################################
-def DedicatedKeyboardListeningThread():
+def KeyboardMapKeysToCallbackFunctions():
 
-    print("Started DedicatedKeyboardListeningThread for UR5arm_ReubenPython2and3Class object.")
-    SharedGlobals_Teleop_UR5arm.DedicatedKeyboardListeningThread_StillRunningFlag = 1
+    keyboard.unhook_all() #Remove all current mappings
 
-    SharedGlobals_Teleop_UR5arm.StartingTime_CalculatedFromDedicatedKeyboardListeningThread = getPreciseSecondsTimeStampString()
-
-    ###################################################
+    ###############################################
     for AxisNameAsKey in SharedGlobals_Teleop_UR5arm.Keyboard_KeysToTeleopControlsMapping_DictOfDicts:
 
             KeyToTeleopControlsMappingDict = SharedGlobals_Teleop_UR5arm.Keyboard_KeysToTeleopControlsMapping_DictOfDicts[AxisNameAsKey]
@@ -881,7 +898,19 @@ def DedicatedKeyboardListeningThread():
             if OnReleaseCallbackFunctionNameString in globals():
                 keyboard.on_release_key(KeyName, globals()[OnReleaseCallbackFunctionNameString])
 
-    ###################################################
+    ###############################################
+
+#######################################################################################################################
+#######################################################################################################################
+
+#######################################################################################################################
+#######################################################################################################################
+def DedicatedKeyboardListeningThread():
+
+    print("Started DedicatedKeyboardListeningThread for UR5arm_ReubenPython2and3Class object.")
+    SharedGlobals_Teleop_UR5arm.DedicatedKeyboardListeningThread_StillRunningFlag = 1
+
+    SharedGlobals_Teleop_UR5arm.StartingTime_CalculatedFromDedicatedKeyboardListeningThread = getPreciseSecondsTimeStampString()
 
     ###############################################
     while SharedGlobals_Teleop_UR5arm.EXIT_PROGRAM_FLAG == 0:
@@ -948,7 +977,7 @@ def KeyPressResponse_RecordNewWaypoint_JointSpace(event):
 
     SharedGlobals_Teleop_UR5arm.BeepNeedsToBePlayedFlag_RecordNewWaypoint_JointSpace = 1
 
-    print("KeyPressResponse_RecordNewWaypoint_JointSpace event fired!")
+    #print("KeyPressResponse_RecordNewWaypoint_JointSpace event fired!")
 #######################################################################################################################
 #######################################################################################################################
 
@@ -956,7 +985,7 @@ def KeyPressResponse_RecordNewWaypoint_JointSpace(event):
 #######################################################################################################################
 def KeyPressResponse_RecordNewWaypoint_CartesianSpace(event):
 
-    KeyPressResponse_RecordNewWaypoint_CartesianSpace_TextToPrint = ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual, 0, 5) + ","
+    KeyPressResponse_RecordNewWaypoint_CartesianSpace_TextToPrint = ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual, 0, 5)
     KeyPressResponse_RecordNewWaypoint_CartesianSpace_TextToPrint = KeyPressResponse_RecordNewWaypoint_CartesianSpace_TextToPrint.replace("+","")
     print(KeyPressResponse_RecordNewWaypoint_CartesianSpace_TextToPrint)
 
@@ -1197,6 +1226,7 @@ def GUI_update_clock():
     global Joystick_AddToUR5armCurrentPositionList
     global Joystick_AxisHatButtonOrBallTo6DOFposeMapping_ListOfDicts_FormattedAsNicelyPrintedString
     global JoystickInfo_Label
+    global Joystick_ClutchState
 
     global MyPrint_ReubenPython2and3ClassObject
     global MYPRINT_OPEN_FLAG
@@ -1273,6 +1303,7 @@ def GUI_update_clock():
             #########################################################
             #########################################################
             JoystickInfo_Label["text"] = "Joystick_AddToUR5armCurrentPositionList: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(Joystick_AddToUR5armCurrentPositionList, 0, 3) +\
+                            "\nJoystick_ClutchState: " + str(Joystick_ClutchState) + \
                             "\nJoystick_AxisHatButtonOrBallTo6DOFposeMapping_ListOfDicts: " + \
                             "\n" + Joystick_AxisHatButtonOrBallTo6DOFposeMapping_ListOfDicts_FormattedAsNicelyPrintedString
             #########################################################
@@ -2084,8 +2115,7 @@ if __name__ == '__main__':
     global Keyboard_KeysToTeleopControlsMapping_DictOfDicts
 
     LoadAndParseJSONfile_Keyboard()
-
-    SharedGlobals_Teleop_UR5arm.Keyboard_KeysToTeleopControlsMapping_DictOfDicts = Keyboard_KeysToTeleopControlsMapping_DictOfDicts
+    KeyboardMapKeysToCallbackFunctions()
     #################################################
 
     #################################################
@@ -2094,9 +2124,10 @@ if __name__ == '__main__':
     global Joystick_ShowJustDotMovingFlag
     global Joystick_Axis_Index_ToDisplayAsHorizontalAxisOn2DdotDisplay
     global Joystick_Axis_Index_ToDisplayAsVerticalAxisOn2DdotDisplay
-    global Joystick_Button_Index_ToDisplayAsDotColorOn2DdotDisplay
+    global Joystick_Clutch_Button_Index_ToDisplayAsDotColorOn2DdotDisplay
     global Joystick_PrintInfoForAllDetectedJoysticksFlag
     global Joystick_AxisHatButtonOrBallTo6DOFposeMapping_ListOfDicts
+    global Joystick_UseClutchFlag
 
     LoadAndParseJSONfile_Joystick()
     #################################################
@@ -2379,6 +2410,9 @@ if __name__ == '__main__':
 
     global Joystick_AddToUR5armCurrentPositionList
     Joystick_AddToUR5armCurrentPositionList = [0.0]*6
+
+    global Joystick_ClutchState
+    Joystick_ClutchState = 0
     #################################################
     #################################################
 
@@ -2715,7 +2749,7 @@ if __name__ == '__main__':
                                                                 ("Joystick_ShowJustDotMovingFlag", Joystick_ShowJustDotMovingFlag),
                                                                 ("Joystick_Axis_Index_ToDisplayAsHorizontalAxisOn2DdotDisplay", Joystick_Axis_Index_ToDisplayAsHorizontalAxisOn2DdotDisplay),
                                                                 ("Joystick_Axis_Index_ToDisplayAsVerticalAxisOn2DdotDisplay", Joystick_Axis_Index_ToDisplayAsVerticalAxisOn2DdotDisplay),
-                                                                ("Joystick_Button_Index_ToDisplayAsDotColorOn2DdotDisplay", Joystick_Button_Index_ToDisplayAsDotColorOn2DdotDisplay),
+                                                                ("Joystick_Button_Index_ToDisplayAsDotColorOn2DdotDisplay", Joystick_Clutch_Button_Index_ToDisplayAsDotColorOn2DdotDisplay),
                                                                 ("MainThread_TimeToSleepEachLoop", 0.010),
                                                                 ("Joystick_PrintInfoForAllDetectedJoysticksFlag", Joystick_PrintInfoForAllDetectedJoysticksFlag)])
 
@@ -2851,7 +2885,10 @@ if __name__ == '__main__':
             LoadAndParseJSONfile_GUIsettings()
             LoadAndParseJSONfile_UR5()
             LoadAndParseJSONfile_ControlLawParameters()
+
             LoadAndParseJSONfile_Keyboard()
+            KeyboardMapKeysToCallbackFunctions()
+
             LoadAndParseJSONfile_Joystick()
             LoadAndParseJSONfile_ZEDasHandController()
 
@@ -3009,7 +3046,9 @@ if __name__ == '__main__':
         ###################################################
         ###################################################
         ###################################################
-        if ControlType == "KeyboardControl" or ControlType == "ZEDcontrol":
+        #We can include JoystickControl here because the joystick-->robotiq code will overwrite these keyboard-generated values later.
+        #However, if 'ParametersToBeLoaded_Joystick.json' doesn't map anything to the Robotiq (like with the SpaceMouse), then this keyboard code's values will still map to the Robotiq.
+        if ControlType == "KeyboardControl" or ControlType == "JoystickControl" or ControlType == "ZEDcontrol":
 
             ###################################################
             ###################################################
@@ -3089,36 +3128,45 @@ if __name__ == '__main__':
 
             ###################################################
             ###################################################
-            if UR5arm_MostRecentDict_ToolVectorActual_IsItInitializedFlag == 1 and JOYSTICK_OPEN_FLAG == 1 and JOYSTICK_MostRecentDict_Joystick_Button_Value_List[Joystick_Button_Index_ToDisplayAsDotColorOn2DdotDisplay] == 1:
+            if UR5arm_MostRecentDict_ToolVectorActual_IsItInitializedFlag == 1 and JOYSTICK_OPEN_FLAG == 1:
 
                 ###################################################
-                for Index in range(0,6):
-                    AxisHatButtonOrBallTo6DOFposeMappingDict = Joystick_AxisHatButtonOrBallTo6DOFposeMapping_ListOfDicts[Index]
-
-                    IncrementSize = AxisHatButtonOrBallTo6DOFposeMappingDict["IncrementSize"]
-                    PrimaryAxisHatButtonOrBallIndex = AxisHatButtonOrBallTo6DOFposeMappingDict["PrimaryAxisHatButtonOrBallIndex"]
-                    SecondaryAxisHatButtonOrBallIndex = AxisHatButtonOrBallTo6DOFposeMappingDict["SecondaryAxisHatButtonOrBallIndex"]
-
-                    if AxisHatButtonOrBallTo6DOFposeMappingDict["AxisHatButtonOrBallType"] == "AXIS":
-                        Joystick_AddToUR5armCurrentPositionList[Index] = IncrementSize*JOYSTICK_MostRecentDict_Joystick_Axis_Value_List[PrimaryAxisHatButtonOrBallIndex]
-
-                    elif AxisHatButtonOrBallTo6DOFposeMappingDict["AxisHatButtonOrBallType"] == "HAT":
-                        Joystick_AddToUR5armCurrentPositionList[Index] = IncrementSize*JOYSTICK_MostRecentDict_Joystick_Hat_Value_List[PrimaryAxisHatButtonOrBallIndex][SecondaryAxisHatButtonOrBallIndex]
-
-                    else:
-                        print("In JoystickControl, only AXIS and HAT can be used to control the UR5.") #Nothing other than an axis or hat can be used as an input currently (no buttons or balls).
-
+                if Joystick_UseClutchFlag == 1:
+                    Joystick_ClutchState = JOYSTICK_MostRecentDict_Joystick_Button_Value_List[Joystick_Clutch_Button_Index_ToDisplayAsDotColorOn2DdotDisplay]
+                else:
+                    Joystick_ClutchState = 1
                 ###################################################
 
-                #We're NOT using UR5arm_MostRecentDict_ToolVectorActual_AtTimeOfClutchIn because the joystick inputs rate-control, not absolute position.
-                UR5arm_ToolVectorActual_ToBeSet = list(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual)
+                if Joystick_ClutchState == 1:
 
-                ###################################################
-                for Index in range(0,6):
-                    UR5arm_ToolVectorActual_ToBeSet[Index] = UR5arm_ToolVectorActual_ToBeSet[Index]  + Joystick_AddToUR5armCurrentPositionList[Index]
-                ###################################################
+                    ###################################################
+                    for Index in range(0,6):
+                        AxisHatButtonOrBallTo6DOFposeMappingDict = Joystick_AxisHatButtonOrBallTo6DOFposeMapping_ListOfDicts[Index]
 
-                UR5arm_PositionControl_NeedsToBeChangedFlag = 1
+                        IncrementSize = AxisHatButtonOrBallTo6DOFposeMappingDict["IncrementSize"]
+                        PrimaryAxisHatButtonOrBallIndex = AxisHatButtonOrBallTo6DOFposeMappingDict["PrimaryAxisHatButtonOrBallIndex"]
+                        SecondaryAxisHatButtonOrBallIndex = AxisHatButtonOrBallTo6DOFposeMappingDict["SecondaryAxisHatButtonOrBallIndex"]
+
+                        if AxisHatButtonOrBallTo6DOFposeMappingDict["AxisHatButtonOrBallType"] == "AXIS":
+                            Joystick_AddToUR5armCurrentPositionList[Index] = IncrementSize*JOYSTICK_MostRecentDict_Joystick_Axis_Value_List[PrimaryAxisHatButtonOrBallIndex]
+
+                        elif AxisHatButtonOrBallTo6DOFposeMappingDict["AxisHatButtonOrBallType"] == "HAT":
+                            Joystick_AddToUR5armCurrentPositionList[Index] = IncrementSize*JOYSTICK_MostRecentDict_Joystick_Hat_Value_List[PrimaryAxisHatButtonOrBallIndex][SecondaryAxisHatButtonOrBallIndex]
+
+                        else:
+                            print("In JoystickControl, only AXIS and HAT can be used to control the UR5.") #Nothing other than an axis or hat can be used as an input currently (no buttons or balls).
+
+                    ###################################################
+
+                    #We're NOT using UR5arm_MostRecentDict_ToolVectorActual_AtTimeOfClutchIn because the joystick inputs rate-control, not absolute position.
+                    UR5arm_ToolVectorActual_ToBeSet = list(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual)
+
+                    ###################################################
+                    for Index in range(0,6):
+                        UR5arm_ToolVectorActual_ToBeSet[Index] = UR5arm_ToolVectorActual_ToBeSet[Index]  + Joystick_AddToUR5armCurrentPositionList[Index]
+                    ###################################################
+
+                    UR5arm_PositionControl_NeedsToBeChangedFlag = 1
 
             else:
                 UR5arm_ToolVectorActual_ToBeSet = list(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual)
@@ -3130,28 +3178,29 @@ if __name__ == '__main__':
             if RobotiqGripper2F85_OPEN_FLAG == 1:
 
                 ###################################################
-                AxisHatButtonOrBallTo6DOFposeMappingDict = Joystick_AxisHatButtonOrBallTo6DOFposeMapping_ListOfDicts[6]
+                if len(Joystick_AxisHatButtonOrBallTo6DOFposeMapping_ListOfDicts) >= 7: #If 'ParametersToBeLoaded_Joystick.json' includes mapping to the Robotiq.
+                    AxisHatButtonOrBallTo6DOFposeMappingDict = Joystick_AxisHatButtonOrBallTo6DOFposeMapping_ListOfDicts[6]
 
-                IncrementSize = AxisHatButtonOrBallTo6DOFposeMappingDict["IncrementSize"]
-                PrimaryAxisHatButtonOrBallIndex = AxisHatButtonOrBallTo6DOFposeMappingDict["PrimaryAxisHatButtonOrBallIndex"]
-                SecondaryAxisHatButtonOrBallIndex = AxisHatButtonOrBallTo6DOFposeMappingDict["SecondaryAxisHatButtonOrBallIndex"]
+                    IncrementSize = AxisHatButtonOrBallTo6DOFposeMappingDict["IncrementSize"]
+                    PrimaryAxisHatButtonOrBallIndex = AxisHatButtonOrBallTo6DOFposeMappingDict["PrimaryAxisHatButtonOrBallIndex"]
+                    SecondaryAxisHatButtonOrBallIndex = AxisHatButtonOrBallTo6DOFposeMappingDict["SecondaryAxisHatButtonOrBallIndex"]
 
-                if AxisHatButtonOrBallTo6DOFposeMappingDict["AxisHatButtonOrBallType"] == "AXIS":
-                    RobotiqGripper2F85_Position_ToBeSet = RobotiqGripper2F85_Position_ToBeSet + IncrementSize*JOYSTICK_MostRecentDict_Joystick_Axis_Value_List[PrimaryAxisHatButtonOrBallIndex]
+                    if AxisHatButtonOrBallTo6DOFposeMappingDict["AxisHatButtonOrBallType"] == "AXIS":
+                        RobotiqGripper2F85_Position_ToBeSet = RobotiqGripper2F85_Position_ToBeSet + IncrementSize*JOYSTICK_MostRecentDict_Joystick_Axis_Value_List[PrimaryAxisHatButtonOrBallIndex]
 
-                elif AxisHatButtonOrBallTo6DOFposeMappingDict["AxisHatButtonOrBallType"] == "HAT":
-                    RobotiqGripper2F85_Position_ToBeSet = RobotiqGripper2F85_Position_ToBeSet + IncrementSize*JOYSTICK_MostRecentDict_Joystick_Hat_Value_List[PrimaryAxisHatButtonOrBallIndex][SecondaryAxisHatButtonOrBallIndex]
+                    elif AxisHatButtonOrBallTo6DOFposeMappingDict["AxisHatButtonOrBallType"] == "HAT":
+                        RobotiqGripper2F85_Position_ToBeSet = RobotiqGripper2F85_Position_ToBeSet + IncrementSize*JOYSTICK_MostRecentDict_Joystick_Hat_Value_List[PrimaryAxisHatButtonOrBallIndex][SecondaryAxisHatButtonOrBallIndex]
 
-                elif AxisHatButtonOrBallTo6DOFposeMappingDict["AxisHatButtonOrBallType"] == "BUTTON":
-                    #PrimaryAxisHatButtonOrBallIndex is 1 button (for opening), and SecondaryAxisHatButtonOrBallIndex is another button (for closing).
-                    #If both are pressed at once, then nothing will happen as they cancel eachother out.
-                    RobotiqGripper2F85_Position_ToBeSet = RobotiqGripper2F85_Position_ToBeSet + IncrementSize*JOYSTICK_MostRecentDict_Joystick_Button_Value_List[PrimaryAxisHatButtonOrBallIndex] - IncrementSize*JOYSTICK_MostRecentDict_Joystick_Button_Value_List[SecondaryAxisHatButtonOrBallIndex]
+                    elif AxisHatButtonOrBallTo6DOFposeMappingDict["AxisHatButtonOrBallType"] == "BUTTON":
+                        #PrimaryAxisHatButtonOrBallIndex is 1 button (for opening), and SecondaryAxisHatButtonOrBallIndex is another button (for closing).
+                        #If both are pressed at once, then nothing will happen as they cancel eachother out.
+                        RobotiqGripper2F85_Position_ToBeSet = RobotiqGripper2F85_Position_ToBeSet + IncrementSize*JOYSTICK_MostRecentDict_Joystick_Button_Value_List[PrimaryAxisHatButtonOrBallIndex] - IncrementSize*JOYSTICK_MostRecentDict_Joystick_Button_Value_List[SecondaryAxisHatButtonOrBallIndex]
 
-                else:
-                    print("In JoystickControl, only AXIS, HAT, and BUTTON can be specified to control the RobotiqGripper2F85.") #Nothing other than an axis or hat can be used as an input currently (no buttons or balls).
+                    else:
+                        print("In JoystickControl, only AXIS, HAT, and BUTTON can be specified to control the RobotiqGripper2F85.") #Nothing other than an axis or hat can be used as an input currently (no buttons or balls).
 
-                RobotiqGripper2F85_Position_ToBeSet = LimitNumber_FloatOutputOnly(0.0, 255.0, RobotiqGripper2F85_Position_ToBeSet)
-                RobotiqGripper2F85_PositionSpeedOrForce_NeedsToBeChangedFlag = 1
+                    RobotiqGripper2F85_Position_ToBeSet = LimitNumber_FloatOutputOnly(0.0, 255.0, RobotiqGripper2F85_Position_ToBeSet)
+                    RobotiqGripper2F85_PositionSpeedOrForce_NeedsToBeChangedFlag = 1
                 ###################################################
 
             ###################################################

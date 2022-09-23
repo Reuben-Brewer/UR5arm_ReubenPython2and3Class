@@ -6,9 +6,9 @@ reuben.brewer@gmail.com
 www.reubotics.com
 
 Apache 2 License
-Software Revision B, 08/29/2022
+Software Revision C, 09/21/2022
 
-Verified working on: Python 2.7, 3.8 for Windows 8.1, 10 64-bit and Raspberry Pi Buster (no Mac testing yet).
+Verified working on: Python 2.7, 3.8 for Windows 8.1, 10 64-bit, Ubuntu 20.04, and Raspberry Pi Buster (no Mac testing yet).
 '''
 
 __author__ = 'reuben.brewer'
@@ -26,13 +26,32 @@ import threading
 import traceback
 #########################################################
 
-##########################################
+#########################################################
+
+##########################
 import serial #___IMPORTANT: pip install pyserial (NOT pip install serial).
 from serial.tools import list_ports
-import ftd2xx #https://pypi.org/project/ftd2xx/ 'pip install ftd2xx', current version is 1.3.1 as of 05/06/22. For SetAllFTDIdevicesLatencyTimer function
+##########################
 
+##########################
+global ftd2xx_IMPORTED_FLAG
+ftd2xx_IMPORTED_FLAG = 0
+try:
+    import ftd2xx #https://pypi.org/project/ftd2xx/ 'pip install ftd2xx', current version is 1.3.1 as of 05/06/22. For SetAllFTDIdevicesLatencyTimer function
+    ftd2xx_IMPORTED_FLAG = 1
+
+except:
+    exceptions = sys.exc_info()[0]
+    print("**********")
+    print("********** RobotiqGripper2F85_ReubenPython2and3Class __init__: ERROR, failed to import ftdtxx, Exceptions: %s" % exceptions + " ********** ")
+    print("**********")
+##########################
+
+##########################
 if sys.version_info[0] < 3:
     from builtins import bytes #Necessary to make bytes() function call work in Python 2.7
+##########################
+
 #########################################################
 
 #########################################################
@@ -447,8 +466,15 @@ class RobotiqGripper2F85_ReubenPython2and3Class(Frame): #Subclass the Tkinter Fr
         #########################################################
         #########################################################
         try:
-            self.SetAllFTDIdevicesLatencyTimer()
+
+            ################
+            if ftd2xx_IMPORTED_FLAG == 1:
+                self.SetAllFTDIdevicesLatencyTimer()
+            ################
+
+            ################
             self.FindAssignAndOpenSerialPort()
+            ################
 
         except:
             exceptions = sys.exc_info()[0]

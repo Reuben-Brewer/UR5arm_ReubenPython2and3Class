@@ -1,6 +1,6 @@
 {
     "Joystick_Directions": "Joystick_NameDesired = '' means we don't care about NameDresired. Joystick_IntegerIDdesired = -1 means that we don't care about the IntegerID.",
-    "Joystick_NameDesired":"Tetherscript Virtual Joystick",
+    "Joystick_NameDesired":"VKBsim Gladiator",
     "Joystick_IntegerIDdesired":-1,
     "Joystick_ShowJustDotMovingFlag":0,
     "Joystick_Axis_Index_ToDisplayAsHorizontalAxisOn2DdotDisplay":0,

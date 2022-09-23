@@ -4,25 +4,25 @@
     {
             "Xincrement":
 
-                {"KeyName":"x",
+                {"KeyName":"a",
                 "OnPressCallbackFunctionNameString": "KeyPressResponse_IncrementURtoolTipInX_START",
                 "OnReleaseCallbackFunctionNameString": "KeyPressResponse_IncrementURtoolTipInX_STOP",
                 "IncrementSize": 0.020},
 
             "Xdecrement":
-                {"KeyName":"s",
+                {"KeyName":"z",
                 "OnPressCallbackFunctionNameString": "KeyPressResponse_DecrementURtoolTipInX_START",
                 "OnReleaseCallbackFunctionNameString": "KeyPressResponse_DecrementURtoolTipInX_STOP",
                 "IncrementSize": -0.020},
 
             "Yincrement":
-                {"KeyName":"a",
+                {"KeyName":"x",
                 "OnPressCallbackFunctionNameString": "KeyPressResponse_IncrementURtoolTipInY_START",
                 "OnReleaseCallbackFunctionNameString": "KeyPressResponse_IncrementURtoolTipInY_STOP",
                 "IncrementSize": 0.020},
 
             "Ydecrement":
-                {"KeyName":"z",
+                {"KeyName":"s",
                 "OnPressCallbackFunctionNameString": "KeyPressResponse_DecrementURtoolTipInY_START",
                 "OnReleaseCallbackFunctionNameString": "KeyPressResponse_DecrementURtoolTipInY_STOP",
                 "IncrementSize": -0.020},
