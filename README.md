@@ -84,8 +84,6 @@ Windows: cd "C:\Program Files (x86)\ZED SDK\"
 
 python get_python_api.py
 
-#
-
 ###
 
 ###
