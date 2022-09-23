@@ -72,7 +72,7 @@ pip install pyserial
 
 pip install ftd2xx #PROBABLY SKIP THIS IN UBUNTU AS IT'S VERY PAINFUL AND BUGGY
 
-# Install pyzed module
+#Install pyzed module
 
 Ubuntu: cd "/usr/local/zed/"
 
