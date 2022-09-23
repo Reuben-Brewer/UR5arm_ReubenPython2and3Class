@@ -1,9 +1,0 @@
-{
-    "RobotiqGripper2F85_Directions": "",
-    "RobotiqGripper2F85_DesiredSerialNumber": "FT2KQDVSA",
-    "RobotiqGripper2F85_DesiredSlaveID": 9,
-    "RobotiqGripper2F85_MainThread_TimeToSleepEachLoop": 0.002,
-    "RobotiqGripper2F85_Position_Starting": 0,
-    "RobotiqGripper2F85_Speed_Starting": 50,
-    "RobotiqGripper2F85_Force_Starting": 50
-}

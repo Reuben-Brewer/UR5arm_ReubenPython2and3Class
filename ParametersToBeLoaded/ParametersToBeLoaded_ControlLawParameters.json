@@ -1,7 +1,0 @@
-{
-    "ControlLawParameters_UserNotes": "",
-    "ControlType_StartingValue":"JoystickControl",
-    "ControlType_AcceptableValues": ["KeyboardControl", "JoystickControl", "ZEDcontrol"],
-    "Teleop_UR5arm_MainThread_TimeToSleepEachLoop":0.008
-}
-
