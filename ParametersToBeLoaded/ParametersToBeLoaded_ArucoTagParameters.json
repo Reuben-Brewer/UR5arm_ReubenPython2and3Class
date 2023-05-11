@@ -1,0 +1,21 @@
+{
+    "ArucoTag_user_notes": "None",
+    "ArucoTag_TkinterPreviewImageScalingFactor": 0.25,
+    "ArucoTag_DictType_EnglishString":"DICT_4X4_50",
+    "ArucoTag_MarkerLengthInMillimeters": 20.0,
+    "ArucoTag_AxesToDrawLengthInMillimeters": 20.0,
+    "ArucoTag_TranslationVectorOfMarkerCenter_ExponentialSmoothingFilterLambda": 0.5,
+    "ArucoTag_RotationVectorOfMarkerCenter_ExponentialSmoothingFilterLambda": 0.5,
+    "ArucoTag_DistanceBetweenMarkers0and1": 52.0,
+    "ArucoTag_DistanceBetweenMarkers0and1_ClosenessThreshold": 3.0,
+    "ArucoTag_HowManyFramesAcceptedBetweenMarkers": 500,
+    "ArucoTag_DetectInvertedMarkersAsWellAsNormalOnesFlag": 1,
+    "ArucoTag_MarkerIDToDetect_PrimaryMarker":7,
+    "ArucoTag_MarkerIDToDetect_SecondaryMarker":1,
+    "ArucoTag_UseClutchFlag": 1,
+    "ArucoTag_RotationMatrixListsOfLists": [[1,0,0],[0,0,1],[0,-1,0]],
+    "ArucoTag_PositionList_ScalingFactorList": [0.001, 0.001, 0.0001],
+    "ArucoTag_RollPitchYaw_AbtXYZ_List_ScalingFactorList": [0.0001, 0.0001, 0.0001],
+    "ArucoTag_UseTranslationClutchFlag": 1,
+    "ArucoTag_UseRotationClutchFlag": 1
+}

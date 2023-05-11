@@ -8,11 +8,12 @@
     "Joystick_Clutch_Button_Index_ToDisplayAsDotColorOn2DdotDisplay":13,
     "Joystick_PrintInfoForAllDetectedJoysticksFlag":0,
     "Joystick_AxisHatButtonOrBallTo6DOFposeMapping_ListOfDicts":
-        [{"AxisName":"X", "AxisHatButtonOrBallType":"AXIS", "PrimaryAxisHatButtonOrBallIndex": 0, "SecondaryAxisHatButtonOrBallIndex": -1, "IncrementSize": -0.040},
-        {"AxisName":"Y", "AxisHatButtonOrBallType":"AXIS", "PrimaryAxisHatButtonOrBallIndex": 1, "SecondaryAxisHatButtonOrBallIndex": -1, "IncrementSize": -0.040},
-        {"AxisName":"Z", "AxisHatButtonOrBallType":"AXIS", "PrimaryAxisHatButtonOrBallIndex": 2, "SecondaryAxisHatButtonOrBallIndex": 1, "IncrementSize": 0.040},
-        {"AxisName":"RX", "AxisHatButtonOrBallType":"AXIS", "PrimaryAxisHatButtonOrBallIndex": 4, "SecondaryAxisHatButtonOrBallIndex": -1, "IncrementSize": 0.000},
-        {"AxisName":"RY", "AxisHatButtonOrBallType":"AXIS", "PrimaryAxisHatButtonOrBallIndex": 5, "SecondaryAxisHatButtonOrBallIndex": -1, "IncrementSize": 0.000},
-        {"AxisName":"RZ", "AxisHatButtonOrBallType":"AXIS", "PrimaryAxisHatButtonOrBallIndex": 6, "SecondaryAxisHatButtonOrBallIndex": -1, "IncrementSize": 0.000}],
-    "Joystick_UseClutchFlag": 0
+        [{"AxisName":"X", "AxisHatButtonOrBallType":"AXIS", "PrimaryAxisHatButtonOrBallIndex": 0, "SecondaryAxisHatButtonOrBallIndex": -1, "IncrementSize": -0.060},
+        {"AxisName":"Y", "AxisHatButtonOrBallType":"AXIS", "PrimaryAxisHatButtonOrBallIndex": 1, "SecondaryAxisHatButtonOrBallIndex": -1, "IncrementSize": -0.060},
+        {"AxisName":"Z", "AxisHatButtonOrBallType":"AXIS", "PrimaryAxisHatButtonOrBallIndex": 2, "SecondaryAxisHatButtonOrBallIndex": 1, "IncrementSize": 0.060},
+        {"AxisName":"RX", "AxisHatButtonOrBallType":"AXIS", "PrimaryAxisHatButtonOrBallIndex": 4, "SecondaryAxisHatButtonOrBallIndex": -1, "IncrementSize": -0.2},
+        {"AxisName":"RY", "AxisHatButtonOrBallType":"AXIS", "PrimaryAxisHatButtonOrBallIndex": 5, "SecondaryAxisHatButtonOrBallIndex": -1, "IncrementSize": -0.4},
+        {"AxisName":"RZ", "AxisHatButtonOrBallType":"AXIS", "PrimaryAxisHatButtonOrBallIndex": 6, "SecondaryAxisHatButtonOrBallIndex": -1, "IncrementSize": 0.2}],
+    "Joystick_UseTranslationClutchFlag": 1,
+    "Joystick_UseRotationClutchFlag": 1
 }

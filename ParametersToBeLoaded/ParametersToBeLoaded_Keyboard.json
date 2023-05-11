@@ -51,10 +51,16 @@
                 "OnReleaseCallbackFunctionNameString": "KeyPressResponse_CloseRobotiqGripper2F85_STOP",
                 "IncrementSize": -3.00},
 
-            "ZEDcontrolClutch":
+            "KeyboardTranslationClutch":
                 {"KeyName":"t",
-                "OnPressCallbackFunctionNameString": "KeyPressResponse_ZEDcontrolClutch_START",
-                "OnReleaseCallbackFunctionNameString": "KeyPressResponse_ZEDcontrolClutch_STOP",
+                "OnPressCallbackFunctionNameString": "KeyPressResponse_KeyboardTranslationClutch_START",
+                "OnReleaseCallbackFunctionNameString": "KeyPressResponse_KeyboardTranslationClutch_STOP",
+                "IncrementSize": -11111.0},
+
+            "KeyboardRotationClutch":
+                {"KeyName":"r",
+                "OnPressCallbackFunctionNameString": "KeyPressResponse_KeyboardRotationClutch_START",
+                "OnReleaseCallbackFunctionNameString": "KeyPressResponse_KeyboardRotationClutch_STOP",
                 "IncrementSize": -11111.0},
 
             "KeyPressResponse_RecordNewWaypoint_JointSpace":
