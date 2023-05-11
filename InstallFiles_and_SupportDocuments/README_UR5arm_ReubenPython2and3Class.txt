@@ -14,7 +14,7 @@ www.reubotics.com
 
 Apache 2 License
 
-Software Revision D, 09/21/2022
+Software Revision E, 05/10/2023
 
 UR5arm_ReubenPython2and3Class.py, test_program_for_UR5arm_ReubenPython2and3Class.py, and Teleop_UR5arm.py verified working on:
 Python 3.8.
@@ -24,21 +24,21 @@ Raspberry Pi Buster
 (no Mac testing yet)
 
 NOTE: When commanding position in Tool/cartesian space via the function PositionControl_ServoJ_MoveThroughListOfPoses (using "PoseIsInToolSpaceFlag" = 1),
-the UR5 is performing inverse-kinematics internally. If the desired TCP pose is one where the arm could achieve it via multuple sets of joint-angles
-(like "elbow-left" vs "elbow-right"), then the arm may feak-out and attempt to make a sudden, large motion as it tries to switch between different joint-angle configurations.
-In the future, I plan to perform the inverse kinematics within this class so that the user can specify "elbow-left" vs "elbow-right" to prevent those freak-outs.
-For now, make sure to operate the arm in a portion of the workspace where there's only a single-joint-angle-configuration that could satisfy a commanded TCP pose.
-Of course, if you command only joint-angles via PositionControl_ServoJ_MoveThroughListOfPoses (using "PoseIsInToolSpaceFlag" = 0), then none of these problems will arise.
+the UR5 is performing inverse-kinematics internally. If the desired TCP pose is one where the arm could achieve it via multiple sets of joint-angles
+(like "elbow-left" vs "elbow-right"), then the arm would normally feak-out and attempt to make a sudden, large motion as it tries to switch between different joint-angle configurations.
+For now, I allow the user to specify a maximum joint-angle-distance to travel in a given step, and the arm will refuse to move if it's going to exceed that max distance.
+In the future, I plan to add the ability for the user to specify "elbow-left" vs "elbow-right".
+When commanding only joint-angles via PositionControl_ServoJ_MoveThroughListOfPoses (using "PoseIsInToolSpaceFlag" = 0), this isn't an issue.
 
 ###########################
 
 ########################### Python module installation instructions, all OS's
 
 ###
-UR5arm_ReubenPython2and3Class, ListOfModuleDependencies: ['future.builtins']
+UR5arm_ReubenPython2and3Class, ListOfModuleDependencies: ['future.builtins', 'numpy', 'scipy.spatial.transform']
 UR5arm_ReubenPython2and3Class, ListOfModuleDependencies_TestProgram: ['MyPrint_ReubenPython2and3Class']
 UR5arm_ReubenPython2and3Class, ListOfModuleDependencies_NestedLayers: ['future.builtins']
-UR5arm_ReubenPython2and3Class, ListOfModuleDependencies_All: ['future.builtins', 'MyPrint_ReubenPython2and3Class']
+UR5arm_ReubenPython2and3Class, ListOfModuleDependencies_All:['future.builtins', 'MyPrint_ReubenPython2and3Class', 'numpy', 'scipy.spatial.transform']
 ###
 
 ###
@@ -49,7 +49,10 @@ or
 sudo python Teleop_UR5arm.py "software_launch_method":"BATfile"
 (In Ubuntu, may need to run as sudo to get the keyboard module to work properly. Definitely need to run as sudo to get the ftd2xx module to work.)
 
-Teleop_UR5arm.py, ListOfModuleDependencies_All:['ftd2xx', 'future.builtins', 'Joystick2DdotDisplay_ReubenPython2and3Class', 'JoystickHID_ReubenPython2and3Class', 'keyboard', 'LowPassFilter_ReubenPython2and3Class', 'MyPlotterPureTkinterStandAloneProcess_ReubenPython2and3Class', 'MyPrint_ReubenPython2and3Class', 'numpy', 'pexpect', 'psutil', 'pygame', 'pyzed.sl', 'RobotiqGripper2F85_ReubenPython2and3Class', 'serial', 'serial.tools', 'SharedGlobals_Teleop_UR5arm', 'UR5arm_ReubenPython2and3Class', 'ZEDasHandController_ReubenPython2and3Class']
+Teleop_UR5arm.py, ListOfModuleDependencies: ['ArucoTagDetectionFromCameraFeed_ReubenPython3Class', 'GetPIDsByProcessEnglishNameAndOptionallyKill_ReubenPython2and3', 'JoystickHID_ReubenPython2and3Class', 'keyboard', 'LowPassFilter_ReubenPython2and3Class', 'MyPlotterPureTkinterStandAloneProcess_ReubenPython2and3Class', 'MyPrint_ReubenPython2and3Class', 'numpy', 'RobotiqGripper2F85_ReubenPython2and3Class', 'scipy.spatial.transform', 'SharedGlobals_Teleop_UR5arm', 'UR5arm_ReubenPython2and3Class', 'ZEDasHandController_ReubenPython2and3Class']
+Teleop_UR5arm.py, ListOfModuleDependencies_TestProgram: []
+Teleop_UR5arm.py, ListOfModuleDependencies_NestedLayers: ['CameraStreamerClass_ReubenPython2and3Class', 'cv2', 'ftd2xx', 'future.builtins', 'Joystick2DdotDisplay_ReubenPython2and3Class', 'LowPassFilter_ReubenPython2and3Class', 'LowPassFilterForDictsOfLists_ReubenPython2and3Class', 'numpy', 'pexpect', 'psutil', 'pygame', 'pyzed.sl', 'scipy.spatial.transform', 'serial', 'serial.tools']
+Teleop_UR5arm.py, ListOfModuleDependencies_All:['ArucoTagDetectionFromCameraFeed_ReubenPython3Class', 'CameraStreamerClass_ReubenPython2and3Class', 'cv2', 'ftd2xx', 'future.builtins', 'GetPIDsByProcessEnglishNameAndOptionallyKill_ReubenPython2and3', 'Joystick2DdotDisplay_ReubenPython2and3Class', 'JoystickHID_ReubenPython2and3Class', 'keyboard', 'LowPassFilter_ReubenPython2and3Class', 'LowPassFilterForDictsOfLists_ReubenPython2and3Class', 'MyPlotterPureTkinterStandAloneProcess_ReubenPython2and3Class', 'MyPrint_ReubenPython2and3Class', 'numpy', 'pexpect', 'psutil', 'pygame', 'pyzed.sl', 'RobotiqGripper2F85_ReubenPython2and3Class', 'scipy.spatial.transform', 'serial', 'serial.tools', 'SharedGlobals_Teleop_UR5arm', 'UR5arm_ReubenPython2and3Class', 'ZEDasHandController_ReubenPython2and3Class']
 
 sudo apt-get install python3-tk (only if there's an error about tkinter not being found)
 pip install pygame
