@@ -41,7 +41,7 @@ When commanding only joint-angles via PositionControl_ServoJ_MoveThroughListOfPo
 
 ########################### Python module installation instructions, all OS's
 
-###
+---
 
 UR5arm_ReubenPython2and3Class, ListOfModuleDependencies: ['future.builtins', 'numpy', 'scipy.spatial.transform']
 
@@ -51,9 +51,9 @@ UR5arm_ReubenPython2and3Class, ListOfModuleDependencies_NestedLayers: ['future.b
 
 UR5arm_ReubenPython2and3Class, ListOfModuleDependencies_All:['future.builtins', 'MyPrint_ReubenPython2and3Class', 'numpy', 'scipy.spatial.transform']
 
-###
+---
 
-###
+---
 
 Teleop_UR5arm.py run via command:
 
@@ -91,21 +91,21 @@ Ubuntu: cd "/usr/local/zed/"
 
 Windows: cd "C:\Program Files (x86)\ZED SDK\"
 
-#Make sure you have admin access to run it in the Program Files folder, otherwise, you will have a Permission denied error.
+-Make sure you have admin access to run it in the Program Files folder, otherwise, you will have a Permission denied error.
 
-#You can still copy the file into another location to run it without permissions.
+-You can still copy the file into another location to run it without permissions.
 
 python get_python_api.py
 
-#
+-
 
-###
+---
 
-###
+---
 
 ExcelPlot_CSVfileForTrajectoryData.py, ListOfModuleDependencies_All:['pandas', 'win32com.client', 'xlrd', 'xlsxwriter', 'xlutils.copy', 'xlwt']
 
-###
+---
 
 ###########################
 
