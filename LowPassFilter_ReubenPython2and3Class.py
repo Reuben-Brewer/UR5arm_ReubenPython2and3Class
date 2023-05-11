@@ -6,7 +6,7 @@ reuben.brewer@gmail.com
 www.reubotics.com
 
 Apache 2 License
-Software Revision G, 09/21/2022
+Software Revision H, 05/10/2023
 
 Verified working on: Python 2.7, 3.8 for Windows 8.1, 10 64-bit, Ubuntu 20.04, and Raspberry Pi Buster (no Mac testing yet).
 '''
@@ -77,11 +77,6 @@ class LowPassFilter_ReubenPython2and3Class():
         #########################################################
         #########################################################
 
-        self.CurrentTime_CalculatedFromAddDataPointFromExternalProgram = -11111.0
-        self.LastTime_CalculatedFromAddDataPointFromExternalProgram = -11111.0
-        self.DataStreamingDeltaT_CalculatedFromAddDataPointFromExternalProgram = -11111.0
-        self.DataStreamingFrequency_CalculatedFromAddDataPointFromExternalProgram = -11111.0
-
         self.SignalInRaw = [0.0]*5
         self.SignalOutSmoothed = [0.0]*5
 
@@ -100,17 +95,6 @@ class LowPassFilter_ReubenPython2and3Class():
     ##########################################################################################################
     def __del__(self):
         pass
-    ##########################################################################################################
-    ##########################################################################################################
-
-    ##########################################################################################################
-    ##########################################################################################################
-    def IsNumber0or1(self, InputNumber):
-
-        if float(InputNumber) == 0.0 or float(InputNumber) == 1:
-            return 1
-        else:
-            return 0
     ##########################################################################################################
     ##########################################################################################################
 
@@ -180,49 +164,6 @@ class LowPassFilter_ReubenPython2and3Class():
 
     ##########################################################################################################
     ##########################################################################################################
-    def TellWhichFileWereIn(self):
-
-        #We used to use this method, but it gave us the root calling file, not the class calling file
-        #absolute_file_path = os.path.dirname(os.path.realpath(sys.argv[0]))
-        #filename = absolute_file_path[absolute_file_path.rfind("\\") + 1:]
-
-        frame = inspect.stack()[1]
-        filename = frame[1][frame[1].rfind("\\") + 1:]
-        filename = filename.replace(".py","")
-
-        return filename
-    ##########################################################################################################
-    ##########################################################################################################
-
-    ##########################################################################################################
-    ##########################################################################################################
-    def getPreciseSecondsTimeStampString(self):
-        ts = time.time()
-
-        return ts
-    ##########################################################################################################
-    ##########################################################################################################
-
-    ##########################################################################################################
-    ##########################################################################################################
-    def UpdateFrequencyCalculation_CalculatedFromAddDataPointFromExternalProgram(self):
-
-        try:
-            self.DataStreamingDeltaT_CalculatedFromAddDataPointFromExternalProgram = self.CurrentTime_CalculatedFromAddDataPointFromExternalProgram - self.LastTime_CalculatedFromAddDataPointFromExternalProgram
-
-            if self.DataStreamingDeltaT_CalculatedFromAddDataPointFromExternalProgram != 0.0:
-                self.DataStreamingFrequency_CalculatedFromAddDataPointFromExternalProgram = 1.0/self.DataStreamingDeltaT_CalculatedFromAddDataPointFromExternalProgram
-
-            self.LastTime_CalculatedFromAddDataPointFromExternalProgram = self.CurrentTime_CalculatedFromAddDataPointFromExternalProgram
-        except:
-            exceptions = sys.exc_info()[0]
-            print("UpdateFrequencyCalculation_CalculatedFromAddDataPointFromExternalProgram ERROR with Exceptions: %s" % exceptions)
-            traceback.print_exc()
-    ##########################################################################################################
-    ##########################################################################################################
-
-    ##########################################################################################################
-    ##########################################################################################################
     def SwapTwoNumbersBasedOnSize(self, j, k):  # swaps values of j and k if j > k
 
         x = j
@@ -274,10 +215,6 @@ class LowPassFilter_ReubenPython2and3Class():
 
         try:
             ###############################################
-            self.CurrentTime_CalculatedFromAddDataPointFromExternalProgram = self.getPreciseSecondsTimeStampString()
-            ###############################################
-
-            ###############################################
             NewDataPoint = float(NewDataPoint)
 
             self.SignalInRaw = list(numpy.roll(self.SignalInRaw, 1)) #MUST EXPLICITLY MAKE NEW LIST() FOR THIS TO WORK PROPERLY
@@ -301,13 +238,9 @@ class LowPassFilter_ReubenPython2and3Class():
             ###############################################
 
             ###############################################
-            self.UpdateFrequencyCalculation_CalculatedFromAddDataPointFromExternalProgram()
-            ###############################################
-
-            ###############################################
             self.MostRecentDataDict = dict([("SignalInRaw", self.SignalInRaw[0]),
                                            ("SignalOutSmoothed", self.SignalOutSmoothed[0]),
-                                           ("DataStreamingFrequency", self.DataStreamingFrequency_CalculatedFromAddDataPointFromExternalProgram)])
+                                           ("DataStreamingFrequency", -11111.0)]) #For backwards-compatibility, remove this later after we've updated our code.
 
             return self.MostRecentDataDict
             ###############################################

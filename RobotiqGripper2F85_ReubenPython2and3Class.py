@@ -6,7 +6,7 @@ reuben.brewer@gmail.com
 www.reubotics.com
 
 Apache 2 License
-Software Revision C, 09/21/2022
+Software Revision D, 05/10/2023
 
 Verified working on: Python 2.7, 3.8 for Windows 8.1, 10 64-bit, Ubuntu 20.04, and Raspberry Pi Buster (no Mac testing yet).
 '''
@@ -1196,9 +1196,11 @@ class RobotiqGripper2F85_ReubenPython2and3Class(Frame): #Subclass the Tkinter Fr
     ##########################################################################################################
     def StartGUI(self, GuiParent):
 
-        self.GUI_Thread_ThreadingObject = threading.Thread(target=self.GUI_Thread, args=(GuiParent,))
-        self.GUI_Thread_ThreadingObject.setDaemon(True) #Should mean that the GUI thread is destroyed automatically when the main thread is destroyed.
-        self.GUI_Thread_ThreadingObject.start()
+        #self.GUI_Thread_ThreadingObject = threading.Thread(target=self.GUI_Thread, args=(GuiParent,))
+        #self.GUI_Thread_ThreadingObject.setDaemon(True) #Should mean that the GUI thread is destroyed automatically when the main thread is destroyed.
+        #self.GUI_Thread_ThreadingObject.start()
+
+        self.GUI_Thread(GuiParent)
     ##########################################################################################################
     ##########################################################################################################
 

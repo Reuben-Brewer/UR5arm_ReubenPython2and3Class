@@ -6,7 +6,7 @@ reuben.brewer@gmail.com
 www.reubotics.com
 
 Apache 2 License
-Software Revision D, 09/21/2022
+Software Revision E, 05/10/2023
 
 Verified working on: Python 3.8 for Windows 10 64-bit, Ubuntu 20.04, and Raspberry Pi Buster (no Mac testing yet).
 '''
@@ -31,6 +31,8 @@ import select
 import struct
 import string
 import types #Required for 'ListFunctionNamesInClass'
+import numpy
+from scipy.spatial.transform import Rotation
 #########################################################
 
 #########################################################
@@ -135,7 +137,7 @@ class UR5arm_ReubenPython2and3Class(Frame): #Subclass the Tkinter Frame
         ##########################################################################################################
         ##########################################################################################################
 
-        ##########################################################################################################
+        ########################################################################################################## unicorn dragon
         ##########################################################################################################
         self.StandAloneProcess_DictOfFunctions = dict([("MoveSafelyToStartingPoseViaMultipointSequence", self.MoveSafelyToStartingPoseViaMultipointSequence),
                                                        ("PositionControl_ServoJ_MoveThroughListOfPoses_SafeReturnToStartingPoseFromAnywhere", self.PositionControl_ServoJ_MoveThroughListOfPoses_SafeReturnToStartingPoseFromAnywhere),
@@ -146,7 +148,8 @@ class UR5arm_ReubenPython2and3Class(Frame): #Subclass the Tkinter Frame
                                                        ("KickWatchdogButDoNothing", self.KickWatchdogButDoNothing),
                                                        ("SetWatchdogTimerEnableState", self.SetWatchdogTimerEnableState),
                                                        ("StopMotion_JointSpace", self.StopMotion_JointSpace),
-                                                       ("ForceControl", self.ForceControl)])
+                                                       ("ForceControl", self.ForceControl),
+                                                       ("DisplayPopupMessage", self.DisplayPopupMessage)])
         ##########################################################################################################
         ##########################################################################################################
 
@@ -263,6 +266,10 @@ class UR5arm_ReubenPython2and3Class(Frame): #Subclass the Tkinter Frame
         self.DedicatedTxThread_TxMessageToSend_Queue = Queue.Queue()
         self.TxDataToWrite = ""
 
+        self.ServoJ_JointAngleDistance_Threshold_MinValue = 0.0
+        self.ServoJ_JointAngleDistance_Threshold_MaxValue = 20.0
+        self.ServoJ_JointAngleDistance_Threshold = 1.0
+
         self.Velocity_MinValue = 0.001
         self.Velocity_MaxValue = 1.5 # 1.5m/s or 1500 mm/s
         self.Acceleration_MinValue = 0.001
@@ -272,6 +279,11 @@ class UR5arm_ReubenPython2and3Class(Frame): #Subclass the Tkinter Frame
         #self.JointAngleList_Rad = [-11111.0] * 6
         self.JointAngleList_Deg = [-11111.0] * 6
         self.ToolVectorActual = [-11111.0]*6
+
+        self.ToolTip_XYZ_Meters = [-11111.0]*3
+        self.ToolTip_RotationEulerList_Radians = [-11111.0]*3
+        self.ToolTip_RotationEulerList_Degrees = [-11111.0]*3
+
         self.ToolTipSpeedsCartestian_TCPspeedActual = [-11111.0] * 6
         self.ToolTipSpeedsCartestian_LinearXYZnorm_MetersPerMin = -11111.0
         self.ToolTipSpeedsCartestian_LinearXYZnorm_MetersPerSec = -11111.0
@@ -960,6 +972,12 @@ class UR5arm_ReubenPython2and3Class(Frame): #Subclass the Tkinter Frame
         self.PacketDict = dict()
         for KeywordString in self.PacketKeywordStringsList:
             self.PacketDict[KeywordString] = "-11111.0"
+        #########################################################
+        #########################################################
+
+        #########################################################
+        #########################################################
+        self.ToolTip6DOFpose_ToBeSet = [-11111.0]*6
         #########################################################
         #########################################################
 
@@ -1805,10 +1823,28 @@ class UR5arm_ReubenPython2and3Class(Frame): #Subclass the Tkinter Frame
                 #########################################################
 
                 #########################################################
+                self.ToolTip6DOFpose_ToBeSet = ToolTip6DOFpose
+                #########################################################
+
+                #########################################################
                 Message = Message + \
-                                "  x = p" + self.ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(ToolTip6DOFpose, 0, 3) + \
-                                "  q = get_inverse_kin(x)" + \
-                                "  servoj(q"
+                                "  x_NextPoseCartesianSpace = p" + self.ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(ToolTip6DOFpose, 0, 3) + "\n" +\
+                                "  q_NextPoseJointSpace = get_inverse_kin(x_NextPoseCartesianSpace)\n" + \
+                                "  q_CurrentPoseJointSpace = get_actual_joint_positions()\n" + \
+                                "  MoveFlag = 1\n" + \
+                                "  i = 0\n" + \
+                                "  while i < 5:\n" + \
+                                "    JointAngleDistance = norm(q_NextPoseJointSpace[i] - q_CurrentPoseJointSpace[i])\n" + \
+                                "    if JointAngleDistance > " + str(self.ServoJ_JointAngleDistance_Threshold) + ":\n" + \
+                                "        MoveFlag = 0\n" + \
+                                "        popup(\"EXCEEDED THRESHOLD\", blocking=True)\n" + \
+                                "    end\n" +\
+                                "    i = i + 1\n" + \
+                                "  end\n" + \
+                                "  if MoveFlag == 1:\n" + \
+                                "    servoj(q_NextPoseJointSpace"
+                                #"    PopupMessageString = to_str(JointAngleDistance)\n" + \
+                                #                                "    popup(PopupMessageString, blocking=True)\n" + \
                 #########################################################
 
             #########################################################
@@ -1856,7 +1892,9 @@ class UR5arm_ReubenPython2and3Class(Frame): #Subclass the Tkinter Frame
             #########################################################
 
             #########################################################
-            Message = Message  + ")\n" + "end\n"
+            Message = Message  + ")\n" + \
+                      "    end\n" + \
+                      "end\n"
             #########################################################
 
         #########################################################
@@ -2026,6 +2064,39 @@ class UR5arm_ReubenPython2and3Class(Frame): #Subclass the Tkinter Frame
                 print("SetPayload ERROR: Payload_CoGmetersList_ToBeSet must be a list of 3 numbers.")
         else:
             print("SetPayload ERROR: Payload_MassKG_ToBeSet must be an int or float2")
+    ##########################################################################################################
+    ##########################################################################################################
+
+    ##########################################################################################################
+    ##########################################################################################################
+    def DisplayPopupMessage(self, MessageString = "MessageString", TitleString = "TitleString", WarningBooleanInteger = 0, ErrorBooleanInteger = 0, BlockingBooleanInteger = 1):
+
+        if WarningBooleanInteger not in [0, 1]:
+            print("DisplayPopupMessage: ERROR, 'WarningBooleanInteger' must be 0 or 1.")
+            return
+
+        if ErrorBooleanInteger not in [0, 1]:
+            print("DisplayPopupMessage: ERROR, 'ErrorBooleanInteger' must be 0 or 1.")
+            return
+
+
+        if BlockingBooleanInteger not in [0, 1]:
+            print("DisplayPopupMessage: ERROR, 'BlockingBooleanInteger' must be 0 or 1.")
+            return
+
+        #popup(s, title=’Popup’, warning=False, error=False, blocking=False)
+        #blocking: if True, program will be suspended until "continue" is pressed
+        PopupMessageCommandToSend = "popup(" +\
+                                    "\"" + str(MessageString) + "\"" +\
+                                    ", title=\"" + str(TitleString) + "\"" +\
+                                    ", warning=" + str(bool(WarningBooleanInteger)) +\
+                                    ", error=" + str(bool(ErrorBooleanInteger)) +\
+                                    ", blocking=" + str(bool(BlockingBooleanInteger)) +\
+                                    ")\n"
+
+        print("DisplayPopupMessage, PopupMessageCommandToSend: " + str(PopupMessageCommandToSend))
+        self.SendTxMessage(PopupMessageCommandToSend)
+
     ##########################################################################################################
     ##########################################################################################################
 
@@ -2406,6 +2477,11 @@ class UR5arm_ReubenPython2and3Class(Frame): #Subclass the Tkinter Frame
             self.MostRecentDataDict["JointAngleList_Deg"] = self.JointAngleList_Deg
             self.MostRecentDataDict["JointAngleList_Rad"] = self.JointAngleList_Rad
             self.MostRecentDataDict["ToolVectorActual"] = self.ToolVectorActual
+
+            self.MostRecentDataDict["ToolTip_XYZ_Meters"] = self.ToolTip_XYZ_Meters
+            self.MostRecentDataDict["ToolTip_RotationEulerList_Radians"] = self.ToolTip_RotationEulerList_Radians
+            self.MostRecentDataDict["ToolTip_RotationEulerList_Degrees"] = self.ToolTip_RotationEulerList_Degrees
+
             self.MostRecentDataDict["ToolTipSpeedsCartestian_TCPspeedActual"] = self.ToolTipSpeedsCartestian_TCPspeedActual
             self.MostRecentDataDict["ToolTipSpeedsCartestian_LinearXYZnorm_MetersPerSec"] = self.ToolTipSpeedsCartestian_LinearXYZnorm_MetersPerSec
             self.MostRecentDataDict["DataStreamingFrequency_CalculatedFromDedicatedRxThread"] = self.DataStreamingFrequency_CalculatedFromDedicatedRxThread
@@ -2471,9 +2547,20 @@ class UR5arm_ReubenPython2and3Class(Frame): #Subclass the Tkinter Frame
                             ##############################
 
                             ##############################
-                            self.ToolVectorActual = [self.PacketDict["ToolXactual"], self.PacketDict["ToolYactual"],
-                                                     self.PacketDict["ToolZactual"], self.PacketDict["ToolRXactual"],
-                                                     self.PacketDict["ToolRYactual"], self.PacketDict["ToolRZactual"]]
+                            self.ToolVectorActual = [self.PacketDict["ToolXactual"],
+                                                     self.PacketDict["ToolYactual"],
+                                                     self.PacketDict["ToolZactual"],
+                                                     self.PacketDict["ToolRXactual"],
+                                                     self.PacketDict["ToolRYactual"],
+                                                     self.PacketDict["ToolRZactual"]]
+                            ##############################
+
+                            ##############################
+                            self.ToolTip_XYZ_Meters = self.ToolVectorActual [0:3]
+
+                            RotationObjectScipy = Rotation.from_rotvec(self.ToolVectorActual[-3:])
+                            self.ToolTip_RotationEulerList_Radians = RotationObjectScipy.as_euler('xyz', degrees=False)
+                            self.ToolTip_RotationEulerList_Degrees = numpy.array(numpy.rad2deg(numpy.array(self.ToolTip_RotationEulerList_Radians))).tolist()
                             ##############################
 
                             ##############################
@@ -2808,6 +2895,28 @@ class UR5arm_ReubenPython2and3Class(Frame): #Subclass the Tkinter Frame
         #################################################
 
         #################################################
+        self.ServoJ_JointAngleDistance_Threshold_Slider_DoubleVar = DoubleVar()
+
+        self.ServoJ_JointAngleDistance_Threshold_Slider = Scale(self.AdditionalControls_Frame,
+                                                       label = "ServoJ_JointAngleDistance_Threshold",
+                                                       state="normal",
+                                                       from_ = self.ServoJ_JointAngleDistance_Threshold_MinValue,
+                                                       to = self.ServoJ_JointAngleDistance_Threshold_MaxValue,
+                                                       tickinterval = (self.ServoJ_JointAngleDistance_Threshold_MaxValue - self.ServoJ_JointAngleDistance_Threshold_MinValue)/5.0,
+                                                       orient=HORIZONTAL,
+                                                       showvalue=True,
+                                                       width = 10,
+                                                       length = self.Tkinter_Scalelength,
+                                                       resolution = 0.01,
+                                                       variable = self.ServoJ_JointAngleDistance_Threshold_Slider_DoubleVar)
+        self.ServoJ_JointAngleDistance_Threshold_Slider.bind('<Button-1>', lambda event, name="ServoJ_JointAngleDistance_Threshold_Slider": self.ServoJ_JointAngleDistance_Threshold_Slider_Response(event, name))
+        self.ServoJ_JointAngleDistance_Threshold_Slider.bind('<B1-Motion>', lambda event, name="ServoJ_JointAngleDistance_Threshold_Slider": self.ServoJ_JointAngleDistance_Threshold_Slider_Response(event, name))
+        self.ServoJ_JointAngleDistance_Threshold_Slider.bind('<ButtonRelease-1>', lambda event, name="ServoJ_JointAngleDistance_Threshold_Slider": self.ServoJ_JointAngleDistance_Threshold_Slider_Response(event, name))
+        self.ServoJ_JointAngleDistance_Threshold_Slider.set(self.ServoJ_JointAngleDistance_Threshold)
+        self.ServoJ_JointAngleDistance_Threshold_Slider.grid(row=1, column=3, padx=1, pady=10, columnspan=2, rowspan=1)
+        #################################################
+
+        #################################################
         self.Acceleration_Slider_DoubleVar = DoubleVar()
 
         self.Acceleration_Slider = Scale(self.AdditionalControls_Frame,
@@ -2932,6 +3041,17 @@ class UR5arm_ReubenPython2and3Class(Frame): #Subclass the Tkinter Frame
 
     ##########################################################################################################
     ##########################################################################################################
+    def ServoJ_JointAngleDistance_Threshold_Slider_Response(self, event, name):
+
+        self.ServoJ_JointAngleDistance_Threshold = float(self.ServoJ_JointAngleDistance_Threshold_Slider_DoubleVar.get())
+
+        #print("ServoJ_JointAngleDistance_Threshold_Slider_Response event fired, Velocity = " + str(self.ServoJ_JointAngleDistance_Threshold))
+
+    ##########################################################################################################
+    ##########################################################################################################
+
+    ##########################################################################################################
+    ##########################################################################################################
     def Acceleration_Slider_Response(self, event, name):
 
         self.Acceleration = float(self.Acceleration_Slider_DoubleVar.get())
@@ -2978,7 +3098,8 @@ class UR5arm_ReubenPython2and3Class(Frame): #Subclass the Tkinter Frame
                     self.DedicatedTxThread_Label["text"] = "URarm_ConnectedFlag_DedicatedTx: " + str(self.URarm_ConnectedFlag_DedicatedTx) + \
                                                 "\nTime: " + self.ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(self.CurrentTime_CalculatedFromDedicatedTxThread, 0, 3) + \
                                                 "\nTx Data Frequency: " + self.ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(self.DataStreamingFrequency_CalculatedFromDedicatedTxThread, 0, 3) + \
-                                                "\nTxDataToWrite: " + str(self.TxDataToWrite)
+                                                "\nToolTip6DOFpose_ToBeSet: " + self.ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(self.ToolTip6DOFpose_ToBeSet, 0, 5) # +\
+                                                #"\nTxDataToWrite: " + str(self.TxDataToWrite)
                     #######################################################
 
                     #######################################################
@@ -2990,6 +3111,9 @@ class UR5arm_ReubenPython2and3Class(Frame): #Subclass the Tkinter Frame
                                                 "\t\tTx Data Frequency: " + self.ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(self.DataStreamingFrequency_CalculatedFromDedicatedTxThread, 0, 3) + \
                                                 "\nRxPacketsCounter_Total: " + str(self.RxPacketsCounter_Total) + ",\tWrongSize: "  + str(self.RxPacketsCounter_WrongSize) + "\t%WrongSize: " + str(self.RxPackets_PercentWrongSize) + \
                                                 "\nToolVectorActual: " + self.ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(self.ToolVectorActual, 0, 5) + \
+                                                "\nToolTip_XYZ_Meters: " + self.ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(self.ToolTip_XYZ_Meters, 0, 5) + \
+                                                "\nToolTip_RotationEulerList_Radians: " + self.ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(self.ToolTip_RotationEulerList_Radians, 0, 3) + \
+                                                "\nToolTip_RotationEulerList_Degrees: " + self.ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(self.ToolTip_RotationEulerList_Degrees, 0, 3) + \
                                                 "\nToolTipSpeedsCartestian_TCPspeedActual: " + self.ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(self.ToolTipSpeedsCartestian_TCPspeedActual, 0, 5) + \
                                                 "\nToolTipSpeedsCartestian_LinearXYZnorm_MetersPerSec: " + self.ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(self.ToolTipSpeedsCartestian_LinearXYZnorm_MetersPerSec, 0, 3) + \
                                                 "\nToolTipSpeedsCartestian_LinearXYZnorm_MetersPerMin: " + self.ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(self.ToolTipSpeedsCartestian_LinearXYZnorm_MetersPerMin, 0, 3) + \

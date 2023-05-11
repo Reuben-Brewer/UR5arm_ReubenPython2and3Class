@@ -6,7 +6,7 @@ reuben.brewer@gmail.com
 www.reubotics.com
 
 Apache 2 License
-Software Revision D, 09/21/2022
+Software Revision E, 05/10/2023
 
 Verified working on: Python 3.8 for Windows 10 64-bit, Ubuntu 20.04, and Raspberry Pi Buster (no Mac testing yet).
 '''
@@ -481,7 +481,7 @@ if __name__ == '__main__':
     USE_MYPRINT_FLAG = 1
 
     global USE_SINUSOIDAL_INPUT_FLAG
-    USE_SINUSOIDAL_INPUT_FLAG = 0
+    USE_SINUSOIDAL_INPUT_FLAG = 1
     ##########################################################################################################
     ##########################################################################################################
     ##########################################################################################################
@@ -590,6 +590,15 @@ if __name__ == '__main__':
     global UR5arm_MostRecentDict_ToolVectorActual
     UR5arm_MostRecentDict_ToolVectorActual = [-11111.0]*6
 
+    global UR5arm_MostRecentDict_ToolTip_XYZ_Meters
+    UR5arm_MostRecentDict_ToolTip_XYZ_Meters= [-11111.0]*3
+
+    global UR5arm_MostRecentDict_ToolTip_RotationEulerList_Radians
+    UR5arm_MostRecentDict_ToolTip_RotationEulerList_Radians= [-11111.0]*3
+
+    global UR5arm_MostRecentDict_ToolTip_RotationEulerList_Degrees
+    UR5arm_MostRecentDict_ToolTip_RotationEulerList_Degrees= [-11111.0]*3
+
     global UR5arm_MostRecentDict_ToolTipSpeedsCartestian_TCPspeedActual
     UR5arm_MostRecentDict_ToolTipSpeedsCartestian_TCPspeedActual = [-11111.0]*6
 
@@ -663,17 +672,16 @@ if __name__ == '__main__':
     global HomeStraightUpPose_Deg
     HomeStraightUpPose_Deg = [0.0, -90.0, 0.0, -90.0, 0.0, 0.0]
 
-    #    #''' CB3_S
+    '''    #CB3_S
     global UR5arm_PositionControl_MoveJ_MoveThroughListOfPoses_SafeReturnToStartingPoseFromAnywhere
     UR5arm_PositionControl_MoveJ_MoveThroughListOfPoses_SafeReturnToStartingPoseFromAnywhere = list([dict([("JointAngleList_Deg", [180.0, -81.95056, 94.05708, -188.0, 1.29492, 0.0]), ("TimeDurationSec", 5.0)]),
                                                                                                 dict([("JointAngleList_Deg", [180.0, -81.95056, 94.05708, -188.0, 1.29492, 0.0]), ("TimeDurationSec", 5.0)])])
-    #'''
-
-    ''' CB3_K
-    global UR5arm_PositionControl_MoveJ_MoveThroughListOfPoses_SafeReturnToStartingPoseFromAnywhere
-    UR5arm_PositionControl_MoveJ_MoveThroughListOfPoses_SafeReturnToStartingPoseFromAnywhere = list([dict([("JointAngleList_Deg", [88.310, -115.040, 88.510, 21.571, 82.274, 41.313]), ("TimeDurationSec", 5.0)]),
-                                                                                                dict([("JointAngleList_Deg", [88.310, -115.040, 88.510, 21.571, 82.274, 41.313]), ("TimeDurationSec", 5.0)])])
     '''
+
+    #''' CB3_K
+    global UR5arm_PositionControl_MoveJ_MoveThroughListOfPoses_SafeReturnToStartingPoseFromAnywhere
+    UR5arm_PositionControl_MoveJ_MoveThroughListOfPoses_SafeReturnToStartingPoseFromAnywhere = list([dict([("JointAngleList_Deg", [90.00, -75.00, 102.50, -30.00, 84.200, 40.00]), ("TimeDurationSec", 5.0)])])
+    #'''
 
     '''
     global UR5arm_PositionControl_MoveJ_MoveThroughListOfPoses_SafeReturnToStartingPoseFromAnywhere
@@ -713,7 +721,8 @@ if __name__ == '__main__':
                                                         ("UR5arm_WatchdogTimerDurationSeconds_ExpirationWillEndStandAloneProcess", UR5arm_WatchdogTimerDurationSeconds_ExpirationWillEndStandAloneProcess),
                                                         ("MultiprocessingQueue_Rx_MaxSize", UR5arm_MultiprocessingQueue_Rx_MaxSize),
                                                         ("MultiprocessingQueue_Tx_MaxSize", UR5arm_MultiprocessingQueue_Tx_MaxSize),
-                                                        ("EnableTx_State_AtStartupFlag", 1)])
+                                                        ("EnableTx_State_AtStartupFlag", 1),
+                                                        ])
 
     if USE_UR5arm_FLAG == 1:
         try:
@@ -815,6 +824,15 @@ if __name__ == '__main__':
     ##########################################################################################################
 
     ##########################################################################################################
+    '''
+    UR5arm_ReubenPython2and3ClassObject.FunctionCallToStandAloneProcess("DisplayPopupMessage",
+                                                                        ["test"],
+                                                                        MultiprocessingQueue_Rx_MaxSize_Local = UR5arm_MultiprocessingQueue_Rx_MaxSize,
+                                                                        IgnoreNewDataIfQueueIsFullFlag = 1)
+    '''
+    ##########################################################################################################
+
+    ##########################################################################################################
     ##########################################################################################################
     ##########################################################################################################
     while(EXIT_PROGRAM_FLAG == 0):
@@ -843,6 +861,11 @@ if __name__ == '__main__':
                         UR5arm_MostRecentDict_JointAngleList_Deg = UR5arm_MostRecentDict["JointAngleList_Deg"]
                         UR5arm_MostRecentDict_JointAngleList_Rad = UR5arm_MostRecentDict["JointAngleList_Rad"]
                         UR5arm_MostRecentDict_ToolVectorActual = UR5arm_MostRecentDict["ToolVectorActual"]
+
+                        UR5arm_MostRecentDict_ToolTip_XYZ_Meters = UR5arm_MostRecentDict["ToolTip_XYZ_Meters"]
+                        UR5arm_MostRecentDict_ToolTip_RotationEulerList_Radians = UR5arm_MostRecentDict["ToolTip_RotationEulerList_Radians"]
+                        UR5arm_MostRecentDict_ToolTip_RotationEulerList_Degrees = UR5arm_MostRecentDict["ToolTip_RotationEulerList_Degrees"]
+
                         UR5arm_MostRecentDict_ToolTipSpeedsCartestian_TCPspeedActual = UR5arm_MostRecentDict["ToolTipSpeedsCartestian_TCPspeedActual"]
                         UR5arm_MostRecentDict_ToolTipSpeedsCartestian_LinearXYZnorm_MetersPerSec = UR5arm_MostRecentDict["ToolTipSpeedsCartestian_LinearXYZnorm_MetersPerSec"]
                         UR5arm_MostRecentDict_DataStreamingFrequency_CalculatedFromDedicatedRxThread = UR5arm_MostRecentDict["DataStreamingFrequency_CalculatedFromDedicatedRxThread"]

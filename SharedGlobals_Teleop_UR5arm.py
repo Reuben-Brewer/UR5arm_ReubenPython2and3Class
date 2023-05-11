@@ -6,7 +6,7 @@ reuben.brewer@gmail.com
 www.reubotics.com
 
 Apache 2 License
-Software Revision D, 09/21/2022
+Software Revision E, 05/10/2023
 
 Verified working on: Python 3.8 for Windows 10 64-bit, Ubuntu 20.04, and Raspberry Pi Buster (no Mac testing yet).
 '''
@@ -49,6 +49,27 @@ UR5arm_MostRecentDict_JointAngleList_Deg = [-11111.0] * 6
 
 global UR5arm_MostRecentDict_ToolVectorActual
 UR5arm_MostRecentDict_ToolVectorActual = [-11111.0] * 6
+
+global UR5arm_MostRecentDict_ToolTip_XYZ_Meters
+UR5arm_MostRecentDict_ToolTip_XYZ_Meters = [-11111.0] * 3
+
+global UR5arm_MostRecentDict_ToolTip_RotationEulerList_Radians
+UR5arm_MostRecentDict_ToolTip_RotationEulerList_Radians = [-11111.0] * 3
+
+global UR5arm_MostRecentDict_ToolTip_RotationEulerList_Degrees
+UR5arm_MostRecentDict_ToolTip_RotationEulerList_Degrees = [-11111.0] * 3
+
+global UR5arm_MostRecentDict_ToolTipSpeedsCartestian_TCPspeedActual
+UR5arm_MostRecentDict_ToolTipSpeedsCartestian_TCPspeedActual = [-11111.0] * 6
+
+global UR5arm_MostRecentDict_ToolTipSpeedsCartestian_LinearXYZnorm_MetersPerSec
+UR5arm_MostRecentDict_ToolTipSpeedsCartestian_LinearXYZnorm_MetersPerSec = -11111.0
+
+global UR5arm_MostRecentDict_DataStreamingFrequency_CalculatedFromDedicatedRxThread
+UR5arm_MostRecentDict_DataStreamingFrequency_CalculatedFromDedicatedRxThread = -11111.0
+
+global UR5arm_MostRecentDict_Time
+UR5arm_MostRecentDict_Time = -11111.0
 #################################################
 
 #################################################
@@ -79,8 +100,11 @@ BeepNeedsToBePlayedFlag_RecordNewWaypoint_JointSpace = 0
 global BeepNeedsToBePlayedFlag_RecordNewWaypoint_CartesianSpace
 BeepNeedsToBePlayedFlag_RecordNewWaypoint_CartesianSpace = 0
 
-global KeyPressResponse_ZEDcontrolClutch_State
-KeyPressResponse_ZEDcontrolClutch_State = 0
+global KeyPressResponse_Keyboard_TranslationClutch_State
+KeyPressResponse_Keyboard_TranslationClutch_State = 0
+
+global KeyPressResponse_Keyboard_RotationClutch_State
+KeyPressResponse_Keyboard_RotationClutch_State = 0
 
 global KeyPressResponse_IncrementURtoolTipInX_NeedsToBeChangedFlag
 KeyPressResponse_IncrementURtoolTipInX_NeedsToBeChangedFlag = 0
@@ -111,6 +135,9 @@ KeyPressResponse_CloseRobotiqGripper2F85_NeedsToBeChangedFlag = 0
 
 global Keyboard_KeysToTeleopControlsMapping_DictOfDicts
 Keyboard_KeysToTeleopControlsMapping_DictOfDicts = dict()
+
+global Keyboard_OPEN_FLAG
+Keyboard_OPEN_FLAG = -1
 #################################################
 
 print("SharedGlobals_Teleop_UR5arm.py, finished loading!")

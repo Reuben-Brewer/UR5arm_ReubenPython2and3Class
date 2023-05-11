@@ -6,7 +6,7 @@ reuben.brewer@gmail.com
 www.reubotics.com
 
 Apache 2 License
-Software Revision E, 09/21/2022
+Software Revision F, 05/10/2023
 
 Verified working on: Python 3.8 for Windows 10 64-bit and Ubuntu 20.04.
 '''
@@ -136,6 +136,9 @@ class ZEDasHandController_ReubenPython2and3Class(Frame): #Subclass the Tkinter F
                                     "VGA"]  #672*376 (x2), available framerates: 15, 30, 60, 100 fps.
 
         self.NumberOfFramesGrabbed = 0
+
+        self.ZEDcameraRotationVector_INITIAL = [0.0]*3
+        self.ZEDcameraRotationVector_INITIAL_Queue = Queue.Queue()
         #########################################################
         #########################################################
 
@@ -452,6 +455,18 @@ class ZEDasHandController_ReubenPython2and3Class(Frame): #Subclass the Tkinter F
 
         #########################################################
         #########################################################
+        if "NumberOfFramesForRotationInitialization" in setup_dict:
+            self.NumberOfFramesForRotationInitialization = int(self.PassThroughFloatValuesInRange_ExitProgramOtherwise("NumberOfFramesForRotationInitialization", setup_dict["NumberOfFramesForRotationInitialization"], 1, 100000))
+
+        else:
+            self.NumberOfFramesForRotationInitialization = 3
+
+        print("ZEDasHandController_ReubenPython2and3Class __init__: NumberOfFramesForRotationInitialization: " + str(self.NumberOfFramesForRotationInitialization))
+        #########################################################
+        #########################################################
+
+        #########################################################
+        #########################################################
         self.PrintToGui_Label_TextInputHistory_List = [" "]*self.NumberOfPrintLines
         self.PrintToGui_Label_TextInput_Str = ""
         self.GUI_ready_to_be_updated_flag = 0
@@ -504,7 +519,7 @@ class ZEDasHandController_ReubenPython2and3Class(Frame): #Subclass the Tkinter F
         
         self.ZEDcameraOpenFlag = self.ZEDcameraObject.open(self.ZEDcameraInitParameters)
         if self.ZEDcameraOpenFlag != StereoLabs.ERROR_CODE.SUCCESS:
-            print("ZEDasHandController_ReubenPython2and3Class __init__: Failed to open ZED camera, " + str(repr(self.ZEDcameraOpenFlag)))
+            print("ZEDasHandController_ReubenPython2and3Class __init__: Failed to open ZED camera, " + str(repr(self.ZEDcameraOpenFlag)) + "\nMAKE SURE YOU'RE PLUGGED DIRECTLY INTO USB3.0 PORT!")
             return
         #########################################################
 
@@ -940,14 +955,34 @@ class ZEDasHandController_ReubenPython2and3Class(Frame): #Subclass the Tkinter F
 
                     ##########################################################################################################
                     ##########################################################################################################
-                    if self.NumberOfFramesGrabbed == 1:
-                        self.ZEDcameraRotationVector_INITIAL = self.ZEDcameraRotationVector
-                        print("self.ZEDcameraRotationVector: " + str(self.ZEDcameraRotationVector))
+
+                    ##########################################################################################################
+                    if self.NumberOfFramesGrabbed < self.NumberOfFramesForRotationInitialization:
+                        self.ZEDcameraRotationVector_INITIAL_Queue.put(self.ZEDcameraRotationVector)
+                    ##########################################################################################################
+
+                    ##########################################################################################################
+                    elif self.NumberOfFramesGrabbed == self.NumberOfFramesForRotationInitialization:
+
+                        self.ZEDcameraRotationVector_INITIAL_Sum = numpy.zeros(3)
+
+                        LoopCounter = 0
+                        while self.ZEDcameraRotationVector_INITIAL_Queue.qsize() > 0:
+                            self.ZEDcameraRotationVector_INITIAL_Sum = self.ZEDcameraRotationVector_INITIAL_Sum + numpy.array(self.ZEDcameraRotationVector_INITIAL_Queue.get())
+                            LoopCounter = LoopCounter + 1
+
+                        self.ZEDcameraRotationVector_INITIAL = numpy.array(self.ZEDcameraRotationVector_INITIAL_Sum/LoopCounter).tolist()
+
+                        self.ZEDcameraRotationVector = self.ZEDcameraRotationVector_INITIAL
+                        print("self.ZEDcameraRotationVector: " + str(self.ZEDcameraRotationVector) + ", Type: " + str(type(self.ZEDcameraRotationVector)))
 
                         initial_position = StereoLabs.Transform()
                         initial_position.set_rotation_vector(*self.ZEDcameraRotationVector_INITIAL)
 
                         self.ZEDcameraTrackingParameters.set_initial_world_transform(initial_position)
+
+                    ##########################################################################################################
+
                     ##########################################################################################################
                     ##########################################################################################################
 
@@ -1202,9 +1237,11 @@ class ZEDasHandController_ReubenPython2and3Class(Frame): #Subclass the Tkinter F
     ##########################################################################################################
     def StartGUI(self, GuiParent):
 
-        self.GUI_Thread_ThreadingObject = threading.Thread(target=self.GUI_Thread, args=(GuiParent,))
-        self.GUI_Thread_ThreadingObject.setDaemon(True) #Should mean that the GUI thread is destroyed automatically when the main thread is destroyed.
-        self.GUI_Thread_ThreadingObject.start()
+        #self.GUI_Thread_ThreadingObject = threading.Thread(target=self.GUI_Thread, args=(GuiParent,))
+        #self.GUI_Thread_ThreadingObject.setDaemon(True) #Should mean that the GUI thread is destroyed automatically when the main thread is destroyed.
+        #self.GUI_Thread_ThreadingObject.start()
+
+        self.GUI_Thread(GuiParent)
     ##########################################################################################################
     ##########################################################################################################
 
@@ -1375,7 +1412,11 @@ class ZEDasHandController_ReubenPython2and3Class(Frame): #Subclass the Tkinter F
                         "\nRollPitchYaw_AbtXYZ_List_Radians_Filtered_ZeroOffsetValue: " + self.ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(self.RollPitchYaw_AbtXYZ_List_Radians_Filtered_ZeroOffsetValue, 0, 3) + \
                         "\nRollPitchYaw_AbtXYZ_List_Degrees_Filtered_ZeroOffsetValue: " + self.ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(self.RollPitchYaw_AbtXYZ_List_Degrees_Filtered_ZeroOffsetValue, 0, 3) + \
                         "\n" +\
-                        "DataForZeroingQueue.qsize(): " + str(self.RollPitchYaw_AbtXYZ_List_Radians_Raw_DataForZeroingQueue.qsize())
+                        "DataForZeroingQueue.qsize(): " + str(self.RollPitchYaw_AbtXYZ_List_Radians_Raw_DataForZeroingQueue.qsize()) + \
+                        "\n" + \
+                        "\nZEDcameraRotationVector_INITIAL_Queue.qsize(): " + str(self.ZEDcameraRotationVector_INITIAL_Queue.qsize()) +\
+                        "\nZEDcameraRotationVector_INITIAL: " + self.ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(self.ZEDcameraRotationVector_INITIAL, 0, 3)
+
                     #######################################################
 
                     #######################################################

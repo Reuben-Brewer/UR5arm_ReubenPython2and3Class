@@ -6,7 +6,7 @@ reuben.brewer@gmail.com
 www.reubotics.com
 
 Apache 2 License
-Software Revision D, 09/21/2022
+Software Revision E, 05/10/2023
 
 Verified working on: Python 3.8 for Windows 10 64-bit, Ubuntu 20.04, and Raspberry Pi Buster (no Mac testing yet).
 '''
@@ -15,13 +15,13 @@ __author__ = 'reuben.brewer'
 
 #########################################################
 #https://github.com/Reuben-Brewer/UR5arm_ReubenPython2and3Class
-import SharedGlobals_Teleop_UR5arm
+import SharedGlobals_Teleop_UR5arm #MUST BE IMPORTED FIRST
 
-#https://github.com/Reuben-Brewer/MyPrint_ReubenPython2and3Class
-from MyPrint_ReubenPython2and3Class import *
+#https://github.com/Reuben-Brewer/ArucoTagDetectionFromCameraFeed_ReubenPython3Class
+from ArucoTagDetectionFromCameraFeed_ReubenPython3Class import *
 
-#https://github.com/Reuben-Brewer/UR5arm_ReubenPython2and3Class
-from UR5arm_ReubenPython2and3Class import *
+#https://github.com/Reuben-Brewer/GetPIDsByProcessEnglishNameAndOptionallyKill_ReubenPython2and3
+from GetPIDsByProcessEnglishNameAndOptionallyKill_ReubenPython2and3 import *
 
 #https://github.com/Reuben-Brewer/JoystickHID_ReubenPython2and3Class
 from JoystickHID_ReubenPython2and3Class import *
@@ -32,6 +32,11 @@ from LowPassFilter_ReubenPython2and3Class import *
 #https://github.com/Reuben-Brewer/MyPlotterPureTkinterStandAloneProcess_ReubenPython2and3Class
 from MyPlotterPureTkinterStandAloneProcess_ReubenPython2and3Class import *
 
+#https://github.com/Reuben-Brewer/MyPrint_ReubenPython2and3Class
+from MyPrint_ReubenPython2and3Class import *
+
+#https://github.com/Reuben-Brewer/UR5arm_ReubenPython2and3Class
+from UR5arm_ReubenPython2and3Class import *
 try:
     #https://stackoverflow.com/questions/5286210/is-there-a-way-to-access-parent-modules-in-python/45895490
     #Get the name of the file that's importing this one.
@@ -74,12 +79,14 @@ import time
 import datetime
 import threading
 import collections
+from collections import OrderedDict
 from copy import * #for deep_copy of dicts
 import json
-import keyboard #"sudo pip install keyboard" https://pypi.org/project/keyboard/, https://github.com/boppreh/keyboard
+import keyboard #"sudo pip install Keyboard" https://pypi.org/project/Keyboard/, https://github.com/boppreh/Keyboard
 import subprocess #for beep command line call
 import numpy
 import re
+from scipy.spatial.transform import Rotation
 #########################################################
 
 #########################################################
@@ -207,6 +214,22 @@ def LoadAndParseJSONfile_ZEDasHandController():
 
 #######################################################################################################################
 #######################################################################################################################
+def LoadAndParseJSONfile_SavingSettings():
+    global ParametersToBeLoaded_SavingSettings_Dict
+
+    print("Calling LoadAndParseJSONfile_SavingSettings().")
+
+    #################################
+    JSONfilepathFull_SavingSettings = ParametersToBeLoaded_Directory_TO_BE_USED + "//ParametersToBeLoaded_SavingSettings.json"
+
+    ParametersToBeLoaded_SavingSettings_Dict = LoadAndParseJSONfile_AddDictKeysToGlobalsDict(globals(), JSONfilepathFull_SavingSettings, 1, 1)
+    #################################
+
+#######################################################################################################################
+#######################################################################################################################
+
+#######################################################################################################################
+#######################################################################################################################
 def LoadAndParseJSONfile_RobotiqGripper2F85():
     global ParametersToBeLoaded_RobotiqGripper2F85_Dict
 
@@ -257,6 +280,47 @@ def LoadAndParseJSONfile_Joystick():
     Joystick_AxisHatButtonOrBallTo6DOFposeMapping_ListOfDicts_FormattedAsNicelyPrintedString = ""
     for Index, Value in enumerate(Joystick_AxisHatButtonOrBallTo6DOFposeMapping_ListOfDicts):
         Joystick_AxisHatButtonOrBallTo6DOFposeMapping_ListOfDicts_FormattedAsNicelyPrintedString = Joystick_AxisHatButtonOrBallTo6DOFposeMapping_ListOfDicts_FormattedAsNicelyPrintedString + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(Value, 0, 2) + "\n"
+
+#######################################################################################################################
+#######################################################################################################################
+
+#######################################################################################################################
+#######################################################################################################################
+def LoadAndParseJSONfile_Camera():
+    global ParametersToBeLoaded_Camera_Dict
+
+    #################################
+    JSONfilepathFull_Camera = ParametersToBeLoaded_Directory_TO_BE_USED + "//ParametersToBeLoaded_Camera.json"
+
+    ParametersToBeLoaded_Camera_Dict = LoadAndParseJSONfile_AddDictKeysToGlobalsDict(globals(), JSONfilepathFull_Camera, 1, 1)
+    #################################
+
+    #################################
+    for Key in CameraCalibrationParametersDict:
+        if Key == "fx" or Key == "fy" or Key == "cx" or Key == "cy":
+            CameraCalibrationParametersDict[Key] = CameraCalibrationResolutionScalarMultiplier*CameraCalibrationParametersDict[Key]
+     #################################
+
+    print("CameraCalibrationParametersDict: " + str(CameraCalibrationParametersDict))
+
+#######################################################################################################################
+#######################################################################################################################
+
+#######################################################################################################################
+#######################################################################################################################
+def LoadAndParseJSONfile_ArucoTagParameters():
+    global ParametersToBeLoaded_ArucoTagParameters_Dict
+    global ArucoTag_MarkerIDToDetect_PrimaryMarker
+    global ArucoTag_MarkerIDToDetect_SecondaryMarker
+
+    #################################
+    JSONfilepathFull_ArucoTagParameters = ParametersToBeLoaded_Directory_TO_BE_USED + "//ParametersToBeLoaded_ArucoTagParameters.json"
+
+    ParametersToBeLoaded_ArucoTagParameters_Dict = LoadAndParseJSONfile_AddDictKeysToGlobalsDict(globals(), JSONfilepathFull_ArucoTagParameters, 1, 1)
+    #################################
+
+    ArucoTag_MarkerIDToDetect_PrimaryMarker = str(ArucoTag_MarkerIDToDetect_PrimaryMarker)
+    ArucoTag_MarkerIDToDetect_SecondaryMarker = str(ArucoTag_MarkerIDToDetect_SecondaryMarker)
 
 #######################################################################################################################
 #######################################################################################################################
@@ -912,6 +976,8 @@ def DedicatedKeyboardListeningThread():
 
     SharedGlobals_Teleop_UR5arm.StartingTime_CalculatedFromDedicatedKeyboardListeningThread = getPreciseSecondsTimeStampString()
 
+    SharedGlobals_Teleop_UR5arm.Keyboard_OPEN_FLAG = 1
+
     ###############################################
     while SharedGlobals_Teleop_UR5arm.EXIT_PROGRAM_FLAG == 0:
         try:
@@ -997,21 +1063,41 @@ def KeyPressResponse_RecordNewWaypoint_CartesianSpace(event):
 
 #######################################################################################################################
 #######################################################################################################################
-def KeyPressResponse_ZEDcontrolClutch_START(event):
+def KeyPressResponse_KeyboardTranslationClutch_START(event):
 
-    SharedGlobals_Teleop_UR5arm.KeyPressResponse_ZEDcontrolClutch_State = 1
+    SharedGlobals_Teleop_UR5arm.KeyPressResponse_Keyboard_TranslationClutch_State = 1
 
-    #print("KeyPressResponse_ZEDcontrolClutch_START event fired!")
+    #print("KeyPressResponse_KeyboardTranslationClutch_START event fired!")
 #######################################################################################################################
 #######################################################################################################################
 
 #######################################################################################################################
 #######################################################################################################################
-def KeyPressResponse_ZEDcontrolClutch_STOP(event):
+def KeyPressResponse_KeyboardTranslationClutch_STOP(event):
 
-    SharedGlobals_Teleop_UR5arm.KeyPressResponse_ZEDcontrolClutch_State = 0
+    SharedGlobals_Teleop_UR5arm.KeyPressResponse_Keyboard_TranslationClutch_State = 0
 
-    #print("KeyPressResponse_ZEDcontrolClutch_STOP event fired!")
+    #print("KeyPressResponse_KeyboardTranslationClutch_STOP event fired!")
+#######################################################################################################################
+#######################################################################################################################
+
+#######################################################################################################################
+#######################################################################################################################
+def KeyPressResponse_KeyboardRotationClutch_START(event):
+
+    SharedGlobals_Teleop_UR5arm.KeyPressResponse_Keyboard_RotationClutch_State = 1
+
+    #print("KeyPressResponse_KeyboardRotationClutch_START event fired!")
+#######################################################################################################################
+#######################################################################################################################
+
+#######################################################################################################################
+#######################################################################################################################
+def KeyPressResponse_KeyboardRotationClutch_STOP(event):
+
+    SharedGlobals_Teleop_UR5arm.KeyPressResponse_Keyboard_RotationClutch_State = 0
+
+    #print("KeyPressResponse_KeyboardRotationClutch_STOP event fired!")
 #######################################################################################################################
 #######################################################################################################################
 
@@ -1186,6 +1272,10 @@ def GUI_update_clock():
     global TKinter_LightBlueColor
     global TKinter_LightYellowColor
     global TKinter_DefaultGrayColor
+    global GreenCheckmarkPhotoImage
+    global RedXphotoImage
+    global TabControlObject
+    global GUItabObjectsOrderedDict
 
     global CurrentTime_CalculatedFromMainThread
     global DataStreamingFrequency_CalculatedFromMainThread
@@ -1206,7 +1296,7 @@ def GUI_update_clock():
     global SHOW_IN_GUI_ZEDasHandController_FLAG
     global ZEDasHandController_MostRecentDict
     global ZEDasHandController_MostRecentDict_Time
-    global ZEDasHandController_Trigger_State
+    global ZEDasHandController_TranslationClutch_State
     global ZEDasHandController_AddToUR5armCurrentPositionList
     global ZEDasHandController_PositionList_ScalingFactorList
     global ZEDasHandController_RotationMatrixListsOfLists
@@ -1221,16 +1311,39 @@ def GUI_update_clock():
     global Keyboard_KeysToTeleopControlsMapping_DictOfDicts_FormattedAsNicelyPrintedString
 
     global JoystickHID_ReubenPython2and3ClassObject
-    global JOYSTICK_OPEN_FLAG
-    global SHOW_IN_GUI_JOYSTICK_FLAG
-    global Joystick_AddToUR5armCurrentPositionList
+    global Joystick_OPEN_FLAG
+    global SHOW_IN_GUI_Joystick_FLAG
+
     global Joystick_AxisHatButtonOrBallTo6DOFposeMapping_ListOfDicts_FormattedAsNicelyPrintedString
     global JoystickInfo_Label
-    global Joystick_ClutchState
+    global Joystick_AddToUR5armCurrentPositionList
+    global Joystick_TranslationClutch_State
+    global Joystick_RotationClutch_State
+
+    global ArucoTagDetectionFromCameraFeed_ReubenPython3ClassObject
+    global ArucoTag_OPEN_FLAG
+    global SHOW_IN_GUI_ArucoTag_FLAG
+    global ArucoTag_MostRecentDict
+    global ArucoTag_MostRecentDict_DetectedArucoTag_InfoDict
+    global ArucoTag_TranslationVectorOfMarkerCenter_PythonList_PrimaryMarker
+    global ArucoTag_RotationVectorOfMarkerCenter_EulerAnglesXYZrollPitchYawInDegrees_PythonList_PrimaryMarker
+    global ArucoTag_TranslationVectorOfMarkerCenter_PythonList_SecondaryMarker
+    global ArucoTag_RotationVectorOfMarkerCenter_EulerAnglesXYZrollPitchYawInDegrees_PythonList_SecondaryMarker
+    global ArucoTagDetectionInfo_Label
+    global ArucoTag_RotationMatrixListsOfLists
+    global ArucoTag_PositionList_ScalingFactorList
+    global ArucoTag_RollPitchYaw_AbtXYZ_List_ScalingFactorList
+    global ArucoTag_AddToUR5armCurrentPositionList
+    global ArucoTag_TranslationClutch_State
+    global ArucoTag_RotationClutch_State
+    global ArucoTag_PositionList
+    global ArucoTag_RollPitchYaw_AbtXYZ_List_Degrees
+    global ArucoTag_RollPitchYaw_AbtXYZ_List_Radians
+    global ArucoTag_PositionList_AtTimeOfClutchIn
 
     global MyPrint_ReubenPython2and3ClassObject
-    global MYPRINT_OPEN_FLAG
-    global SHOW_IN_GUI_MYPRINT_FLAG
+    global MyPrint_OPEN_FLAG
+    global SHOW_IN_GUI_MyPrint_FLAG
 
     global DebuggingInfo_Label
 
@@ -1255,125 +1368,190 @@ def GUI_update_clock():
 
     if USE_GUI_FLAG == 1:
         if SharedGlobals_Teleop_UR5arm.EXIT_PROGRAM_FLAG == 0:
-        #########################################################
-        #########################################################
 
             #########################################################
             #########################################################
-            CurrentTime_CalculatedFromGUIthread = getPreciseSecondsTimeStampString() - StartingTime_CalculatedFromGUIthread
+            try:
+                #########################################################
+                #########################################################
+                CurrentTime_CalculatedFromGUIthread = getPreciseSecondsTimeStampString() - StartingTime_CalculatedFromGUIthread
 
-            [LoopCounter_CalculatedFromGUIthread, LastTime_CalculatedFromGUIthread, DataStreamingFrequency_CalculatedFromGUIthread, DataStreamingDeltaT_CalculatedFromGUIthread] = UpdateFrequencyCalculation(LoopCounter_CalculatedFromGUIthread, CurrentTime_CalculatedFromGUIthread, LastTime_CalculatedFromGUIthread, DataStreamingFrequency_CalculatedFromGUIthread, DataStreamingDeltaT_CalculatedFromGUIthread)
+                [LoopCounter_CalculatedFromGUIthread, LastTime_CalculatedFromGUIthread, DataStreamingFrequency_CalculatedFromGUIthread, DataStreamingDeltaT_CalculatedFromGUIthread] = UpdateFrequencyCalculation(LoopCounter_CalculatedFromGUIthread, CurrentTime_CalculatedFromGUIthread, LastTime_CalculatedFromGUIthread, DataStreamingFrequency_CalculatedFromGUIthread, DataStreamingDeltaT_CalculatedFromGUIthread)
+                #########################################################
+                #########################################################
+
+                #########################################################
+                #########################################################
+                DebuggingInfo_Label["text"] = "MainThread, Time: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(CurrentTime_CalculatedFromMainThread, 0, 3) +\
+                                "\t\t\tFrequency: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(DataStreamingFrequency_CalculatedFromMainThread, 0, 3) +\
+                                "\nGUIthread, Time: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(CurrentTime_CalculatedFromGUIthread, 0, 3) +\
+                                "\t\t\tFrequency: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(DataStreamingFrequency_CalculatedFromGUIthread, 0, 3) +\
+                                "\nControlType: " + ControlType + \
+                                "\nUR5arm_MostRecentDict_JointAngleList_Deg: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_JointAngleList_Deg, 0, 5) +\
+                                "\nUR5arm_MostRecentDict_JointAngleList_Rad: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_JointAngleList_Rad, 0, 5) +\
+                                "\nUR5, ToolVectorActual: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual, 0, 5) +\
+                                "\nUR5, ToolVectorActual_ToBeSet: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(UR5arm_ToolVectorActual_ToBeSet, 0, 5) +\
+                                "\nRobotiqGripper2F85, Position Speed Force: " + str([RobotiqGripper2F85_Position_ToBeSet, RobotiqGripper2F85_Speed_ToBeSet, RobotiqGripper2F85_Force_ToBeSet]) + \
+                                "\nCSVfileForTrajectoryData_SaveFlag: " + str(CSVfileForTrajectoryData_SaveFlag) +\
+                                "\nDifference UR5arm for CSV writing: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(UR5arm_MostRecentDict_ToolVectorActual_MotionFromSnapshotAtTimeOfCreatingCSVfileForTrajectoryData, 0, 3)
+
+                #########################################################
+                #########################################################
+
+                #########################################################
+                #########################################################
+                KeyboardInfo_Label["text"] = "Keyboard flags: " + str([SharedGlobals_Teleop_UR5arm.KeyPressResponse_DecrementURtoolTipInX_NeedsToBeChangedFlag,
+                                                            SharedGlobals_Teleop_UR5arm.KeyPressResponse_IncrementURtoolTipInX_NeedsToBeChangedFlag,
+                                                            SharedGlobals_Teleop_UR5arm.KeyPressResponse_DecrementURtoolTipInY_NeedsToBeChangedFlag,
+                                                            SharedGlobals_Teleop_UR5arm.KeyPressResponse_IncrementURtoolTipInY_NeedsToBeChangedFlag,
+                                                            SharedGlobals_Teleop_UR5arm.KeyPressResponse_DecrementURtoolTipInZ_NeedsToBeChangedFlag,
+                                                            SharedGlobals_Teleop_UR5arm.KeyPressResponse_IncrementURtoolTipInZ_NeedsToBeChangedFlag,
+                                                            SharedGlobals_Teleop_UR5arm.KeyPressResponse_OpenRobotiqGripper2F85_NeedsToBeChangedFlag,
+                                                            SharedGlobals_Teleop_UR5arm.KeyPressResponse_CloseRobotiqGripper2F85_NeedsToBeChangedFlag,
+                                                            SharedGlobals_Teleop_UR5arm.KeyPressResponse_Keyboard_TranslationClutch_State,
+                                                            SharedGlobals_Teleop_UR5arm.KeyPressResponse_Keyboard_RotationClutch_State]) + \
+                                "\nKeyboard_AddToUR5armCurrentPositionList: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(SharedGlobals_Teleop_UR5arm.Keyboard_AddToUR5armCurrentPositionList, 0, 3) +\
+                                "\nKeyboard_KeysToTeleopControlsMapping_DictOfDicts: " + \
+                                "\n" + Keyboard_KeysToTeleopControlsMapping_DictOfDicts_FormattedAsNicelyPrintedString
+                #########################################################
+                #########################################################
+
+                #########################################################
+                #########################################################
+                JoystickInfo_Label["text"] = "Joystick_AddToUR5armCurrentPositionList: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(Joystick_AddToUR5armCurrentPositionList, 0, 3) +\
+                                "\nJoystick_TranslationClutch_State: " + str(Joystick_TranslationClutch_State) + \
+                                "\nJoystick_RotationClutch_State: " + str(Joystick_RotationClutch_State) + \
+                                "\nJoystick_AxisHatButtonOrBallTo6DOFposeMapping_ListOfDicts: " + \
+                                "\n" + Joystick_AxisHatButtonOrBallTo6DOFposeMapping_ListOfDicts_FormattedAsNicelyPrintedString
+                #########################################################
+                #########################################################
+
+                #########################################################
+                #########################################################
+                ArucoTagDetectionInfo_Label["text"] = "ArucoTag_TranslationClutch_State: " + str(ArucoTag_TranslationClutch_State) + \
+                                "\nArucoTag_RotationClutch_State: " + str(ArucoTag_RotationClutch_State) + \
+                                "\nArucoTag_PositionList_ScalingFactorList: " + str(ArucoTag_PositionList_ScalingFactorList) + \
+                                "\nArucoTag_RollPitchYaw_AbtXYZ_List_ScalingFactorList: " + str(ArucoTag_RollPitchYaw_AbtXYZ_List_ScalingFactorList) + \
+                                "\nArucoTag_RotationMatrixListsOfLists: " + str(ArucoTag_RotationMatrixListsOfLists) +\
+                                "\nArucoTag_TranslationVectorOfMarkerCenter_PythonList_PrimaryMarker: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(ArucoTag_TranslationVectorOfMarkerCenter_PythonList_PrimaryMarker, 0, 3) + \
+                                "\nArucoTag_RotationVectorOfMarkerCenter_EulerAnglesXYZrollPitchYawInDegrees_PythonList_PrimaryMarker: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(ArucoTag_RotationVectorOfMarkerCenter_EulerAnglesXYZrollPitchYawInDegrees_PythonList_PrimaryMarker, 0, 3) + \
+                                "\nArucoTag_TranslationVectorOfMarkerCenter_PythonList_SecondaryMarker: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(ArucoTag_TranslationVectorOfMarkerCenter_PythonList_SecondaryMarker, 0, 3) + \
+                                "\nArucoTag_RotationVectorOfMarkerCenter_EulerAnglesXYZrollPitchYawInDegrees_PythonList_SecondaryMarker: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(ArucoTag_RotationVectorOfMarkerCenter_EulerAnglesXYZrollPitchYawInDegrees_PythonList_SecondaryMarker, 0, 3) + \
+                                "\n\n" +\
+                                "\nArucoTag_PositionList: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(ArucoTag_PositionList, 0, 3) + \
+                                "\nArucoTag_PositionList_AtTimeOfClutchIn: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(ArucoTag_PositionList_AtTimeOfClutchIn, 0, 3) + \
+                                "\nArucoTag_RollPitchYaw_AbtXYZ_List_Degrees: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(ArucoTag_RollPitchYaw_AbtXYZ_List_Degrees, 0, 3) + \
+                                "\nArucoTag_RollPitchYaw_AbtXYZ_List_Radians: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(ArucoTag_RollPitchYaw_AbtXYZ_List_Radians, 0, 3) + \
+                                "\nArucoTag_AddToUR5armCurrentPositionList: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(ArucoTag_AddToUR5armCurrentPositionList, 0, 3)
+
+
+                #########################################################
+                #########################################################
+
+                #########################################################
+                #########################################################
+                ZEDasHandControllerInfo_Label["text"] = "\nZEDasHandController_PositionList_ScalingFactorList: " + str(ZEDasHandController_PositionList_ScalingFactorList) + \
+                                "\nZEDasHandController_RollPitchYaw_AbtXYZ_List_ScalingFactorList: " + str(ZEDasHandController_RollPitchYaw_AbtXYZ_List_ScalingFactorList) + \
+                                "\nZEDasHandController_RotationMatrixListsOfLists: " + str(ZEDasHandController_RotationMatrixListsOfLists) + \
+                                "\nZEDasHandController_AddToUR5armCurrentPositionList: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(ZEDasHandController_AddToUR5armCurrentPositionList, 0, 3) + \
+                                "\nZEDasHandController_TranslationClutch_State: " + str(ZEDasHandController_TranslationClutch_State)
+
+                #########################################################
+                #########################################################
+
+                ###########################################################
+                ###########################################################
+                for TabNameStringAsKey in GUItabObjectsOrderedDict:
+
+                    #########################################################
+                    if "IsTabCreatedFlag" in GUItabObjectsOrderedDict[TabNameStringAsKey]:
+                        if GUItabObjectsOrderedDict[TabNameStringAsKey]["IsTabCreatedFlag"] == 1:
+
+                            if GUItabObjectsOrderedDict[TabNameStringAsKey]["OpenFlag"] == 1:
+                                TabControlObject.tab(GUItabObjectsOrderedDict[TabNameStringAsKey]["TabObject_InternalStringName"], state='normal')
+                                TabControlObject.tab(GUItabObjectsOrderedDict[TabNameStringAsKey]["TabObject_InternalStringName"], image=GreenCheckmarkPhotoImage)
+                            else:
+                                TabControlObject.tab(GUItabObjectsOrderedDict[TabNameStringAsKey]["TabObject_InternalStringName"], state='disabled')
+                                TabControlObject.tab(GUItabObjectsOrderedDict[TabNameStringAsKey]["TabObject_InternalStringName"], image=RedXphotoImage)
+                    #########################################################
+
+                ###########################################################
+                ###########################################################
+
+                #########################################################
+                #########################################################
+
+                #########################################################
+                #########################################################
+                if SHOW_IN_GUI_UR5arm_MostRecentDict_FLAG == 1:
+                    UR5arm_MostRecentDict_Label["text"] = ConvertDictToProperlyFormattedStringForPrinting(UR5arm_MostRecentDict, NumberOfDecimalsPlaceToUse = 3, NumberOfEntriesPerLine = 3, NumberOfTabsBetweenItems = 1)
+                #########################################################
+                #########################################################
+
+                #########################################################
+                #########################################################
+                if CSVfileForTrajectoryData_SaveFlag == 1:
+                    CSVfileForTrajectoryData_SaveFlag_Button["bg"] = TKinter_LightGreenColor
+                    CSVfileForTrajectoryData_SaveFlag_Button["text"] = "Saving CSV"
+                else:
+                    CSVfileForTrajectoryData_SaveFlag_Button["bg"] = TKinter_LightRedColor
+                    CSVfileForTrajectoryData_SaveFlag_Button["text"] = "NOT saving CSV"
+                #########################################################
+                #########################################################
+
+                #########################################################
+                #########################################################
+                if ZEDasHandController_OPEN_FLAG == 1 and SHOW_IN_GUI_ZEDasHandController_FLAG == 1:
+                    ZEDasHandController_ReubenPython2and3ClassObject.GUI_update_clock()
+                #########################################################
+                #########################################################
+
+                #########################################################
+                #########################################################
+                if RobotiqGripper2F85_OPEN_FLAG == 1 and SHOW_IN_GUI_RobotiqGripper2F85_FLAG == 1:
+                    RobotiqGripper2F85_ReubenPython2and3ClassObject.GUI_update_clock()
+                #########################################################
+                #########################################################
+
+                #########################################################
+                #########################################################
+                if Joystick_OPEN_FLAG == 1 and SHOW_IN_GUI_Joystick_FLAG == 1:
+                    JoystickHID_ReubenPython2and3ClassObject.GUI_update_clock()
+                #########################################################
+                #########################################################
+
+                #########################################################
+                #########################################################
+                if ArucoTag_OPEN_FLAG == 1 and SHOW_IN_GUI_ArucoTag_FLAG == 1:
+                    ArucoTagDetectionFromCameraFeed_ReubenPython3ClassObject.GUI_update_clock()
+                #########################################################
+                #########################################################
+
+                #########################################################
+                #########################################################
+                if MyPrint_OPEN_FLAG == 1 and SHOW_IN_GUI_MyPrint_FLAG == 1:
+                    MyPrint_ReubenPython2and3ClassObject.GUI_update_clock()
+                #########################################################
+                #########################################################
+
+                #########################################################
+                #########################################################
+                root.after(GUI_RootAfterCallbackInterval_Milliseconds, GUI_update_clock)
+                #########################################################
+                #########################################################
+
             #########################################################
             #########################################################
 
             #########################################################
             #########################################################
-            DebuggingInfo_Label["text"] = "MainThread, Time: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(CurrentTime_CalculatedFromMainThread, 0, 3) +\
-                            "\t\t\tFrequency: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(DataStreamingFrequency_CalculatedFromMainThread, 0, 3) +\
-                            "\nGUIthread, Time: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(CurrentTime_CalculatedFromGUIthread, 0, 3) +\
-                            "\t\t\tFrequency: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(DataStreamingFrequency_CalculatedFromGUIthread, 0, 3) +\
-                            "\nControlType: " + ControlType + \
-                            "\nUR5arm_MostRecentDict_JointAngleList_Deg: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_JointAngleList_Deg, 0, 5) +\
-                            "\nUR5arm_MostRecentDict_JointAngleList_Rad: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_JointAngleList_Rad, 0, 5) +\
-                            "\nUR5, ToolVectorActual: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual, 0, 5) +\
-                            "\nUR5, ToolVectorActual_ToBeSet: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(UR5arm_ToolVectorActual_ToBeSet, 0, 5) +\
-                            "\nRobotiqGripper2F85, Position Speed Force: " + str([RobotiqGripper2F85_Position_ToBeSet, RobotiqGripper2F85_Speed_ToBeSet, RobotiqGripper2F85_Force_ToBeSet]) + \
-                            "\nCSVfileForTrajectoryData_SaveFlag: " + str(CSVfileForTrajectoryData_SaveFlag) +\
-                            "\nDifference UR5arm for CSV writing: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(UR5arm_MostRecentDict_ToolVectorActual_MotionFromSnapshotAtTimeOfCreatingCSVfileForTrajectoryData, 0, 3)
+            except:
+                exceptions = sys.exc_info()[0]
+                print("GUI_update_clock(), Exceptions: %s" % exceptions)
+                traceback.print_exc()
 
             #########################################################
             #########################################################
-
-            #########################################################
-            #########################################################
-            KeyboardInfo_Label["text"] = "Keyboard flags: " + str([SharedGlobals_Teleop_UR5arm.KeyPressResponse_DecrementURtoolTipInX_NeedsToBeChangedFlag,
-                                                        SharedGlobals_Teleop_UR5arm.KeyPressResponse_IncrementURtoolTipInX_NeedsToBeChangedFlag,
-                                                        SharedGlobals_Teleop_UR5arm.KeyPressResponse_DecrementURtoolTipInY_NeedsToBeChangedFlag,
-                                                        SharedGlobals_Teleop_UR5arm.KeyPressResponse_IncrementURtoolTipInY_NeedsToBeChangedFlag,
-                                                        SharedGlobals_Teleop_UR5arm.KeyPressResponse_DecrementURtoolTipInZ_NeedsToBeChangedFlag,
-                                                        SharedGlobals_Teleop_UR5arm.KeyPressResponse_IncrementURtoolTipInZ_NeedsToBeChangedFlag,
-                                                        SharedGlobals_Teleop_UR5arm.KeyPressResponse_OpenRobotiqGripper2F85_NeedsToBeChangedFlag,
-                                                        SharedGlobals_Teleop_UR5arm.KeyPressResponse_CloseRobotiqGripper2F85_NeedsToBeChangedFlag]) + \
-                            "\nKeyboard_AddToUR5armCurrentPositionList: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(SharedGlobals_Teleop_UR5arm.Keyboard_AddToUR5armCurrentPositionList, 0, 3) +\
-                            "\nKeyboard_KeysToTeleopControlsMapping_DictOfDicts: " + \
-                            "\n" + Keyboard_KeysToTeleopControlsMapping_DictOfDicts_FormattedAsNicelyPrintedString
-            #########################################################
-            #########################################################
-
-            #########################################################
-            #########################################################
-            JoystickInfo_Label["text"] = "Joystick_AddToUR5armCurrentPositionList: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(Joystick_AddToUR5armCurrentPositionList, 0, 3) +\
-                            "\nJoystick_ClutchState: " + str(Joystick_ClutchState) + \
-                            "\nJoystick_AxisHatButtonOrBallTo6DOFposeMapping_ListOfDicts: " + \
-                            "\n" + Joystick_AxisHatButtonOrBallTo6DOFposeMapping_ListOfDicts_FormattedAsNicelyPrintedString
-            #########################################################
-            #########################################################
-
-            #########################################################
-            #########################################################
-            ZEDasHandControllerInfo_Label["text"] = "\nZEDasHandController_PositionList_ScalingFactorList: " + str(ZEDasHandController_PositionList_ScalingFactorList) + \
-                            "\nZEDasHandController_RollPitchYaw_AbtXYZ_List_ScalingFactorList: " + str(ZEDasHandController_RollPitchYaw_AbtXYZ_List_ScalingFactorList) + \
-                            "\nZEDasHandController_RotationMatrixListsOfLists: " + str(ZEDasHandController_RotationMatrixListsOfLists) + \
-                            "\nZEDasHandController_AddToUR5armCurrentPositionList: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(ZEDasHandController_AddToUR5armCurrentPositionList, 0, 3) + \
-                            "\nZEDasHandController_Trigger_State: " + str(ZEDasHandController_Trigger_State)
-
-            #########################################################
-            #########################################################
-
-            #########################################################
-            #########################################################
-            if SHOW_IN_GUI_UR5arm_MostRecentDict_FLAG == 1:
-                UR5arm_MostRecentDict_Label["text"] = ConvertDictToProperlyFormattedStringForPrinting(UR5arm_MostRecentDict, NumberOfDecimalsPlaceToUse = 3, NumberOfEntriesPerLine = 3, NumberOfTabsBetweenItems = 1)
-            #########################################################
-            #########################################################
-
-            #########################################################
-            #########################################################
-            if CSVfileForTrajectoryData_SaveFlag == 1:
-                CSVfileForTrajectoryData_SaveFlag_Button["bg"] = TKinter_LightGreenColor
-                CSVfileForTrajectoryData_SaveFlag_Button["text"] = "Saving CSV"
-            else:
-                CSVfileForTrajectoryData_SaveFlag_Button["bg"] = TKinter_LightRedColor
-                CSVfileForTrajectoryData_SaveFlag_Button["text"] = "NOT saving CSV"
-            #########################################################
-            #########################################################
-
-            #########################################################
-            #########################################################
-            if ZEDasHandController_OPEN_FLAG == 1 and SHOW_IN_GUI_ZEDasHandController_FLAG == 1:
-                ZEDasHandController_ReubenPython2and3ClassObject.GUI_update_clock()
-            #########################################################
-            #########################################################
-
-            #########################################################
-            #########################################################
-            if RobotiqGripper2F85_OPEN_FLAG == 1 and SHOW_IN_GUI_RobotiqGripper2F85_FLAG == 1:
-                RobotiqGripper2F85_ReubenPython2and3ClassObject.GUI_update_clock()
-            #########################################################
-            #########################################################
-
-            #########################################################
-            #########################################################
-            if JOYSTICK_OPEN_FLAG == 1 and SHOW_IN_GUI_JOYSTICK_FLAG == 1:
-                JoystickHID_ReubenPython2and3ClassObject.GUI_update_clock()
-            #########################################################
-            #########################################################
-
-            #########################################################
-            #########################################################
-            if MYPRINT_OPEN_FLAG == 1 and SHOW_IN_GUI_MYPRINT_FLAG == 1:
-                MyPrint_ReubenPython2and3ClassObject.GUI_update_clock()
-            #########################################################
-            #########################################################
-
-            #########################################################
-            #########################################################
-            root.after(GUI_RootAfterCallbackInterval_Milliseconds, GUI_update_clock)
-            #########################################################
-            #########################################################
-        
-        #########################################################
-        #########################################################
 
 #######################################################################################################################
 #######################################################################################################################
@@ -1401,6 +1579,20 @@ def GUI_Thread():
     global TKinter_DefaultGrayColor
     global SHOW_IN_GUI_UR5arm_MostRecentDict_FLAG
 
+    global USE_Keyboard_FLAG
+    global USE_MyPrint_FLAG
+    global USE_UR5arm_FLAG
+    global USE_ZEDasHandController_FLAG
+    global USE_RobotiqGripper2F85_FLAG
+    global USE_Joystick_FLAG
+    global USE_ArucoTag_FLAG
+
+    global ParametersToBeLoaded_Directory_TO_BE_USED
+    global GreenCheckmarkPhotoImage
+    global RedXphotoImage
+    global GUItabObjectsOrderedDict
+    global TabControlObject
+
     ########################################################### KEY GUI LINE
     ###########################################################
     root = Tk()
@@ -1427,38 +1619,42 @@ def GUI_Thread():
 
     ###########################################################
     ###########################################################
-    global TabControlObject
-    global Tab_MainControls
-    global Tab_UR5arm
-    global Tab_RobotiqGripper2F85
-    global Tab_KEYBOARD
-    global Tab_JOYSTICK
-    global Tab_ZEDasHandController
-    global Tab_MyPrint
+    GreenCheckmarkPhotoImage = PhotoImage(file=ParametersToBeLoaded_Directory_TO_BE_USED + "//GreenCheckmark.gif")
+    RedXphotoImage = PhotoImage(file=ParametersToBeLoaded_Directory_TO_BE_USED + "//RedXmark.gif")
+    ###########################################################
+    ###########################################################
 
+    ###########################################################
+    ###########################################################
+
+    ###########################################################
     TabControlObject = ttk.Notebook(root)
+    ###########################################################
 
-    Tab_MainControls = ttk.Frame(TabControlObject)
-    TabControlObject.add(Tab_MainControls, text=' Main Controls ')
+    ###########################################################
+    TabCounter = 0
+    for TabNameStringAsKey in GUItabObjectsOrderedDict:
 
-    Tab_UR5arm = ttk.Frame(TabControlObject)
-    TabControlObject.add(Tab_UR5arm, text=' UR5arm ')
+        #############
+        if GUItabObjectsOrderedDict[TabNameStringAsKey]["UseFlag"] == 1:
+            GUItabObjectsOrderedDict[TabNameStringAsKey]["TabObject"] = ttk.Frame(TabControlObject)
+            TabControlObject.add(GUItabObjectsOrderedDict[TabNameStringAsKey]["TabObject"], text=GUItabObjectsOrderedDict[TabNameStringAsKey]["GUItabNameToDisplay"])
 
-    Tab_RobotiqGripper2F85 = ttk.Frame(TabControlObject)
-    TabControlObject.add(Tab_RobotiqGripper2F85, text=' Robotiq ')
+            if TabCounter == 0:
+                GUItabObjectsOrderedDict[TabNameStringAsKey]["TabObject_InternalStringName"] = ".!notebook.!frame"
+            else:
+                GUItabObjectsOrderedDict[TabNameStringAsKey]["TabObject_InternalStringName"] = ".!notebook.!frame" + str(TabCounter + 1)
 
-    Tab_KEYBOARD = ttk.Frame(TabControlObject)
-    TabControlObject.add(Tab_KEYBOARD, text=' Keyboard ')
+            TabControlObject.tab(GUItabObjectsOrderedDict[TabNameStringAsKey]["TabObject_InternalStringName"], compound='top')
+            GUItabObjectsOrderedDict[TabNameStringAsKey]["IsTabCreatedFlag"] = 1
+            TabCounter = TabCounter + 1
+        else:
+            GUItabObjectsOrderedDict[TabNameStringAsKey]["TabObject"] = None
+        #############
 
-    Tab_JOYSTICK = ttk.Frame(TabControlObject)
-    TabControlObject.add(Tab_JOYSTICK, text=' Joystick ')
+    ###########################################################
 
-    Tab_ZEDasHandController = ttk.Frame(TabControlObject)
-    TabControlObject.add(Tab_ZEDasHandController, text=' ZEDasHandController ')
-
-    Tab_MyPrint = ttk.Frame(TabControlObject)
-    TabControlObject.add(Tab_MyPrint, text=' MyPrint ')
-
+    ###########################################################
     TabControlObject.pack(expand=1, fill="both") #CANNOT MIX PACK AND GRID IN THE SAME FRAME/TAB, SO ALL .GRID'S MUST BE CONTAINED WITHIN THEIR OWN FRAME/TAB.
 
     ############# #Set the tab header font
@@ -1467,12 +1663,14 @@ def GUI_Thread():
     #############
 
     ###########################################################
+
+    ###########################################################
     ###########################################################
 
     ###########################################################
     ###########################################################
     global ExtraProgramControlGuiFrame
-    ExtraProgramControlGuiFrame = Frame(Tab_MainControls)
+    ExtraProgramControlGuiFrame = Frame(GUItabObjectsOrderedDict["MainControls"]["TabObject"])
     ExtraProgramControlGuiFrame["borderwidth"] = 2
     ExtraProgramControlGuiFrame["relief"] = "ridge"
     ExtraProgramControlGuiFrame.grid(row=0, column=0, padx=GUIbuttonPadX, pady=GUIbuttonPadY, rowspan=1, columnspan=1, sticky='w')
@@ -1508,31 +1706,43 @@ def GUI_Thread():
     ###########################################################
     ###########################################################
     global KeyboardInfo_Label
-    KeyboardInfo_Label = Label(Tab_KEYBOARD, text="KeyboardInfo_Label", width=120, font=("Helvetica", 10))
-    KeyboardInfo_Label.grid(row=0, column=0, padx=GUIbuttonPadX, pady=GUIbuttonPadY, columnspan=10, rowspan=1)
+    KeyboardInfo_Label = Label(GUItabObjectsOrderedDict["Keyboard"]["TabObject"], text="KeyboardInfo_Label", width=120, font=("Helvetica", 10))
+    if USE_Keyboard_FLAG == 1:
+        KeyboardInfo_Label.grid(row=0, column=0, padx=GUIbuttonPadX, pady=GUIbuttonPadY, columnspan=10, rowspan=1)
     ###########################################################
     ###########################################################
 
     ###########################################################
     ###########################################################
     global JoystickInfo_Label
-    JoystickInfo_Label = Label(Tab_JOYSTICK, text="JoystickInfo_Label", width=120, font=("Helvetica", 10))
-    JoystickInfo_Label.grid(row=1, column=0, padx=GUIbuttonPadX, pady=GUIbuttonPadY, columnspan=10, rowspan=1)
+    JoystickInfo_Label = Label(GUItabObjectsOrderedDict["Joystick"]["TabObject"], text="JoystickInfo_Label", width=120, font=("Helvetica", 10))
+    if USE_Joystick_FLAG == 1:
+        JoystickInfo_Label.grid(row=1, column=0, padx=GUIbuttonPadX, pady=GUIbuttonPadY, columnspan=10, rowspan=1)
+    ###########################################################
+    ###########################################################
+
+    ###########################################################
+    ###########################################################
+    global ArucoTagDetectionInfo_Label
+    ArucoTagDetectionInfo_Label = Label(GUItabObjectsOrderedDict["ArucoTagDetection"]["TabObject"], text="ArucoTagDetectionInfo_Label", width=120, font=("Helvetica", 10))
+    if USE_ArucoTag_FLAG == 1:
+        ArucoTagDetectionInfo_Label.grid(row=1, column=0, padx=GUIbuttonPadX, pady=GUIbuttonPadY, columnspan=10, rowspan=1)
     ###########################################################
     ###########################################################
 
     ###########################################################
     ###########################################################
     global ZEDasHandControllerInfo_Label
-    ZEDasHandControllerInfo_Label = Label(Tab_ZEDasHandController, text="ZEDasHandControllerInfo_Label", width=120, font=("Helvetica", 10))
-    ZEDasHandControllerInfo_Label.grid(row=1, column=0, padx=GUIbuttonPadX, pady=GUIbuttonPadY, columnspan=10, rowspan=1)
+    ZEDasHandControllerInfo_Label = Label(GUItabObjectsOrderedDict["ZEDasHandController"]["TabObject"], text="ZEDasHandControllerInfo_Label", width=120, font=("Helvetica", 10))
+    if USE_ZEDasHandController_FLAG == 1:
+        ZEDasHandControllerInfo_Label.grid(row=1, column=0, padx=GUIbuttonPadX, pady=GUIbuttonPadY, columnspan=10, rowspan=1)
     ###########################################################
     ###########################################################
 
     ###########################################################
     ###########################################################
     global ActuatorsControlGuiFrame
-    ActuatorsControlGuiFrame = Frame(Tab_MainControls)
+    ActuatorsControlGuiFrame = Frame(GUItabObjectsOrderedDict["MainControls"]["TabObject"])
     ActuatorsControlGuiFrame["borderwidth"] = 2
     ActuatorsControlGuiFrame["relief"] = "ridge"
     ActuatorsControlGuiFrame.grid(row=2, column=0, padx=GUIbuttonPadX, pady=GUIbuttonPadY, rowspan=1, columnspan=1, sticky='w')
@@ -1561,8 +1771,8 @@ def GUI_Thread():
     ###########################################################
     ###########################################################
     global UR5arm_MostRecentDict_Label
-    UR5arm_MostRecentDict_Label = Label(Tab_UR5arm, text="UR5arm_MostRecentDict_Label", width=120, font=("Helvetica", 10))
-    if SHOW_IN_GUI_UR5arm_MostRecentDict_FLAG == 1:
+    UR5arm_MostRecentDict_Label = Label(GUItabObjectsOrderedDict["UR5arm"]["TabObject"], text="UR5arm_MostRecentDict_Label", width=120, font=("Helvetica", 10))
+    if USE_UR5arm_FLAG == 1 and SHOW_IN_GUI_UR5arm_MostRecentDict_FLAG == 1:
         UR5arm_MostRecentDict_Label.grid(row=0, column=0, padx=1, pady=1, columnspan=1, rowspan=1)
     ###########################################################
     ###########################################################
@@ -1915,6 +2125,219 @@ def UR5arm_BlockWhileExecuting_MoveSafelyToStartingPoseViaMultipointSequence():
 
 #######################################################################################################################
 #######################################################################################################################
+def UpdateGUItabObjectsOrderedDict():
+
+    global USE_UR5arm_FLAG
+    global UR5arm_OPEN_FLAG
+    global SHOW_IN_GUI_UR5arm_ServoJparameterEntries_FLAG
+
+    global USE_RobotiqGripper2F85_FLAG
+    global RobotiqGripper2F85_OPEN_FLAG
+    global SHOW_IN_GUI_RobotiqGripper2F85_FLAG
+
+    global USE_Joystick_FLAG
+    global Joystick_OPEN_FLAG
+    global SHOW_IN_GUI_Joystick_FLAG
+
+    global USE_ArucoTag_FLAG
+    global ArucoTag_OPEN_FLAG
+    global SHOW_IN_GUI_ArucoTag_FLAG
+
+    global USE_ZEDasHandController_FLAG
+    global ZEDasHandController_OPEN_FLAG
+    global SHOW_IN_GUI_ZEDasHandController_FLAG
+
+    global USE_MyPrint_FLAG
+    global MyPrint_OPEN_FLAG
+    global SHOW_IN_GUI_MyPrint_FLAG
+
+    global GUItabObjectsOrderedDict
+
+    try:
+
+        ###########################################################
+        ###########################################################
+        if len(GUItabObjectsOrderedDict) == 0: #Not yet populated
+            GUItabObjectsOrderedDict = OrderedDict([("MainControls", dict([("UseFlag", 1), ("ShowFlag", 1), ("GUItabObjectName", "MainControls"), ("GUItabNameToDisplay", "MainControls"), ("IsTabCreatedFlag", 0), ("TabObject", None)])),
+                                    ("UR5arm", dict([("UseFlag", USE_UR5arm_FLAG), ("ShowFlag", SHOW_IN_GUI_UR5arm_ServoJparameterEntries_FLAG), ("GUItabObjectName", "UR5arm"), ("GUItabNameToDisplay", "UR5"), ("IsTabCreatedFlag", 0), ("TabObject", None)])),
+                                   ("ArucoTagDetection", dict([("UseFlag", USE_ArucoTag_FLAG), ("ShowFlag", SHOW_IN_GUI_ArucoTag_FLAG), ("GUItabObjectName", "ArucoTagDetection"), ("GUItabNameToDisplay", "AR"), ("IsTabCreatedFlag", 0), ("TabObject", None)])),
+                                   ("RobotiqGripper2F85", dict([("UseFlag", USE_RobotiqGripper2F85_FLAG), ("ShowFlag", SHOW_IN_GUI_RobotiqGripper2F85_FLAG), ("GUItabObjectName", "RobotiqGripper2F85"), ("GUItabNameToDisplay", "RobotiqGripper"), ("IsTabCreatedFlag", 0), ("TabObject", None)])),
+                                   ("Keyboard", dict([("UseFlag", USE_Keyboard_FLAG), ("ShowFlag", SHOW_IN_GUI_Keyboard_FLAG), ("GUItabObjectName", "Keyboard"), ("GUItabNameToDisplay", "Keys"), ("IsTabCreatedFlag", 0), ("TabObject", None)])),
+                                   ("Joystick", dict([("UseFlag", USE_Joystick_FLAG), ("ShowFlag", SHOW_IN_GUI_Joystick_FLAG), ("GUItabObjectName", "Joystick"), ("GUItabNameToDisplay", "Joy"), ("IsTabCreatedFlag", 0), ("TabObject", None)])),
+                                   ("ZEDasHandController", dict([("UseFlag", USE_ZEDasHandController_FLAG),  ("ShowFlag", SHOW_IN_GUI_ZEDasHandController_FLAG), ("GUItabObjectName", "ZEDasHandController"), ("GUItabNameToDisplay", "ZED"), ("IsTabCreatedFlag", 0), ("TabObject", None)])),
+                                   ("MyPrint", dict([("UseFlag", USE_MyPrint_FLAG), ("ShowFlag", SHOW_IN_GUI_MyPrint_FLAG), ("GUItabObjectName", "MyPrint"), ("GUItabNameToDisplay", "MyPrint"), ("IsTabCreatedFlag", 0), ("TabObject", None)]))])
+        ###########################################################
+        ###########################################################
+
+        ###########################################################
+        ###########################################################
+        GUItabObjectsOrderedDict["MainControls"]["OpenFlag"] = 1
+        GUItabObjectsOrderedDict["UR5arm"]["OpenFlag"] = UR5arm_OPEN_FLAG
+        GUItabObjectsOrderedDict["RobotiqGripper2F85"]["OpenFlag"] = RobotiqGripper2F85_OPEN_FLAG
+        GUItabObjectsOrderedDict["Keyboard"]["OpenFlag"] = SharedGlobals_Teleop_UR5arm.Keyboard_OPEN_FLAG
+        GUItabObjectsOrderedDict["Joystick"]["OpenFlag"] = Joystick_OPEN_FLAG
+        GUItabObjectsOrderedDict["ArucoTagDetection"]["OpenFlag"] = ArucoTag_OPEN_FLAG
+        GUItabObjectsOrderedDict["ZEDasHandController"]["OpenFlag"] = ZEDasHandController_OPEN_FLAG
+        GUItabObjectsOrderedDict["MyPrint"]["OpenFlag"] = MyPrint_OPEN_FLAG
+        ###########################################################
+        ###########################################################
+
+        print("UpdateGUItabObjectsOrderedDict, GUItabObjectsOrderedDict: " + str(GUItabObjectsOrderedDict))
+
+    except:
+        exceptions = sys.exc_info()[0]
+        print("UpdateGUItabObjectsOrderedDict, exceptions: %s" % exceptions)
+        traceback.print_exc()
+
+#######################################################################################################################
+#######################################################################################################################
+
+#######################################################################################################################
+#######################################################################################################################
+#######################################################################################################################
+#######################################################################################################################
+def GeneralizedControlForPositionInput(Input_RotationMatrixListsOfLists, Input_TranslationList, Input_TranslationList_AtTimeOfClutchIn, Input_TranslationClutch_State, Input_RotationList, Input_RotationList_AtTimeOfClutchIn, Input_RotationClutch_State, Input_OPEN_FLAG):
+
+    global UR5arm_MostRecentDict_ToolVectorActual_IsItInitializedFlag
+    global UR5arm_ToolVectorActual_ToBeSet
+    global UR5arm_PositionControl_NeedsToBeChangedFlag
+
+    try:
+
+        #######################################################################################################################
+        #######################################################################################################################
+        #######################################################################################################################
+        if UR5arm_MostRecentDict_ToolVectorActual_IsItInitializedFlag == 1 and Input_OPEN_FLAG == 1:
+
+            #######################################################################################################################
+            #######################################################################################################################
+            if Input_TranslationClutch_State == 1 or Input_RotationClutch_State == 1:
+                
+                # We're locking to UR5arm_MostRecentDict_ToolVectorActual_AtTimeOfClutchIn, not updating based on actual each function.
+                UR5arm_ToolVectorActual_ToBeSet = list(UR5arm_MostRecentDict_ToolVectorActual_AtTimeOfClutchIn)
+                
+                ####################################################################################################################### Translation
+                if Input_TranslationClutch_State == 1:
+    
+                    TranslationList_AddToUR5armCurrent = numpy.array(Input_RotationMatrixListsOfLists).dot(numpy.array(Input_TranslationList) - numpy.array(Input_TranslationList_AtTimeOfClutchIn)).tolist()
+        
+                    ###################################################
+                    for Index in range(0,3):
+                        UR5arm_ToolVectorActual_ToBeSet[Index] = UR5arm_ToolVectorActual_ToBeSet[Index]  + TranslationList_AddToUR5armCurrent[Index]
+                    ###################################################
+    
+                    UR5arm_PositionControl_NeedsToBeChangedFlag = 1
+                #######################################################################################################################
+                
+                ####################################################################################################################### Rotation
+                if Input_RotationClutch_State == 1:
+    
+                    RotationList_AddToUR5armCurrent = numpy.array(Input_RotationMatrixListsOfLists).dot(numpy.array(Input_RotationList) - numpy.array(Input_RotationList_AtTimeOfClutchIn)).tolist()
+    
+                    ###################################################
+                    for Index in range(3,6): #3, 4, 5
+                        UR5arm_ToolVectorActual_ToBeSet[Index] = UR5arm_ToolVectorActual_ToBeSet[Index]  + RotationList_AddToUR5armCurrent[Index-3]
+                    ###################################################
+                    
+                    UR5arm_PositionControl_NeedsToBeChangedFlag = 1
+                #######################################################################################################################
+
+            #######################################################################################################################
+            #######################################################################################################################
+
+        #######################################################################################################################
+        #######################################################################################################################
+        #######################################################################################################################
+            
+    except:
+        exceptions = sys.exc_info()[0]
+        print("GeneralizedControlForPositionInput, exceptions: %s" % exceptions)
+        UR5arm_ToolVectorActual_ToBeSet = list(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual)
+        traceback.print_exc()
+
+#######################################################################################################################
+#######################################################################################################################
+#######################################################################################################################
+#######################################################################################################################
+
+#######################################################################################################################
+#######################################################################################################################
+#######################################################################################################################
+#######################################################################################################################
+def GeneralizedControlForRateControlInput(Input_TranslationList, Input_TranslationIncrementList, Input_TranslationClutch_State, Input_RotationList, Input_RotationIncrementList, Input_RotationClutch_State, Input_OPEN_FLAG):
+
+    global UR5arm_MostRecentDict_ToolVectorActual_IsItInitializedFlag
+    global UR5arm_ToolVectorActual_ToBeSet
+    global UR5arm_PositionControl_NeedsToBeChangedFlag
+
+    try:
+
+        #######################################################################################################################
+        #######################################################################################################################
+        #######################################################################################################################
+        if UR5arm_MostRecentDict_ToolVectorActual_IsItInitializedFlag == 1 and Input_OPEN_FLAG == 1:
+
+            #######################################################################################################################
+            #######################################################################################################################
+            if Input_TranslationClutch_State == 1 or Input_RotationClutch_State == 1:
+                
+                UR5arm_ToolVectorActual_ToBeSet = list(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual)
+                
+                ####################################################################################################################### Translation
+                if Input_TranslationClutch_State == 1:
+    
+                    TranslationList_AddToUR5armCurrent = numpy.array(numpy.array(Input_TranslationList)*numpy.array(Input_TranslationIncrementList)).tolist()
+        
+                    ###################################################
+                    for Index in range(0,3):
+                        UR5arm_ToolVectorActual_ToBeSet[Index] = UR5arm_ToolVectorActual_ToBeSet[Index]  + TranslationList_AddToUR5armCurrent[Index]
+                    ###################################################
+    
+                    UR5arm_PositionControl_NeedsToBeChangedFlag = 1
+                #######################################################################################################################
+                
+                ####################################################################################################################### Rotation
+                if Input_RotationClutch_State == 1:
+    
+                    RotationList_AddToUR5armCurrent_RotationEulerList_Radians = numpy.array(numpy.array(Input_RotationList)*numpy.array(Input_RotationIncrementList)).tolist()
+
+                    ###################################################
+                    RotationEulerList = [0.0]*3
+                    for Index in range(0, 3):
+                        RotationEulerList[Index] = SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolTip_RotationEulerList_Radians[Index] + RotationList_AddToUR5armCurrent_RotationEulerList_Radians[Index]
+
+                    RotationObjectScipy_Joystick_AddToUR5armCurrentPositionList = Rotation.from_euler('xyz', RotationEulerList, degrees=False)
+                    RotationAxisAngleList_Joystick_AddToUR5armCurrentPositionList = RotationObjectScipy_Joystick_AddToUR5armCurrentPositionList.as_rotvec()
+                    ###################################################
+
+                    ###################################################
+                    for Index in range(3,6): #3, 4, 5
+                        UR5arm_ToolVectorActual_ToBeSet[Index] = RotationAxisAngleList_Joystick_AddToUR5armCurrentPositionList[Index-3]
+                    ###################################################
+                    
+                    UR5arm_PositionControl_NeedsToBeChangedFlag = 1
+                #######################################################################################################################
+
+            #######################################################################################################################
+            #######################################################################################################################
+
+        #######################################################################################################################
+        #######################################################################################################################
+        #######################################################################################################################
+            
+    except:
+        exceptions = sys.exc_info()[0]
+        print("GeneralizedControlForPositionInput, exceptions: %s" % exceptions)
+        UR5arm_ToolVectorActual_ToBeSet = list(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual)
+        traceback.print_exc()
+
+#######################################################################################################################
+#######################################################################################################################
+#######################################################################################################################
+#######################################################################################################################
+
+#######################################################################################################################
+#######################################################################################################################
 if __name__ == '__main__':
 
     ################################################
@@ -1955,7 +2378,7 @@ if __name__ == '__main__':
 
     print("Teleop_UR5arm, USE_GUI_FLAG_ARGV_OVERRIDE: " + str(USE_GUI_FLAG_ARGV_OVERRIDE) + ", SOFTWARE_LAUNCH_METHOD: " + str(SOFTWARE_LAUNCH_METHOD))
 
-    if SOFTWARE_LAUNCH_METHOD == -1:
+    if 0:#SOFTWARE_LAUNCH_METHOD == -1:
         print("Teleop_UR5arm ERROR, must launch software via command terminal/BAT-file, not IDE!")
         time.sleep(5.0)
         sys.exit()
@@ -1984,12 +2407,13 @@ if __name__ == '__main__':
     #################################################
     global UseClassesFlags_Directions
     global USE_GUI_FLAG
-    global USE_KEYBOARD_FLAG
-    global USE_MYPRINT_FLAG
+    global USE_Keyboard_FLAG
+    global USE_MyPrint_FLAG
     global USE_UR5arm_FLAG
     global USE_ZEDasHandController_FLAG
     global USE_RobotiqGripper2F85_FLAG
-    global USE_JOYSTICK_FLAG
+    global USE_Joystick_FLAG
+    global USE_ArucoTag_FLAG
     global USE_PLOTTER_FLAG
     global SAVE_PROGRAM_LOGS_FLAG
     global SAVE_CSV_FILE_OF_TRAJECTORY_DATA_FLAG_AT_START_OF_PROGRAM
@@ -1998,13 +2422,15 @@ if __name__ == '__main__':
     #################################################
 
     #################################################
-    global SHOW_IN_GUI_MYPRINT_FLAG
+    global SHOW_IN_GUI_MyPrint_FLAG
+    global SHOW_IN_GUI_Keyboard_FLAG
     global SHOW_IN_GUI_UR5arm_StandAloneProcess_FLAG
     global SHOW_IN_GUI_UR5arm_MostRecentDict_FLAG
     global SHOW_IN_GUI_UR5arm_ServoJparameterEntries_FLAG
     global SHOW_IN_GUI_ZEDasHandController_FLAG
     global SHOW_IN_GUI_RobotiqGripper2F85_FLAG
-    global SHOW_IN_GUI_JOYSTICK_FLAG
+    global SHOW_IN_GUI_Joystick_FLAG
+    global SHOW_IN_GUI_ArucoTag_FLAG
     global GUItitleString
     global GUI_RootAfterCallbackInterval_Milliseconds
     global root_Xpos
@@ -2020,30 +2446,41 @@ if __name__ == '__main__':
     global UR5arm_RootWindowStartingX
     global UR5arm_RootWindowStartingY
     global UR5arm_RootWindowTitle
+
     global GUI_ROW_ZEDasHandController
     global GUI_COLUMN_ZEDasHandController
     global GUI_PADX_ZEDasHandController
     global GUI_PADY_ZEDasHandController
     global GUI_ROWSPAN_ZEDasHandController
     global GUI_COLUMNSPAN_ZEDasHandController
+
     global GUI_ROW_RobotiqGripper2F85
     global GUI_COLUMN_RobotiqGripper2F85
     global GUI_PADX_RobotiqGripper2F85
     global GUI_PADY_RobotiqGripper2F85
     global GUI_ROWSPAN_RobotiqGripper2F85
     global GUI_COLUMNSPAN_RobotiqGripper2F85
-    global GUI_ROW_JOYSTICK
-    global GUI_COLUMN_JOYSTICK
-    global GUI_PADX_JOYSTICK
-    global GUI_PADY_JOYSTICK
-    global GUI_ROWSPAN_JOYSTICK
-    global GUI_COLUMNSPAN_JOYSTICK
-    global GUI_ROW_MYPRINT
-    global GUI_COLUMN_MYPRINT
-    global GUI_PADX_MYPRINT
-    global GUI_PADY_MYPRINT
-    global GUI_ROWSPAN_MYPRINT
-    global GUI_COLUMNSPAN_MYPRINT
+
+    global GUI_ROW_Joystick
+    global GUI_COLUMN_Joystick
+    global GUI_PADX_Joystick
+    global GUI_PADY_Joystick
+    global GUI_ROWSPAN_Joystick
+    global GUI_COLUMNSPAN_Joystick
+
+    global GUI_ROW_ArucoTagDetection
+    global GUI_COLUMN_ArucoTagDetection
+    global GUI_PADX_ArucoTagDetection
+    global GUI_PADY_ArucoTagDetection
+    global GUI_ROWSPAN_ArucoTagDetection
+    global GUI_COLUMNSPAN_ArucoTagDetection
+
+    global GUI_ROW_MyPrint
+    global GUI_COLUMN_MyPrint
+    global GUI_PADX_MyPrint
+    global GUI_PADY_MyPrint
+    global GUI_ROWSPAN_MyPrint
+    global GUI_COLUMNSPAN_MyPrint
 
     LoadAndParseJSONfile_GUIsettings()
     #################################################
@@ -2093,6 +2530,7 @@ if __name__ == '__main__':
         UR5arm_ControllerBoxVersion = UR5arm_Arm_Specific_Details[UR5arm_ArmNameToUse]["UR5arm_ControllerBoxVersion"]
         UR5arm_RealTimeClientInterfaceVersionNumberString = UR5arm_Arm_Specific_Details[UR5arm_ArmNameToUse]["UR5arm_RealTimeClientInterfaceVersionNumberString"]
         UR5arm_IPV4Address = UR5arm_Arm_Specific_Details[UR5arm_ArmNameToUse]["UR5arm_IPV4Address"]
+        UR5arm_DedicatedTxThread_MaximumTxMessagesPerSecondFrequency = UR5arm_Arm_Specific_Details[UR5arm_ArmNameToUse]["UR5arm_DedicatedTxThread_MaximumTxMessagesPerSecondFrequency"]
         UR5arm_ServoJtimeDurationSeconds = UR5arm_Arm_Specific_Details[UR5arm_ArmNameToUse]["UR5arm_ServoJtimeDurationSeconds"]
         UR5arm_ServoJlookAheadTimeSeconds = UR5arm_Arm_Specific_Details[UR5arm_ArmNameToUse]["UR5arm_ServoJlookAheadTimeSeconds"]
         UR5arm_ServoJgain = UR5arm_Arm_Specific_Details[UR5arm_ArmNameToUse]["UR5arm_ServoJgain"]
@@ -2127,9 +2565,69 @@ if __name__ == '__main__':
     global Joystick_Clutch_Button_Index_ToDisplayAsDotColorOn2DdotDisplay
     global Joystick_PrintInfoForAllDetectedJoysticksFlag
     global Joystick_AxisHatButtonOrBallTo6DOFposeMapping_ListOfDicts
-    global Joystick_UseClutchFlag
+    global Joystick_UseTranslationClutchFlag
+    global Joystick_UseRotationClutchFlag
 
     LoadAndParseJSONfile_Joystick()
+    #################################################
+
+    #################################################
+    global camera_selection_number
+    global camera_TkinterPreviewImageScalingFactor
+    global camera_Dshow_EnglishName
+    global CameraCaptureThread_TimeToSleepEachLoop
+    global CameraEncodeThread_TimeToSleepEachLoop
+    global ImageSavingThread_TimeToSleepEachLoop
+    global camera_frame_rate
+    global image_width
+    global image_height
+    global image_jpg_encoding_quality
+    global CameraSetting_Autofocus
+    global CameraSetting_Autoexposure
+    global CameraSetting_exposure
+    global CameraSetting_gain
+    global CameraSetting_brightness
+    global CameraSetting_contrast
+    global CameraSetting_saturation
+    global CameraSetting_hue
+    global DrawCircleAtImageCenterFlag
+    global EnableCameraEncodeThreadFlag
+    global EnableImageSavingThreadFlag
+    global RemoveFisheyeDistortionFromImage_Flag
+    global CameraCalibrationParametersDict
+    global CameraCalibrationResolutionScalarMultiplier
+    global ShowOpenCVwindowsFlag
+    global OpenCVwindowPosX
+    global OpenCVwindowPosY
+    global OpenCVwindow_UpdateEveryNmilliseconds
+    global test_program_for_ArucoTagDetectionFromCameraFeed_ReubenPython3Class_MainThread_TimeToSleepEachLoop
+    global OpenCVbackendToUseEnglishName
+
+    LoadAndParseJSONfile_Camera()
+    #################################################
+
+    #################################################
+    global ArucoTag_user_notes
+    global ArucoTag_TkinterPreviewImageScalingFactor
+    global ArucoTag_DictType_EnglishString
+    global ArucoTag_MarkerLengthInMillimeters
+    global ArucoTag_AxesToDrawLengthInMillimeters
+    global ArucoTag_TranslationVectorOfMarkerCenter_ExponentialSmoothingFilterLambda
+    global ArucoTag_RotationVectorOfMarkerCenter_ExponentialSmoothingFilterLambda
+    global ArucoTag_DistanceBetweenMarkers0and1
+    global ArucoTag_DistanceBetweenMarkers0and1_ClosenessThreshold
+    global ArucoTag_HowManyFramesAcceptedBetweenMarkers
+    global ArucoTag_DetectInvertedMarkersAsWellAsNormalOnesFlag
+    global ArucoTag_MarkerIDToDetect_PrimaryMarker
+    global ArucoTag_MarkerIDToDetect_SecondaryMarker
+    global ArucoTag_UseTranslationClutchFlag
+    global ArucoTag_RotationMatrixListsOfLists
+    global ArucoTag_PositionList_ScalingFactorList
+    global ArucoTag_RollPitchYaw_AbtXYZ_List_ScalingFactorList
+    global ArucoTag_UseTranslationClutchFlag
+    global ArucoTag_UseRotationClutchFlag
+
+    LoadAndParseJSONfile_ArucoTagParameters()
     #################################################
 
     #################################################
@@ -2144,8 +2642,21 @@ if __name__ == '__main__':
     global ZEDasHandController_RotationMatrixListsOfLists
     global ZEDasHandController_PositionList_ScalingFactorList
     global ZEDasHandController_RollPitchYaw_AbtXYZ_List_ScalingFactorList
+    global ZEDasHandController_NumberOfFramesForRotationInitialization
+    global ZEDasHandController_UseTranslationClutchFlag
+    global ZEDasHandController_UseRotationClutchFlag
 
     LoadAndParseJSONfile_ZEDasHandController()
+    #################################################
+
+    #################################################
+    global SavingSettings_user_notes
+    global Camera_SavedImages_LocalDirectoryNameNoSlashes
+    global Camera_SavedImages_FilenamePrefix
+    global ArucoTag_SavedImages_LocalDirectoryNameNoSlashes
+    global ArucoTag_SavedImages_FilenamePrefix
+
+    LoadAndParseJSONfile_SavingSettings()
     #################################################
 
     #################################################
@@ -2162,15 +2673,7 @@ if __name__ == '__main__':
     #################################################
     #################################################
     global root
-
-    global TabControlObject
-    global Tab_MainControls
-    global Tab_ZEDasHandController
-    global Tab_UR5arm
-    global Tab_RobotiqGripper2F85
-    global Tab_KEYBOARD
-    global Tab_JOYSTICK
-    global Tab_MyPrint
+    root = None
 
     global ControlType
     ControlType = ControlType_StartingValue
@@ -2184,8 +2687,8 @@ if __name__ == '__main__':
     #################################################
     global MyPrint_ReubenPython2and3ClassObject
 
-    global MYPRINT_OPEN_FLAG
-    MYPRINT_OPEN_FLAG = -1
+    global MyPrint_OPEN_FLAG
+    MyPrint_OPEN_FLAG = -1
     #################################################
     #################################################
 
@@ -2212,18 +2715,6 @@ if __name__ == '__main__':
 
     global UR5arm_MostRecentDict_ToolVectorActual_MotionFromSnapshotAtTimeOfCreatingCSVfileForTrajectoryData
     UR5arm_MostRecentDict_ToolVectorActual_MotionFromSnapshotAtTimeOfCreatingCSVfileForTrajectoryData = [0.0]*6
-
-    global UR5arm_MostRecentDict_ToolTipSpeedsCartestian_TCPspeedActual
-    UR5arm_MostRecentDict_ToolTipSpeedsCartestian_TCPspeedActual = [-11111.0]*6
-
-    global UR5arm_MostRecentDict_ToolTipSpeedsCartestian_LinearXYZnorm_MetersPerSec
-    UR5arm_MostRecentDict_ToolTipSpeedsCartestian_LinearXYZnorm_MetersPerSec = -11111.0
-
-    global UR5arm_MostRecentDict_DataStreamingFrequency_CalculatedFromDedicatedRxThread
-    UR5arm_MostRecentDict_DataStreamingFrequency_CalculatedFromDedicatedRxThread = -11111.0
-
-    global UR5arm_MostRecentDict_Time
-    UR5arm_MostRecentDict_Time = -11111.0
 
     global UR5arm_MostRecentDict_ToolVectorActual_IsItInitializedFlag
     UR5arm_MostRecentDict_ToolVectorActual_IsItInitializedFlag = 0
@@ -2330,11 +2821,17 @@ if __name__ == '__main__':
     global ZEDasHandController_RollPitchYaw_AbtXYZ_List_Radians_AtTimeOfClutchIn
     ZEDasHandController_RollPitchYaw_AbtXYZ_List_Radians_AtTimeOfClutchIn = [-11111.0] * 3
 
-    global ZEDasHandController_Trigger_State
-    ZEDasHandController_Trigger_State = -1
+    global ZEDasHandController_TranslationClutch_State
+    ZEDasHandController_TranslationClutch_State = -1
 
-    global ZEDasHandController_Trigger_State_last
-    ZEDasHandController_Trigger_State_last = -1
+    global ZEDasHandController_TranslationClutch_State_last
+    ZEDasHandController_TranslationClutch_State_last = -1
+    
+    global ZEDasHandController_RotationClutch_State
+    ZEDasHandController_RotationClutch_State = -1
+
+    global ZEDasHandController_RotationClutch_State_last
+    ZEDasHandController_RotationClutch_State_last = -1
 
     global ZEDasHandController_AddToUR5armCurrentPositionList
     ZEDasHandController_AddToUR5armCurrentPositionList = [0.0]*3
@@ -2376,43 +2873,136 @@ if __name__ == '__main__':
 
     #################################################
     #################################################
+    global ArucoTagDetectionFromCameraFeed_ReubenPython3ClassObject
+
+    global ArucoTag_OPEN_FLAG
+    ArucoTag_OPEN_FLAG = -1
+
+    global ArucoTag_MostRecentDict
+    ArucoTag_MostRecentDict = dict()
+
+    global ArucoTag_MostRecentDict_DataStreamingFrequency_CalculatedFromMainThread
+    ArucoTag_MostRecentDict_DataStreamingFrequency_CalculatedFromMainThread = -11111.0
+
+    global ArucoTag_MostRecentDict_Time
+    ArucoTag_MostRecentDict_Time = -11111.0
+
+    global ArucoTag_MostRecentDict_DetectedArucoTag_InfoDict
+    ArucoTag_MostRecentDict_DetectedArucoTag_InfoDict = dict()
+
+    global ArucoTag_TranslationVectorOfMarkerCenter_PythonList_PrimaryMarker
+    ArucoTag_TranslationVectorOfMarkerCenter_PythonList_PrimaryMarker = [-11111.0]*3
+
+    global ArucoTag_TranslationVectorOfMarkerCenter_PythonList_PrimaryMarker_AtTimeOfClutchIn
+    ArucoTag_TranslationVectorOfMarkerCenter_PythonList_PrimaryMarker_AtTimeOfClutchIn = [0.0]*3
+
+    global ArucoTag_RotationVectorOfMarkerCenter_EulerAnglesXYZrollPitchYawInDegrees_PythonList_PrimaryMarker
+    ArucoTag_RotationVectorOfMarkerCenter_EulerAnglesXYZrollPitchYawInDegrees_PythonList_PrimaryMarker = [-11111.0] * 3
+
+    global ArucoTag_RotationVectorOfMarkerCenter_EulerAnglesXYZrollPitchYawInRadians_PythonList_PrimaryMarker
+    ArucoTag_RotationVectorOfMarkerCenter_EulerAnglesXYZrollPitchYawInRadians_PythonList_PrimaryMarker = [-11111.0] * 3
+
+    global ArucoTag_DetectionTimeInMilliseconds_PrimaryMarker
+    ArucoTag_DetectionTimeInMilliseconds_PrimaryMarker = -11111.0
+
+    global ArucoTag_TranslationVectorOfMarkerCenter_PythonList_SecondaryMarker
+    ArucoTag_TranslationVectorOfMarkerCenter_PythonList_SecondaryMarker = [-11111.0]*3
+
+    global ArucoTag_TranslationVectorOfMarkerCenter_PythonList_SecondaryMarker_AtTimeOfClutchIn
+    ArucoTag_TranslationVectorOfMarkerCenter_PythonList_SecondaryMarker_AtTimeOfClutchIn = [0.0]*3
+
+    global ArucoTag_RotationVectorOfMarkerCenter_EulerAnglesXYZrollPitchYawInDegrees_PythonList_SecondaryMarker
+    ArucoTag_RotationVectorOfMarkerCenter_EulerAnglesXYZrollPitchYawInDegrees_PythonList_SecondaryMarker = [-11111.0] * 3
+
+    global ArucoTag_RotationVectorOfMarkerCenter_EulerAnglesXYZrollPitchYawInRadians_PythonList_SecondaryMarker
+    ArucoTag_RotationVectorOfMarkerCenter_EulerAnglesXYZrollPitchYawInRadians_PythonList_SecondaryMarker = [-11111.0] * 3
+
+    global ArucoTag_DetectionTimeInMilliseconds_SecondaryMarker
+    ArucoTag_DetectionTimeInMilliseconds_SecondaryMarker = -11111.0
+
+    global ArucoTag_AddToUR5armCurrentPositionList
+    ArucoTag_AddToUR5armCurrentPositionList = [0.0]*6
+
+    global ArucoTag_PositionList
+    ArucoTag_PositionList = [-11111.0] * 3
+
+    global ArucoTag_RollPitchYaw_AbtXYZ_List_Degrees
+    ArucoTag_RollPitchYaw_AbtXYZ_List_Degrees = [-11111.0] * 3
+
+    global ArucoTag_RollPitchYaw_AbtXYZ_List_Radians
+    ArucoTag_RollPitchYaw_AbtXYZ_List_Radians = [-11111.0] * 3
+
+    global ArucoTag_PositionList_AtTimeOfClutchIn
+    ArucoTag_PositionList_AtTimeOfClutchIn = [-11111.0] * 3
+
+    global ArucoTag_RollPitchYaw_AbtXYZ_List_Degrees_AtTimeOfClutchIn
+    ArucoTag_RollPitchYaw_AbtXYZ_List_Degrees_AtTimeOfClutchIn = [-11111.0] * 3
+
+    global ArucoTag_RollPitchYaw_AbtXYZ_List_Radians_AtTimeOfClutchIn
+    ArucoTag_RollPitchYaw_AbtXYZ_List_Radians_AtTimeOfClutchIn = [-11111.0] * 3
+
+    global ArucoTag_TranslationClutch_State
+    ArucoTag_TranslationClutch_State = 0
+
+    global ArucoTag_TranslationClutch_State_last
+    ArucoTag_TranslationClutch_State_last = -1
+
+    global ArucoTag_RotationClutch_State
+    ArucoTag_RotationClutch_State = 0
+
+    global ArucoTag_RotationClutch_State_last
+    ArucoTag_RotationClutch_State_last = -1
+    #################################################
+    #################################################
+
+    #################################################
+    #################################################
     global JoystickHID_ReubenPython2and3ClassObject
 
-    global JOYSTICK_OPEN_FLAG
-    JOYSTICK_OPEN_FLAG = -1
+    global Joystick_OPEN_FLAG
+    Joystick_OPEN_FLAG = -1
 
-    global JOYSTICK_MostRecentDict
-    JOYSTICK_MostRecentDict = dict()
+    global Joystick_MostRecentDict
+    Joystick_MostRecentDict = dict()
 
-    global JOYSTICK_MostRecentDict_Joystick_Axis_Value_List
-    JOYSTICK_MostRecentDict_Joystick_Axis_Value_List = list()
+    global Joystick_MostRecentDict_Joystick_Axis_Value_List
+    Joystick_MostRecentDict_Joystick_Axis_Value_List = list()
 
-    global JOYSTICK_MostRecentDict_Joystick_Button_Value_List
-    JOYSTICK_MostRecentDict_Joystick_Button_Value_List = list()
+    global Joystick_MostRecentDict_Joystick_Button_Value_List
+    Joystick_MostRecentDict_Joystick_Button_Value_List = list()
 
-    global JOYSTICK_MostRecentDict_Joystick_Button_LatchingRisingEdgeEvents_List
-    JOYSTICK_MostRecentDict_Joystick_Button_LatchingRisingEdgeEvents_List = list()
+    global Joystick_MostRecentDict_Joystick_Button_LatchingRisingEdgeEvents_List
+    Joystick_MostRecentDict_Joystick_Button_LatchingRisingEdgeEvents_List = list()
 
-    global JOYSTICK_MostRecentDict_Joystick_Hat_Value_List
-    JOYSTICK_MostRecentDict_Joystick_Hat_Value_List = list()
+    global Joystick_MostRecentDict_Joystick_Hat_Value_List
+    Joystick_MostRecentDict_Joystick_Hat_Value_List = list()
 
-    global JOYSTICK_MostRecentDict_Joystick_Hat_LatchingRisingEdgeEvents_List
-    JOYSTICK_MostRecentDict_Joystick_Hat_LatchingRisingEdgeEvents_List = list()
+    global Joystick_MostRecentDict_Joystick_Hat_LatchingRisingEdgeEvents_List
+    Joystick_MostRecentDict_Joystick_Hat_LatchingRisingEdgeEvents_List = list()
 
-    global JOYSTICK_MostRecentDict_Joystick_Ball_Value_List
-    JOYSTICK_MostRecentDict_Joystick_Ball_Value_List = list()
+    global Joystick_MostRecentDict_Joystick_Ball_Value_List
+    Joystick_MostRecentDict_Joystick_Ball_Value_List = list()
 
-    global JOYSTICK_MostRecentDict_DataStreamingFrequency
-    JOYSTICK_MostRecentDict_DataStreamingFrequency = -11111.0
+    global Joystick_MostRecentDict_DataStreamingFrequency
+    Joystick_MostRecentDict_DataStreamingFrequency = -11111.0
 
-    global JOYSTICK_MostRecentDict_Time
-    JOYSTICK_MostRecentDict_Time = -11111.0
+    global Joystick_MostRecentDict_Time
+    Joystick_MostRecentDict_Time = -11111.0
 
     global Joystick_AddToUR5armCurrentPositionList
     Joystick_AddToUR5armCurrentPositionList = [0.0]*6
 
-    global Joystick_ClutchState
-    Joystick_ClutchState = 0
+    global Joystick_TranslationClutch_State
+    Joystick_TranslationClutch_State = 0
+
+    global Joystick_TranslationClutch_State_last
+    Joystick_TranslationClutch_State_last = -1
+
+    global Joystick_RotationClutch_State
+    Joystick_RotationClutch_State = 0
+
+    global Joystick_RotationClutch_State_last
+    Joystick_RotationClutch_State_last = -1
     #################################################
     #################################################
 
@@ -2497,6 +3087,15 @@ if __name__ == '__main__':
 
     #################################################
     #################################################
+    global GUItabObjectsOrderedDict
+    GUItabObjectsOrderedDict = OrderedDict()
+
+    UpdateGUItabObjectsOrderedDict()
+    #################################################
+    #################################################
+
+    #################################################
+    #################################################
     #All Keyboard variables defined in SharedGlobals_Teleop_UR5arm.py:
     #global DedicatedKeyboardListeningThread_StillRunningFlag
     #global KeyPressResponse_IncrementURtoolTipInX_NeedsToBeChangedFlag
@@ -2506,10 +3105,16 @@ if __name__ == '__main__':
 
     #################################################
     #################################################
-    if USE_KEYBOARD_FLAG == 1:
+    if USE_Keyboard_FLAG == 1:
         DedicatedKeyboardListeningThread_ThreadingObject = threading.Thread(target=DedicatedKeyboardListeningThread, args=())
         DedicatedKeyboardListeningThread_ThreadingObject.setDaemon(True) #Means that thread is destroyed automatically when the main thread is destroyed.
         DedicatedKeyboardListeningThread_ThreadingObject.start()
+    #################################################
+    #################################################
+
+    #################################################
+    #################################################
+    UpdateGUItabObjectsOrderedDict()
     #################################################
     #################################################
 
@@ -2525,29 +3130,28 @@ if __name__ == '__main__':
         GUI_Thread_ThreadingObject.start()
         time.sleep(0.5)  # Allow enough time for 'root' to be created that we can then pass it into other classes.
     else:
-        root = None
-        Tab_MainControls = None
-        Tab_UR5arm = None
-        Tab_RobotiqGripper2F85 = None
-        Tab_ZEDasHandController = None
-        Tab_KEYBOARD = None
-        Tab_JOYSTICK = None
-        Tab_MyPrint = None
+        pass
+    #################################################
+    #################################################
+
+    #################################################
+    #################################################
+    UpdateGUItabObjectsOrderedDict()
     #################################################
     #################################################
 
     #################################################
     #################################################
     global MyPrint_ReubenPython2and3ClassObject_GUIparametersDict
-    MyPrint_ReubenPython2and3ClassObject_GUIparametersDict = dict([("USE_GUI_FLAG", USE_GUI_FLAG and SHOW_IN_GUI_MYPRINT_FLAG),
-                                                                    ("root", Tab_MyPrint),
+    MyPrint_ReubenPython2and3ClassObject_GUIparametersDict = dict([("USE_GUI_FLAG", USE_GUI_FLAG and SHOW_IN_GUI_MyPrint_FLAG),
+                                                                    ("root", GUItabObjectsOrderedDict["MyPrint"]["TabObject"]),
                                                                     ("UseBorderAroundThisGuiObjectFlag", 0),
-                                                                    ("GUI_ROW", GUI_ROW_MYPRINT),
-                                                                    ("GUI_COLUMN", GUI_COLUMN_MYPRINT),
-                                                                    ("GUI_PADX", GUI_PADX_MYPRINT),
-                                                                    ("GUI_PADY", GUI_PADY_MYPRINT),
-                                                                    ("GUI_ROWSPAN", GUI_ROWSPAN_MYPRINT),
-                                                                    ("GUI_COLUMNSPAN", GUI_COLUMNSPAN_MYPRINT),
+                                                                    ("GUI_ROW", GUI_ROW_MyPrint),
+                                                                    ("GUI_COLUMN", GUI_COLUMN_MyPrint),
+                                                                    ("GUI_PADX", GUI_PADX_MyPrint),
+                                                                    ("GUI_PADY", GUI_PADY_MyPrint),
+                                                                    ("GUI_ROWSPAN", GUI_ROWSPAN_MyPrint),
+                                                                    ("GUI_COLUMNSPAN", GUI_COLUMNSPAN_MyPrint),
                                                                     ("GUI_STICKY", "W")])
 
     global MyPrint_ReubenPython2and3ClassObject_LogFile_Directory_TO_BE_USED
@@ -2563,15 +3167,21 @@ if __name__ == '__main__':
                                                             ("LogFileNameFullPath", MyPrint_ReubenPython2and3ClassObject_LogFile_Directory_TO_BE_USED),
                                                             ("GUIparametersDict", MyPrint_ReubenPython2and3ClassObject_GUIparametersDict)])
 
-    if USE_MYPRINT_FLAG == 1:
+    if USE_MyPrint_FLAG == 1:
         try:
             MyPrint_ReubenPython2and3ClassObject = MyPrint_ReubenPython2and3Class(MyPrint_ReubenPython2and3ClassObject_setup_dict)
-            MYPRINT_OPEN_FLAG = MyPrint_ReubenPython2and3ClassObject.OBJECT_CREATED_SUCCESSFULLY_FLAG
+            MyPrint_OPEN_FLAG = MyPrint_ReubenPython2and3ClassObject.OBJECT_CREATED_SUCCESSFULLY_FLAG
 
         except:
             exceptions = sys.exc_info()[0]
             print("MyPrint_ReubenPython2and3ClassObject __init__: Exceptions: %s" % exceptions)
             traceback.print_exc()
+    #################################################
+    #################################################
+
+    #################################################
+    #################################################
+    UpdateGUItabObjectsOrderedDict()
     #################################################
     #################################################
 
@@ -2598,9 +3208,9 @@ if __name__ == '__main__':
 
     UR5arm_ReubenPython2and3ClassObject_setup_dict = dict([("GUIparametersDict", UR5arm_ReubenPython2and3ClassObject_GUIparametersDict),
                                                         ("NameToDisplay_UserSet", "UR5arm"),
-                                                        ("RealTimeClientInterfaceVersionNumberString", UR5arm_RealTimeClientInterfaceVersionNumberString), #'<3.0' for test UR5CB2, '3.8' for test URCB3
-                                                        ("ControllerBoxVersion", UR5arm_ControllerBoxVersion), #2, #3
-                                                        ("IPV4_address", UR5arm_IPV4Address), #"192.168.1.100" "192.168.1.12"
+                                                        ("RealTimeClientInterfaceVersionNumberString", UR5arm_RealTimeClientInterfaceVersionNumberString),
+                                                        ("ControllerBoxVersion", UR5arm_ControllerBoxVersion),
+                                                        ("IPV4_address", UR5arm_IPV4Address),
                                                         ("IPV4_NumberOfRxMessagesToBuffers", UR5arm_IPV4_NumberOfRxMessagesToBuffers),
                                                         ("IPV4_TimeoutDurationSeconds", 5.0),
                                                         ("DedicatedRxThread_TimeToSleepEachLoop", 0.001),
@@ -2610,7 +3220,7 @@ if __name__ == '__main__':
                                                         ("PositionControl_ServoJ_MoveThroughListOfPoses_SafeReturnToStartingPoseFromAnywhere", list(UR5arm_PositionControl_ServoJ_MoveThroughListOfPoses_SafeReturnToStartingPoseFromAnywhere)),
                                                         ("StartingPoseJointAngleList_Deg", list(UR5arm_PositionControl_ServoJ_MoveThroughListOfPoses_SafeReturnToStartingPoseFromAnywhere)[0]["JointAngleList_Deg"]),
                                                         ("Payload_MassKG_ToBeCommanded", UR5arm_Payload_MassKG_ToBeCommanded),
-                                                        ("Payload_CoGmetersList_ToBeCommanded", UR5arm_Payload_CoGmetersList_ToBeCommanded), #Determined experimentally on 12/16/21.
+                                                        ("Payload_CoGmetersList_ToBeCommanded", UR5arm_Payload_CoGmetersList_ToBeCommanded),
                                                         ("Acceleration", UR5arm_Acceleration),
                                                         ("Velocity", UR5arm_Velocity),
                                                         ("JointAngleCommandIncrementDecrement_ValueInDegrees", 1.0),
@@ -2651,9 +3261,15 @@ if __name__ == '__main__':
 
     #################################################
     #################################################
+    UpdateGUItabObjectsOrderedDict()
+    #################################################
+    #################################################
+
+    #################################################
+    #################################################
     global ZEDasHandController_ReubenPython2and3ClassObject_GUIparametersDict
     ZEDasHandController_ReubenPython2and3ClassObject_GUIparametersDict = dict([("USE_GUI_FLAG", USE_GUI_FLAG and SHOW_IN_GUI_ZEDasHandController_FLAG),
-                                    ("root", Tab_ZEDasHandController),
+                                    ("root", GUItabObjectsOrderedDict["ZEDasHandController"]["TabObject"]),
                                     ("EnableInternal_MyPrint_Flag", 1),
                                     ("NumberOfPrintLines", 10),
                                     ("UseBorderAroundThisGuiObjectFlag", 0),
@@ -2673,7 +3289,8 @@ if __name__ == '__main__':
                                                                 ("DataCollectionDurationInSecondsForZeroing", ZEDasHandController_DataCollectionDurationInSecondsForZeroing),
                                                                 ("ZEDcoordinateSystem", ZEDasHandController_ZEDcoordinateSystem),
                                                                 ("ZEDresolution", ZEDasHandController_ZEDresolution),
-                                                                ("ZEDfps", ZEDasHandController_ZEDfps)])
+                                                                ("ZEDfps", ZEDasHandController_ZEDfps),
+                                                                ("NumberOfFramesForRotationInitialization", ZEDasHandController_NumberOfFramesForRotationInitialization)])
 
     if USE_ZEDasHandController_FLAG == 1:
         try:
@@ -2689,9 +3306,15 @@ if __name__ == '__main__':
 
     #################################################
     #################################################
+    UpdateGUItabObjectsOrderedDict()
+    #################################################
+    #################################################
+
+    #################################################
+    #################################################
     global RobotiqGripper2F85_ReubenPython2and3ClassObject_GUIparametersDict
     RobotiqGripper2F85_ReubenPython2and3ClassObject_GUIparametersDict = dict([("USE_GUI_FLAG", USE_GUI_FLAG and SHOW_IN_GUI_RobotiqGripper2F85_FLAG),
-                                    ("root", Tab_RobotiqGripper2F85), #root Tab_RobotiqGripper2F85
+                                    ("root", GUItabObjectsOrderedDict["RobotiqGripper2F85"]["TabObject"]),
                                     ("EnableInternal_MyPrint_Flag", 1),
                                     ("NumberOfPrintLines", 10),
                                     ("UseBorderAroundThisGuiObjectFlag", 0),
@@ -2728,18 +3351,145 @@ if __name__ == '__main__':
 
     #################################################
     #################################################
+    UpdateGUItabObjectsOrderedDict()
+    #################################################
+    #################################################
+
+    ################################################
+    ################################################
+    global CameraStreamerClass_ReubenPython2and3ClassObject_setup_dict
+    CameraStreamerClass_ReubenPython2and3ClassObject_setup_dict = dict([("MainThread_TimeToSleepEachLoop", 0.030),
+                                                                        ("NameToDisplay_UserSet", "Camera"),
+                                                                        ("TkinterPreviewImageScalingFactor", camera_TkinterPreviewImageScalingFactor),
+                                                                        ("camera_selection_number", camera_selection_number),
+                                                                        ("CameraCaptureThread_TimeToSleepEachLoop", CameraCaptureThread_TimeToSleepEachLoop),
+                                                                        ("CameraEncodeThread_TimeToSleepEachLoop", CameraEncodeThread_TimeToSleepEachLoop),
+                                                                        ("ImageSavingThread_TimeToSleepEachLoop", ImageSavingThread_TimeToSleepEachLoop),
+                                                                        ("camera_frame_rate", camera_frame_rate),
+                                                                        ("image_width", image_width),
+                                                                        ("image_height", image_height),
+                                                                        ("image_jpg_encoding_quality", image_jpg_encoding_quality),
+                                                                        ("CameraSetting_Autofocus", CameraSetting_Autofocus),
+                                                                        ("CameraSetting_Autoexposure", CameraSetting_Autoexposure),
+                                                                        ("CameraSetting_exposure", CameraSetting_exposure),
+                                                                        ("CameraSetting_gain", CameraSetting_gain),
+                                                                        ("CameraSetting_brightness", CameraSetting_brightness),
+                                                                        ("CameraSetting_contrast", CameraSetting_contrast),
+                                                                        ("CameraSetting_saturation", CameraSetting_saturation),
+                                                                        ("CameraSetting_hue", CameraSetting_hue),
+                                                                        ("DrawCircleAtImageCenterFlag", DrawCircleAtImageCenterFlag),
+                                                                        ("EnableCameraEncodeThreadFlag", EnableCameraEncodeThreadFlag),
+                                                                        ("EnableImageSavingThreadFlag", EnableImageSavingThreadFlag),
+                                                                        ("RemoveFisheyeDistortionFromImage_Flag", RemoveFisheyeDistortionFromImage_Flag),
+                                                                        ("CameraCalibrationParametersDict", CameraCalibrationParametersDict),
+                                                                        ("OpenCVbackendToUseEnglishName", OpenCVbackendToUseEnglishName),
+                                                                        ("Camera_SavedImages_LocalDirectoryNameNoSlashes", Camera_SavedImages_LocalDirectoryNameNoSlashes),
+                                                                        ("Camera_SavedImages_FilenamePrefix", Camera_SavedImages_FilenamePrefix)])
+
+    global ArucoTagDetectionFromCameraFeed_ReubenPython3Class_GUIparametersDict
+    ArucoTagDetectionFromCameraFeed_ReubenPython3Class_GUIparametersDict = dict([("USE_GUI_FLAG", 1),
+                                    ("root", GUItabObjectsOrderedDict["ArucoTagDetection"]["TabObject"]),
+                                    ("EnableInternal_MyPrint_Flag", 0),
+                                    ("NumberOfPrintLines", 10),
+                                    ("UseBorderAroundThisGuiObjectFlag", 0),
+                                    ("GUI_ROW", GUI_ROW_ArucoTagDetection),
+                                    ("GUI_COLUMN", GUI_COLUMN_ArucoTagDetection),
+                                    ("GUI_PADX", GUI_PADX_ArucoTagDetection),
+                                    ("GUI_PADY", GUI_PADY_ArucoTagDetection),
+                                    ("GUI_ROWSPAN", GUI_ROWSPAN_ArucoTagDetection),
+                                    ("GUI_COLUMNSPAN", GUI_COLUMNSPAN_ArucoTagDetection)])
+
+    global ArucoTagDetectionFromCameraFeed_ReubenPython3Class_setup_dict
+    ArucoTagDetectionFromCameraFeed_ReubenPython3Class_setup_dict = dict([("GUIparametersDict", ArucoTagDetectionFromCameraFeed_ReubenPython3Class_GUIparametersDict),
+                                                                ("CameraStreamerClass_ReubenPython2and3ClassObject_setup_dict", CameraStreamerClass_ReubenPython2and3ClassObject_setup_dict),
+                                                                ("NameToDisplay_UserSet", "ArucoTagDetectionFromCameraFeed"),
+                                                                ("ShowOpenCVwindowsFlag", ShowOpenCVwindowsFlag),
+                                                                ("OpenCVwindowPosX", OpenCVwindowPosX),
+                                                                ("OpenCVwindowPosY", OpenCVwindowPosY),
+                                                                ("OpenCVwindow_UpdateEveryNmilliseconds", OpenCVwindow_UpdateEveryNmilliseconds),
+                                                                ("MainThread_TimeToSleepEachLoop", test_program_for_ArucoTagDetectionFromCameraFeed_ReubenPython3Class_MainThread_TimeToSleepEachLoop),
+                                                                ("ArucoTag_DictType_EnglishString", ArucoTag_DictType_EnglishString),
+                                                                ("ArucoTag_MarkerLengthInMillimeters", ArucoTag_MarkerLengthInMillimeters),
+                                                                ("ArucoTag_AxesToDrawLengthInMillimeters", ArucoTag_AxesToDrawLengthInMillimeters),
+                                                                ("ArucoTag_TranslationVectorOfMarkerCenter_ExponentialSmoothingFilterLambda", ArucoTag_TranslationVectorOfMarkerCenter_ExponentialSmoothingFilterLambda),
+                                                                ("ArucoTag_RotationVectorOfMarkerCenter_ExponentialSmoothingFilterLambda", ArucoTag_RotationVectorOfMarkerCenter_ExponentialSmoothingFilterLambda),
+                                                                ("TkinterPreviewImageScalingFactor", ArucoTag_TkinterPreviewImageScalingFactor),
+                                                                ("ArucoTag_SavedImages_LocalDirectoryNameNoSlashes", ArucoTag_SavedImages_LocalDirectoryNameNoSlashes),
+                                                                ("ArucoTag_SavedImages_FilenamePrefix", ArucoTag_SavedImages_FilenamePrefix),
+                                                                ("ArucoTag_DetectInvertedMarkersAsWellAsNormalOnesFlag", ArucoTag_DetectInvertedMarkersAsWellAsNormalOnesFlag)])
+
+
+    ###@@@
+    CameraStreamerClass_ReubenPython2and3ClassObject_setup_dict["camera_selection_number"] = int(camera_selection_number)
+    ArucoTagDetectionFromCameraFeed_ReubenPython3Class_setup_dict["CameraStreamerClass_ReubenPython2and3ClassObject_setup_dict"] = CameraStreamerClass_ReubenPython2and3ClassObject_setup_dict
+    ###@@@
+
+    if USE_ArucoTag_FLAG == 1:
+        try:
+            ArucoTagDetectionFromCameraFeed_ReubenPython3ClassObject = ArucoTagDetectionFromCameraFeed_ReubenPython3Class(ArucoTagDetectionFromCameraFeed_ReubenPython3Class_setup_dict)
+            ArucoTag_OPEN_FLAG = ArucoTagDetectionFromCameraFeed_ReubenPython3ClassObject.OBJECT_CREATED_SUCCESSFULLY_FLAG
+
+        except:
+            exceptions = sys.exc_info()[0]
+            print("ArucoTagDetectionFromCameraFeed_ReubenPython3ClassObject __init__: Exceptions: %s" % exceptions)
+            traceback.print_exc()
+    #################################################
+    #################################################
+
+    #################################################
+    #################################################
+    UpdateGUItabObjectsOrderedDict()
+    #################################################
+    #################################################
+
+    #################################################
+    #################################################
+    if USE_Joystick_FLAG == 1:
+        [PID_DictWithPIDasKey, PID_DictWithEXEenglishNameAsKey] = GetPIDsByProcessEnglishName("ControlMyJoystick")
+
+        if len(PID_DictWithPIDasKey) == 0: #ControlMyJoystick.exe isn't running
+            if my_platform == "windows":
+
+                shell_command_to_issue = "C:\\Program Files (x86)\\ControlMyJoystick 5.4.17.79\\ControlMyJoystick.exe"
+                print("shell_command_to_issue: " + shell_command_to_issue)
+
+                ##########################################################################################################
+                try:
+                    process = subprocess.Popen([shell_command_to_issue]) #subprocess.Popen doesn't wait for process to terminate
+                    time.sleep(2.0)
+                except Exception as e: #THIS "Exception as e" format is compatible in both Python2.7 and 3 and SAVES THE CONTENTS OF THE EXCEPTION
+                    shell_response_str = str(e.output)
+                    print("Failed to launch ControlMyJoystick.exe.")
+                ##########################################################################################################
+        else:
+            print("$$$$$$$$$$$$")
+            print("PID_DictWithPIDasKey: " + str(PID_DictWithPIDasKey))
+            print("$$$$$$$$$$$$")
+            print("PID_DictWithEXEenglishNameAsKey: " + str(PID_DictWithEXEenglishNameAsKey))
+            print("$$$$$$$$$$$$")
+    #################################################
+    #################################################
+
+    #################################################
+    #################################################
+    UpdateGUItabObjectsOrderedDict()
+    #################################################
+    #################################################
+
+    #################################################
+    #################################################
     global JoystickHID_ReubenPython2and3ClassObject_GUIparametersDict
-    JoystickHID_ReubenPython2and3ClassObject_GUIparametersDict = dict([("USE_GUI_FLAG", USE_GUI_FLAG and SHOW_IN_GUI_JOYSTICK_FLAG),
-                                    ("root", Tab_JOYSTICK),
+    JoystickHID_ReubenPython2and3ClassObject_GUIparametersDict = dict([("USE_GUI_FLAG", USE_GUI_FLAG and SHOW_IN_GUI_Joystick_FLAG),
+                                    ("root", GUItabObjectsOrderedDict["Joystick"]["TabObject"]),
                                     ("EnableInternal_MyPrint_Flag", 1),
                                     ("NumberOfPrintLines", 10),
                                     ("UseBorderAroundThisGuiObjectFlag", 0),
-                                    ("GUI_ROW", GUI_ROW_JOYSTICK),
-                                    ("GUI_COLUMN", GUI_COLUMN_JOYSTICK),
-                                    ("GUI_PADX", GUI_PADX_JOYSTICK),
-                                    ("GUI_PADY", GUI_PADY_JOYSTICK),
-                                    ("GUI_ROWSPAN", GUI_ROWSPAN_JOYSTICK),
-                                    ("GUI_COLUMNSPAN", GUI_COLUMNSPAN_JOYSTICK)])
+                                    ("GUI_ROW", GUI_ROW_Joystick),
+                                    ("GUI_COLUMN", GUI_COLUMN_Joystick),
+                                    ("GUI_PADX", GUI_PADX_Joystick),
+                                    ("GUI_PADY", GUI_PADY_Joystick),
+                                    ("GUI_ROWSPAN", GUI_ROWSPAN_Joystick),
+                                    ("GUI_COLUMNSPAN", GUI_COLUMNSPAN_Joystick)])
 
     global JoystickHID_ReubenPython2and3ClassObject_setup_dict
     JoystickHID_ReubenPython2and3ClassObject_setup_dict = dict([("GUIparametersDict", JoystickHID_ReubenPython2and3ClassObject_GUIparametersDict),
@@ -2753,15 +3503,21 @@ if __name__ == '__main__':
                                                                 ("MainThread_TimeToSleepEachLoop", 0.010),
                                                                 ("Joystick_PrintInfoForAllDetectedJoysticksFlag", Joystick_PrintInfoForAllDetectedJoysticksFlag)])
 
-    if USE_JOYSTICK_FLAG == 1:
+    if USE_Joystick_FLAG == 1:
         try:
             JoystickHID_ReubenPython2and3ClassObject = JoystickHID_ReubenPython2and3Class(JoystickHID_ReubenPython2and3ClassObject_setup_dict)
-            JOYSTICK_OPEN_FLAG = JoystickHID_ReubenPython2and3ClassObject.OBJECT_CREATED_SUCCESSFULLY_FLAG
+            Joystick_OPEN_FLAG = JoystickHID_ReubenPython2and3ClassObject.OBJECT_CREATED_SUCCESSFULLY_FLAG
 
         except:
             exceptions = sys.exc_info()[0]
             print("JoystickHID_ReubenPython2and3ClassObject __init__: Exceptions: %s" % exceptions)
             traceback.print_exc()
+    #################################################
+    #################################################
+
+    #################################################
+    #################################################
+    UpdateGUItabObjectsOrderedDict()
     #################################################
     #################################################
 
@@ -2784,9 +3540,9 @@ if __name__ == '__main__':
 
     #################################################
     #################################################
-    if USE_MYPRINT_FLAG == 1 and MYPRINT_OPEN_FLAG != 1:
+    if USE_MyPrint_FLAG == 1 and MyPrint_OPEN_FLAG != 1:
         print("Failed to open MyPrint_ReubenPython2and3ClassObject.")
-        ExitProgram_Callback()
+        #ExitProgram_Callback()
     #################################################
     #################################################
 
@@ -2794,7 +3550,7 @@ if __name__ == '__main__':
     #################################################
     if USE_UR5arm_FLAG == 1 and UR5arm_OPEN_FLAG != 1:
         print("Failed to open UR5arm_ReubenPython2and3Class.")
-        ExitProgram_Callback()
+        #ExitProgram_Callback()
     #################################################
     #################################################
 
@@ -2802,7 +3558,7 @@ if __name__ == '__main__':
     #################################################
     if USE_ZEDasHandController_FLAG == 1 and ZEDasHandController_OPEN_FLAG != 1:
         print("Failed to open ZEDasHandController_ReubenPython2and3Class.")
-        ExitProgram_Callback()
+        #ExitProgram_Callback()
     #################################################
     #################################################
 
@@ -2810,15 +3566,23 @@ if __name__ == '__main__':
     #################################################
     if USE_RobotiqGripper2F85_FLAG == 1 and RobotiqGripper2F85_OPEN_FLAG != 1:
         print("Failed to open RobotiqGripper2F85_ReubenPython2and3Class.")
-        ExitProgram_Callback()
+        #ExitProgram_Callback()
     #################################################
     #################################################
 
     #################################################
     #################################################
-    if USE_JOYSTICK_FLAG == 1 and JOYSTICK_OPEN_FLAG != 1:
+    if USE_Joystick_FLAG == 1 and Joystick_OPEN_FLAG != 1:
         print("Failed to open JoystickHID_ReubenPython2and3Class.")
-        ExitProgram_Callback()
+        #ExitProgram_Callback()
+    #################################################
+    #################################################
+
+    #################################################
+    #################################################
+    if USE_ArucoTag_FLAG == 1 and ArucoTag_OPEN_FLAG != 1:
+        print("Failed to open ArucoTagDetectionFromCameraFeed_ReubenPython3Class.")
+        #ExitProgram_Callback()
     #################################################
     #################################################
 
@@ -2826,22 +3590,22 @@ if __name__ == '__main__':
     #################################################
     if USE_PLOTTER_FLAG == 1 and PLOTTER_OPEN_FLAG != 1:
         print("Failed to open MyPlotterPureTkinterStandAloneProcess_ReubenPython2and3ClassObject.")
-        ExitProgram_Callback()
+        #ExitProgram_Callback()
     #################################################
     #################################################
 
     #################################################
     #################################################
-    UR5arm_BlockWhileExecuting_MoveSafelyToStartingPoseViaMultipointSequence()
-    #################################################
-    #################################################
-
-    #################################################
-    #################################################
-    if MYPRINT_OPEN_FLAG == 1:
+    if MyPrint_OPEN_FLAG == 1:
         MyPrint_ReubenPython2and3ClassObject.my_print("Starting main loop 'Teleop_UR5arm'.")
     else:
         print("Starting main loop 'Teleop_UR5arm'.")
+    #################################################
+    #################################################
+
+    ################################################# unicorn
+    #################################################
+    UR5arm_BlockWhileExecuting_MoveSafelyToStartingPoseViaMultipointSequence()
     #################################################
     #################################################
 
@@ -2884,13 +3648,18 @@ if __name__ == '__main__':
         if JSONfiles_NeedsToBeLoadedFlag == 1:
             LoadAndParseJSONfile_GUIsettings()
             LoadAndParseJSONfile_UR5()
-            LoadAndParseJSONfile_ControlLawParameters()
+            LoadAndParseJSONfile_RobotiqGripper2F85
+
 
             LoadAndParseJSONfile_Keyboard()
             KeyboardMapKeysToCallbackFunctions()
 
             LoadAndParseJSONfile_Joystick()
+            LoadAndParseJSONfile_ArucoTagParameters()
             LoadAndParseJSONfile_ZEDasHandController()
+
+            LoadAndParseJSONfile_SavingSettings
+            LoadAndParseJSONfile_ControlLawParameters()
 
             '''
             UPDATE UR PARAMETERS HERE UPON RELOADING JSON FILE
@@ -2914,10 +3683,13 @@ if __name__ == '__main__':
                     SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_JointAngleList_Deg = UR5arm_MostRecentDict["JointAngleList_Deg"]
                     SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_JointAngleList_Rad = UR5arm_MostRecentDict["JointAngleList_Rad"]
                     SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual = UR5arm_MostRecentDict["ToolVectorActual"]
-                    UR5arm_MostRecentDict_ToolTipSpeedsCartestian_TCPspeedActual = UR5arm_MostRecentDict["ToolTipSpeedsCartestian_TCPspeedActual"]
-                    UR5arm_MostRecentDict_ToolTipSpeedsCartestian_LinearXYZnorm_MetersPerSec = UR5arm_MostRecentDict["ToolTipSpeedsCartestian_LinearXYZnorm_MetersPerSec"]
-                    UR5arm_MostRecentDict_DataStreamingFrequency_CalculatedFromDedicatedRxThread = UR5arm_MostRecentDict["DataStreamingFrequency_CalculatedFromDedicatedRxThread"]
-                    UR5arm_MostRecentDict_Time = UR5arm_MostRecentDict["Time"]
+                    SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolTip_XYZ_Meters = UR5arm_MostRecentDict["ToolTip_XYZ_Meters"]
+                    SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolTip_RotationEulerList_Radians = UR5arm_MostRecentDict["ToolTip_RotationEulerList_Radians"]
+                    SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolTip_RotationEulerList_Degrees = UR5arm_MostRecentDict["ToolTip_RotationEulerList_Degrees"]
+                    SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolTipSpeedsCartestian_TCPspeedActual = UR5arm_MostRecentDict["ToolTipSpeedsCartestian_TCPspeedActual"]
+                    SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolTipSpeedsCartestian_LinearXYZnorm_MetersPerSec = UR5arm_MostRecentDict["ToolTipSpeedsCartestian_LinearXYZnorm_MetersPerSec"]
+                    SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_DataStreamingFrequency_CalculatedFromDedicatedRxThread = UR5arm_MostRecentDict["DataStreamingFrequency_CalculatedFromDedicatedRxThread"]
+                    SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_Time = UR5arm_MostRecentDict["Time"]
 
                     #print("UR5arm_MostRecentDict_Time: " + str(UR5arm_MostRecentDict_Time))
             except:
@@ -2929,13 +3701,15 @@ if __name__ == '__main__':
 
         ################################################### GET's
         ###################################################
+        ###################################################
         if ZEDasHandController_OPEN_FLAG == 1:
 
             ZEDasHandController_MostRecentDict = ZEDasHandController_ReubenPython2and3ClassObject.GetMostRecentDataDict()
 
             if "Time" in ZEDasHandController_MostRecentDict:
 
-                #####
+                ###################################################
+                ###################################################
                 ZEDasHandController_MostRecentDict_TrackingState = ZEDasHandController_MostRecentDict["TrackingState"]
                 ZEDasHandController_MostRecentDict_ZEDcameraRotationVector = ZEDasHandController_MostRecentDict["ZEDcameraRotationVector"]
                 ZEDasHandController_MostRecentDict_NumberOfFramesGrabbed = ZEDasHandController_MostRecentDict["NumberOfFramesGrabbed"]
@@ -2948,41 +3722,76 @@ if __name__ == '__main__':
                 ZEDasHandController_MostRecentDict_RollPitchYaw_AbtXYZ_List_Radians_Filtered = ZEDasHandController_MostRecentDict["RollPitchYaw_AbtXYZ_List_Radians_Filtered"]
                 ZEDasHandController_MostRecentDict_RollPitchYaw_AbtXYZ_List_Degrees_Raw = ZEDasHandController_MostRecentDict["RollPitchYaw_AbtXYZ_List_Degrees_Raw"]
                 ZEDasHandController_MostRecentDict_RollPitchYaw_AbtXYZ_List_Degrees_Filtered = ZEDasHandController_MostRecentDict["RollPitchYaw_AbtXYZ_List_Degrees_Filtered"]
-                #####
 
                 #print("ZEDasHandController_MostRecentDict: " + str(ZEDasHandController_MostRecentDict))
                 #print("ZEDasHandController_MostRecentDict_Time: " + str(ZEDasHandController_MostRecentDict_Time))
 
-                #####
+                ###################################################
+                ###################################################
+
+                ###################################################
+                ###################################################
+
+                ###################################################
                 ZEDasHandController_PositionList = ZEDasHandController_MostRecentDict_PosList_Filtered
                 ZEDasHandController_RollPitchYaw_AbtXYZ_List_Degrees = ZEDasHandController_MostRecentDict_RollPitchYaw_AbtXYZ_List_Degrees_Filtered
                 ZEDasHandController_RollPitchYaw_AbtXYZ_List_Radians = ZEDasHandController_MostRecentDict_RollPitchYaw_AbtXYZ_List_Radians_Filtered
-                #####
+                ###################################################
 
-                #####
+                ###################################################
                 for Index in range(0,3):
                     ZEDasHandController_PositionList[Index] = ZEDasHandController_PositionList[Index]*ZEDasHandController_PositionList_ScalingFactorList[Index]
                     ZEDasHandController_RollPitchYaw_AbtXYZ_List_Radians[Index] = ZEDasHandController_RollPitchYaw_AbtXYZ_List_Radians[Index]*ZEDasHandController_RollPitchYaw_AbtXYZ_List_ScalingFactorList[Index]
                     ZEDasHandController_RollPitchYaw_AbtXYZ_List_Degrees[Index] = ZEDasHandController_RollPitchYaw_AbtXYZ_List_Degrees[Index]*ZEDasHandController_RollPitchYaw_AbtXYZ_List_ScalingFactorList[Index]
-                #####
+                ###################################################
 
-                #####
-                ZEDasHandController_Trigger_State = SharedGlobals_Teleop_UR5arm.KeyPressResponse_ZEDcontrolClutch_State #SPACE bar
-                #####
+                ###################################################
+                ###################################################
 
-                #####
-                if ZEDasHandController_Trigger_State == 1 and ZEDasHandController_Trigger_State_last == 0:
-                    ZEDasHandController_PositionList_AtTimeOfClutchIn = list(ZEDasHandController_PositionList)
-                    ZEDasHandController_RollPitchYaw_AbtXYZ_List_Radians_AtTimeOfClutchIn = list(ZEDasHandController_RollPitchYaw_AbtXYZ_List_Radians)
-                    ZEDasHandController_RollPitchYaw_AbtXYZ_List_Degrees_AtTimeOfClutchIn = list(ZEDasHandController_RollPitchYaw_AbtXYZ_List_Degrees)
+            ################################################### Important to have the clutch code outside of new data loop so that we can de-clutch even without new data.
+            ###################################################
 
-                    UR5arm_MostRecentDict_ToolVectorActual_AtTimeOfClutchIn = list(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual)
-                #####
+            ###################################################
+            if ZEDasHandController_UseTranslationClutchFlag == 1:
+                ZEDasHandController_TranslationClutch_State = SharedGlobals_Teleop_UR5arm.KeyPressResponse_Keyboard_TranslationClutch_State
+            else:
+                ZEDasHandController_TranslationClutch_State = 1
+            ###################################################
 
-                #####
-                ZEDasHandController_Trigger_State_last = ZEDasHandController_Trigger_State
-                #####
+            ###################################################
+            if ZEDasHandController_UseRotationClutchFlag == 1:
+                ZEDasHandController_RotationClutch_State = SharedGlobals_Teleop_UR5arm.KeyPressResponse_Keyboard_RotationClutch_State
+            else:
+                ZEDasHandController_RotationClutch_State = 1
+            ###################################################
 
+            ###################################################
+            if ZEDasHandController_TranslationClutch_State == 1 and ZEDasHandController_TranslationClutch_State_last == 0:
+                ZEDasHandController_PositionList_AtTimeOfClutchIn = list(ZEDasHandController_PositionList)
+                ZEDasHandController_RollPitchYaw_AbtXYZ_List_Radians_AtTimeOfClutchIn = list(ZEDasHandController_RollPitchYaw_AbtXYZ_List_Radians)
+                ZEDasHandController_RollPitchYaw_AbtXYZ_List_Degrees_AtTimeOfClutchIn = list(ZEDasHandController_RollPitchYaw_AbtXYZ_List_Degrees)
+
+                UR5arm_MostRecentDict_ToolVectorActual_AtTimeOfClutchIn = list(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual)
+            ###################################################
+
+            ###################################################
+            if ZEDasHandController_RotationClutch_State == 1 and ZEDasHandController_RotationClutch_State_last == 0:
+                ZEDasHandController_PositionList_AtTimeOfClutchIn = list(ZEDasHandController_PositionList)
+                ZEDasHandController_RollPitchYaw_AbtXYZ_List_Radians_AtTimeOfClutchIn = list(ZEDasHandController_RollPitchYaw_AbtXYZ_List_Radians)
+                ZEDasHandController_RollPitchYaw_AbtXYZ_List_Degrees_AtTimeOfClutchIn = list(ZEDasHandController_RollPitchYaw_AbtXYZ_List_Degrees)
+
+                UR5arm_MostRecentDict_ToolVectorActual_AtTimeOfClutchIn = list(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual)
+            ###################################################
+
+            ###################################################
+            ZEDasHandController_TranslationClutch_State_last = ZEDasHandController_TranslationClutch_State
+            ZEDasHandController_RotationClutch_State_last = ZEDasHandController_RotationClutch_State
+            ###################################################
+
+            ###################################################
+            ################################################### Important to have the clutch code outside of new data loop so that we can de-clutch even without new data.
+
+        ###################################################
         ###################################################
         ###################################################
 
@@ -3003,23 +3812,185 @@ if __name__ == '__main__':
 
         ###################################################
         ###################################################
-        if JOYSTICK_OPEN_FLAG == 1:
+        ###################################################
+        if Joystick_OPEN_FLAG == 1:
 
-            JOYSTICK_MostRecentDict = JoystickHID_ReubenPython2and3ClassObject.GetMostRecentDataDict()
+            Joystick_MostRecentDict = JoystickHID_ReubenPython2and3ClassObject.GetMostRecentDataDict()
 
-            if "Time" in JOYSTICK_MostRecentDict:
-                JOYSTICK_MostRecentDict_Joystick_Axis_Value_List = JOYSTICK_MostRecentDict["Joystick_Axis_Value_List"]
-                JOYSTICK_MostRecentDict_Joystick_Button_Value_List = JOYSTICK_MostRecentDict["Joystick_Button_Value_List"]
-                JOYSTICK_MostRecentDict_Joystick_Button_LatchingRisingEdgeEvents_List = JOYSTICK_MostRecentDict["Joystick_Button_LatchingRisingEdgeEvents_List"]
-                JOYSTICK_MostRecentDict_Joystick_Hat_Value_List = JOYSTICK_MostRecentDict["Joystick_Hat_Value_List"]
-                JOYSTICK_MostRecentDict_Joystick_Hat_LatchingRisingEdgeEvents_List = JOYSTICK_MostRecentDict["Joystick_Hat_LatchingRisingEdgeEvents_List"]
-                JOYSTICK_MostRecentDict_Joystick_Ball_Value_List = JOYSTICK_MostRecentDict["Joystick_Ball_Value_List"]
-                JOYSTICK_MostRecentDict_DataStreamingFrequency = JOYSTICK_MostRecentDict["DataStreamingFrequency"]
-                JOYSTICK_MostRecentDict_Time = JOYSTICK_MostRecentDict["Time"]
+            if "Time" in Joystick_MostRecentDict:
 
-                #print("JOYSTICK_MostRecentDict_Joystick_Axis_Value_List: " + str(JOYSTICK_MostRecentDict_Joystick_Axis_Value_List))
+                ###################################################
+                ###################################################
+                Joystick_MostRecentDict_Joystick_Axis_Value_List = Joystick_MostRecentDict["Joystick_Axis_Value_List"]
+                Joystick_MostRecentDict_Joystick_Button_Value_List = Joystick_MostRecentDict["Joystick_Button_Value_List"]
+                Joystick_MostRecentDict_Joystick_Button_LatchingRisingEdgeEvents_List = Joystick_MostRecentDict["Joystick_Button_LatchingRisingEdgeEvents_List"]
+                Joystick_MostRecentDict_Joystick_Hat_Value_List = Joystick_MostRecentDict["Joystick_Hat_Value_List"]
+                Joystick_MostRecentDict_Joystick_Hat_LatchingRisingEdgeEvents_List = Joystick_MostRecentDict["Joystick_Hat_LatchingRisingEdgeEvents_List"]
+                Joystick_MostRecentDict_Joystick_Ball_Value_List = Joystick_MostRecentDict["Joystick_Ball_Value_List"]
+                Joystick_MostRecentDict_DataStreamingFrequency = Joystick_MostRecentDict["DataStreamingFrequency"]
+                Joystick_MostRecentDict_Time = Joystick_MostRecentDict["Time"]
+
+                #print("Joystick_MostRecentDict_Joystick_Axis_Value_List: " + str(Joystick_MostRecentDict_Joystick_Axis_Value_List))
+                ###################################################
+                ###################################################
+
+            ################################################### Important to have the clutch code outside of new data loop so that we can de-clutch even without new data.
+            ###################################################
+
+            ###################################################
+            if Joystick_UseTranslationClutchFlag == 1:
+                #Joystick_TranslationClutch_State = Joystick_MostRecentDict_Joystick_Button_Value_List[Joystick_Clutch_Button_Index_ToDisplayAsDotColorOn2DdotDisplay]
+                Joystick_TranslationClutch_State = SharedGlobals_Teleop_UR5arm.KeyPressResponse_Keyboard_TranslationClutch_State
+            else:
+                Joystick_TranslationClutch_State = 1
+            ###################################################
+
+            ###################################################
+            if Joystick_UseRotationClutchFlag == 1:
+                Joystick_RotationClutch_State = SharedGlobals_Teleop_UR5arm.KeyPressResponse_Keyboard_RotationClutch_State
+            else:
+                Joystick_RotationClutch_State = 1
+            ###################################################
+
+            ###################################################
+            if Joystick_TranslationClutch_State == 1 and Joystick_TranslationClutch_State_last == 0:
+                pass
+                #Joystick_TranslationList_AtTimeOfClutchIn = list(Joystick_TranslationList)
+                #Joystick_RollPitchYaw_AbtXYZ_List_Degrees_AtTimeOfClutchIn = list(Joystick_RollPitchYaw_AbtXYZ_List_Degrees)
+                #Joystick_RollPitchYaw_AbtXYZ_List_Radians_AtTimeOfClutchIn = list(Joystick_RollPitchYaw_AbtXYZ_List_Radians)
+
+                #UR5arm_MostRecentDict_ToolVectorActual_AtTimeOfClutchIn = list(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual)
+            ###################################################
+
+            ###################################################
+            if Joystick_RotationClutch_State == 1 and Joystick_RotationClutch_State_last == 0:
+                pass
+                #Joystick_TranslationList_AtTimeOfClutchIn = list(Joystick_TranslationList)
+                #Joystick_RollPitchYaw_AbtXYZ_List_Degrees_AtTimeOfClutchIn = list(Joystick_RollPitchYaw_AbtXYZ_List_Degrees)
+                #Joystick_RollPitchYaw_AbtXYZ_List_Radians_AtTimeOfClutchIn = list(Joystick_RollPitchYaw_AbtXYZ_List_Radians)
+
+                #UR5arm_MostRecentDict_ToolVectorActual_AtTimeOfClutchIn = list(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual)
+            ###################################################
+
+            ###################################################
+            Joystick_TranslationClutch_State_last = Joystick_TranslationClutch_State
+            Joystick_RotationClutch_State_last = Joystick_RotationClutch_State
+            ###################################################
+
+            ###################################################
+            ################################################### Important to have the clutch code outside of new data loop so that we can de-clutch even without new data.
+                
         ###################################################
         ###################################################
+        ###################################################
+
+        #################################################
+        #################################################
+        #################################################
+        if USE_ArucoTag_FLAG == 1:
+
+            ################################################# GET's
+            #################################################
+            ArucoTag_MostRecentDict = ArucoTagDetectionFromCameraFeed_ReubenPython3ClassObject.GetMostRecentDataDict()
+            #print("ArucoTag_MostRecentDict: " + str(ArucoTag_MostRecentDict))
+
+            if "Time" in ArucoTag_MostRecentDict:
+
+                #################################################
+                ArucoTag_MostRecentDict_DataStreamingFrequency_CalculatedFromMainThread = ArucoTag_MostRecentDict["Frequency"]
+                ArucoTag_MostRecentDict_Time = ArucoTag_MostRecentDict["Time"]
+                ArucoTag_MostRecentDict_DetectedArucoTag_InfoDict = ArucoTag_MostRecentDict["DetectedArucoTag_InfoDict"]
+                #################################################
+
+                #################################################
+                if ArucoTag_MarkerIDToDetect_PrimaryMarker in ArucoTag_MostRecentDict_DetectedArucoTag_InfoDict:
+                    ArucoTag_TranslationVectorOfMarkerCenter_PythonList_PrimaryMarker = ArucoTag_MostRecentDict_DetectedArucoTag_InfoDict[ArucoTag_MarkerIDToDetect_PrimaryMarker]["ArucoTag_TranslationVectorOfMarkerCenter_PythonList"]
+                    ArucoTag_RotationVectorOfMarkerCenter_EulerAnglesXYZrollPitchYawInDegrees_PythonList_PrimaryMarker = ArucoTag_MostRecentDict_DetectedArucoTag_InfoDict[ArucoTag_MarkerIDToDetect_PrimaryMarker]["ArucoTag_RotationVectorOfMarkerCenter_EulerAnglesXYZrollPitchYawInDegrees_PythonList"]
+                    ArucoTag_RotationVectorOfMarkerCenter_EulerAnglesXYZrollPitchYawInRadians_PythonList_PrimaryMarker = ArucoTag_MostRecentDict_DetectedArucoTag_InfoDict[ArucoTag_MarkerIDToDetect_PrimaryMarker]["ArucoTag_RotationVectorOfMarkerCenter_EulerAnglesXYZrollPitchYawInRadians_PythonList"]
+                    ArucoTag_DetectionTimeInMilliseconds_PrimaryMarker = ArucoTag_MostRecentDict_DetectedArucoTag_InfoDict[ArucoTag_MarkerIDToDetect_PrimaryMarker]["ArucoTag_DetectionTimeInMilliseconds"]
+
+                if ArucoTag_MarkerIDToDetect_SecondaryMarker in ArucoTag_MostRecentDict_DetectedArucoTag_InfoDict:
+                    ArucoTag_TranslationVectorOfMarkerCenter_PythonList_SecondaryMarker = ArucoTag_MostRecentDict_DetectedArucoTag_InfoDict[ArucoTag_MarkerIDToDetect_SecondaryMarker]["ArucoTag_TranslationVectorOfMarkerCenter_PythonList"]
+                    ArucoTag_RotationVectorOfMarkerCenter_EulerAnglesXYZrollPitchYawInDegrees_PythonList_SecondaryMarker = ArucoTag_MostRecentDict_DetectedArucoTag_InfoDict[ArucoTag_MarkerIDToDetect_SecondaryMarker]["ArucoTag_RotationVectorOfMarkerCenter_EulerAnglesXYZrollPitchYawInDegrees_PythonList"]
+                    ArucoTag_RotationVectorOfMarkerCenter_EulerAnglesXYZrollPitchYawInRadians_PythonList_SecondaryMarker = ArucoTag_MostRecentDict_DetectedArucoTag_InfoDict[ArucoTag_MarkerIDToDetect_SecondaryMarker]["ArucoTag_RotationVectorOfMarkerCenter_EulerAnglesXYZrollPitchYawInRadians_PythonList"]
+                    ArucoTag_DetectionTimeInMilliseconds_SecondaryMarker = ArucoTag_MostRecentDict_DetectedArucoTag_InfoDict[ArucoTag_MarkerIDToDetect_SecondaryMarker]["ArucoTag_DetectionTimeInMilliseconds"]
+                #################################################
+
+                #################################################
+                if ArucoTag_MarkerIDToDetect_PrimaryMarker in ArucoTag_MostRecentDict_DetectedArucoTag_InfoDict and ArucoTag_MarkerIDToDetect_SecondaryMarker in ArucoTag_MostRecentDict_DetectedArucoTag_InfoDict:
+                    if abs(ArucoTag_DetectionTimeInMilliseconds_PrimaryMarker - ArucoTag_DetectionTimeInMilliseconds_SecondaryMarker) < 30*ArucoTag_HowManyFramesAcceptedBetweenMarkers: #Both markers detected within N frames
+                        pass
+                        #LineFromMarker0to1_NumpyArray = numpy.array(ArucoTag_TranslationVectorOfMarkerCenter_PythonList_SecondaryMarker) - numpy.array(ArucoTag_TranslationVectorOfMarkerCenter_PythonList_PrimaryMarker)
+                        #LineFromMarker0to1_DistanceMM = numpy.linalg.norm(LineFromMarker0to1_NumpyArray)
+                        #LineFromMarker0to1_AngleWRTground = -1.0*numpy.rad2deg(numpy.arctan2(LineFromMarker0to1_NumpyArray[1], LineFromMarker0to1_NumpyArray[0]))
+
+                    else:
+                        pass
+                        #print("ERROR: ArucoTag_DetectionTimeInMilliseconds_PrimaryMarker != ArucoTag_DetectionTimeInMilliseconds_SecondaryMarker, ArucoTag_DetectionTimeInMilliseconds_PrimaryMarker = " + str(ArucoTag_DetectionTimeInMilliseconds_PrimaryMarker) + ", ArucoTag_DetectionTimeInMilliseconds_SecondaryMarker = " + str(ArucoTag_DetectionTimeInMilliseconds_SecondaryMarker))
+                #################################################
+
+                ################################################# unicorn update with average of markers, etc.
+                ArucoTag_PositionList = ArucoTag_TranslationVectorOfMarkerCenter_PythonList_PrimaryMarker
+                ArucoTag_RollPitchYaw_AbtXYZ_List_Degrees = ArucoTag_RotationVectorOfMarkerCenter_EulerAnglesXYZrollPitchYawInDegrees_PythonList_PrimaryMarker
+                ArucoTag_RollPitchYaw_AbtXYZ_List_Radians = ArucoTag_RotationVectorOfMarkerCenter_EulerAnglesXYZrollPitchYawInRadians_PythonList_PrimaryMarker
+                #################################################
+                
+                ###################################################
+                for Index in range(0,3):
+                    ArucoTag_PositionList[Index] = ArucoTag_PositionList[Index]*ArucoTag_PositionList_ScalingFactorList[Index]
+                    ArucoTag_RollPitchYaw_AbtXYZ_List_Radians[Index] = ArucoTag_RollPitchYaw_AbtXYZ_List_Radians[Index]*ArucoTag_RollPitchYaw_AbtXYZ_List_ScalingFactorList[Index]
+                    ArucoTag_RollPitchYaw_AbtXYZ_List_Degrees[Index] = ArucoTag_RollPitchYaw_AbtXYZ_List_Degrees[Index]*ArucoTag_RollPitchYaw_AbtXYZ_List_ScalingFactorList[Index]
+                ###################################################
+
+            ###################################################
+            ###################################################
+
+            ################################################# Important to have the clutch code outside of new data loop so that we can de-clutch even without new data.
+            #################################################
+
+            ###################################################
+            if ArucoTag_UseTranslationClutchFlag == 1:
+                ArucoTag_TranslationClutch_State = SharedGlobals_Teleop_UR5arm.KeyPressResponse_Keyboard_TranslationClutch_State
+            else:
+                ArucoTag_TranslationClutch_State = 1
+            ###################################################
+
+            ###################################################
+            if ArucoTag_UseRotationClutchFlag == 1:
+                ArucoTag_RotationClutch_State = SharedGlobals_Teleop_UR5arm.KeyPressResponse_Keyboard_RotationClutch_State
+            else:
+                ArucoTag_RotationClutch_State = 1
+            ###################################################
+
+            ###################################################
+            if ArucoTag_TranslationClutch_State == 1 and ArucoTag_TranslationClutch_State_last == 0:
+                ArucoTag_PositionList_AtTimeOfClutchIn = list(ArucoTag_PositionList)
+                ArucoTag_RollPitchYaw_AbtXYZ_List_Degrees_AtTimeOfClutchIn = list(ArucoTag_RollPitchYaw_AbtXYZ_List_Degrees)
+                ArucoTag_RollPitchYaw_AbtXYZ_List_Radians_AtTimeOfClutchIn = list(ArucoTag_RollPitchYaw_AbtXYZ_List_Radians)
+
+                UR5arm_MostRecentDict_ToolVectorActual_AtTimeOfClutchIn = list(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual)
+            ###################################################
+
+            ###################################################
+            if ArucoTag_RotationClutch_State == 1 and ArucoTag_RotationClutch_State_last == 0:
+                ArucoTag_PositionList_AtTimeOfClutchIn = list(ArucoTag_PositionList)
+                ArucoTag_RollPitchYaw_AbtXYZ_List_Degrees_AtTimeOfClutchIn = list(ArucoTag_RollPitchYaw_AbtXYZ_List_Degrees)
+                ArucoTag_RollPitchYaw_AbtXYZ_List_Radians_AtTimeOfClutchIn = list(ArucoTag_RollPitchYaw_AbtXYZ_List_Radians)
+
+                UR5arm_MostRecentDict_ToolVectorActual_AtTimeOfClutchIn = list(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual)
+            ###################################################
+
+            ###################################################
+            ArucoTag_TranslationClutch_State_last = ArucoTag_TranslationClutch_State
+            ArucoTag_RotationClutch_State_last = ArucoTag_RotationClutch_State
+            ###################################################
+
+            ###################################################
+            ################################################### Important to have the clutch code outside of new data loop so that we can de-clutch even without new data.
+
+            #################################################
+            #################################################
+            #################################################
 
         ######################################################################################################
         ######################################################################################################
@@ -3046,9 +4017,9 @@ if __name__ == '__main__':
         ###################################################
         ###################################################
         ###################################################
-        #We can include JoystickControl here because the joystick-->robotiq code will overwrite these keyboard-generated values later.
-        #However, if 'ParametersToBeLoaded_Joystick.json' doesn't map anything to the Robotiq (like with the SpaceMouse), then this keyboard code's values will still map to the Robotiq.
-        if ControlType == "KeyboardControl" or ControlType == "JoystickControl" or ControlType == "ZEDcontrol":
+        #We can include JoystickControl here because the Joystick-->robotiq code will overwrite these Keyboard-generated values later.
+        #However, if 'ParametersToBeLoaded_Joystick.json' doesn't map anything to the Robotiq (like with the SpaceMouse), then this Keyboard code's values will still map to the Robotiq.
+        if ControlType == "KeyboardControl" or ControlType == "JoystickControl" or ControlType == "ArucoTagControl" or ControlType == "ZEDcontrol":
 
             ###################################################
             ###################################################
@@ -3126,18 +4097,12 @@ if __name__ == '__main__':
         ###################################################
         if ControlType == "JoystickControl":
 
+            '''
             ###################################################
             ###################################################
-            if UR5arm_MostRecentDict_ToolVectorActual_IsItInitializedFlag == 1 and JOYSTICK_OPEN_FLAG == 1:
+            if UR5arm_MostRecentDict_ToolVectorActual_IsItInitializedFlag == 1 and Joystick_OPEN_FLAG == 1:
 
-                ###################################################
-                if Joystick_UseClutchFlag == 1:
-                    Joystick_ClutchState = JOYSTICK_MostRecentDict_Joystick_Button_Value_List[Joystick_Clutch_Button_Index_ToDisplayAsDotColorOn2DdotDisplay]
-                else:
-                    Joystick_ClutchState = 1
-                ###################################################
-
-                if Joystick_ClutchState == 1:
+                if Joystick_TranslationClutch_State == 1:
 
                     ###################################################
                     for Index in range(0,6):
@@ -3148,28 +4113,91 @@ if __name__ == '__main__':
                         SecondaryAxisHatButtonOrBallIndex = AxisHatButtonOrBallTo6DOFposeMappingDict["SecondaryAxisHatButtonOrBallIndex"]
 
                         if AxisHatButtonOrBallTo6DOFposeMappingDict["AxisHatButtonOrBallType"] == "AXIS":
-                            Joystick_AddToUR5armCurrentPositionList[Index] = IncrementSize*JOYSTICK_MostRecentDict_Joystick_Axis_Value_List[PrimaryAxisHatButtonOrBallIndex]
+                            Joystick_AddToUR5armCurrentPositionList[Index] = IncrementSize*Joystick_MostRecentDict_Joystick_Axis_Value_List[PrimaryAxisHatButtonOrBallIndex]
 
                         elif AxisHatButtonOrBallTo6DOFposeMappingDict["AxisHatButtonOrBallType"] == "HAT":
-                            Joystick_AddToUR5armCurrentPositionList[Index] = IncrementSize*JOYSTICK_MostRecentDict_Joystick_Hat_Value_List[PrimaryAxisHatButtonOrBallIndex][SecondaryAxisHatButtonOrBallIndex]
+                            Joystick_AddToUR5armCurrentPositionList[Index] = IncrementSize*Joystick_MostRecentDict_Joystick_Hat_Value_List[PrimaryAxisHatButtonOrBallIndex][SecondaryAxisHatButtonOrBallIndex]
 
                         else:
                             print("In JoystickControl, only AXIS and HAT can be used to control the UR5.") #Nothing other than an axis or hat can be used as an input currently (no buttons or balls).
 
                     ###################################################
 
-                    #We're NOT using UR5arm_MostRecentDict_ToolVectorActual_AtTimeOfClutchIn because the joystick inputs rate-control, not absolute position.
+                    #We're NOT using UR5arm_MostRecentDict_ToolVectorActual_AtTimeOfClutchIn because the Joystick inputs rate-control, not absolute position.
                     UR5arm_ToolVectorActual_ToBeSet = list(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual)
 
                     ###################################################
-                    for Index in range(0,6):
-                        UR5arm_ToolVectorActual_ToBeSet[Index] = UR5arm_ToolVectorActual_ToBeSet[Index]  + Joystick_AddToUR5armCurrentPositionList[Index]
+                    RotationEulerList = [0.0]*3
+                    RotationEulerList[0] = SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolTip_RotationEulerList_Radians[0] + Joystick_AddToUR5armCurrentPositionList[3]
+                    RotationEulerList[1] = SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolTip_RotationEulerList_Radians[1] + Joystick_AddToUR5armCurrentPositionList[4]
+                    RotationEulerList[2] = SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolTip_RotationEulerList_Radians[2] + Joystick_AddToUR5armCurrentPositionList[5]
+
+                    RotationObjectScipy_Joystick_AddToUR5armCurrentPositionList = Rotation.from_euler('xyz', RotationEulerList, degrees=False)
+                    RotationAxisAngleList_Joystick_AddToUR5armCurrentPositionList = RotationObjectScipy_Joystick_AddToUR5armCurrentPositionList.as_rotvec()
+                    #print("RotationAxisAngleList_Joystick_AddToUR5armCurrentPositionList: " + str(RotationAxisAngleList_Joystick_AddToUR5armCurrentPositionList))
+
+                    ###################################################
+
+                    ###################################################
+                    if Joystick_RotationClutch_State == 0:
+                        for Index in range(0,3):
+                            UR5arm_ToolVectorActual_ToBeSet[Index] = UR5arm_ToolVectorActual_ToBeSet[Index]  + Joystick_AddToUR5armCurrentPositionList[Index]
+
+                    if Joystick_RotationClutch_State == 1:
+                        UR5arm_ToolVectorActual_ToBeSet[3] = RotationAxisAngleList_Joystick_AddToUR5armCurrentPositionList[0]
+                        UR5arm_ToolVectorActual_ToBeSet[4] = RotationAxisAngleList_Joystick_AddToUR5armCurrentPositionList[1]
+                        UR5arm_ToolVectorActual_ToBeSet[5] = RotationAxisAngleList_Joystick_AddToUR5armCurrentPositionList[2]
                     ###################################################
 
                     UR5arm_PositionControl_NeedsToBeChangedFlag = 1
 
             else:
                 UR5arm_ToolVectorActual_ToBeSet = list(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual)
+            '''
+
+
+            ###################################################
+            Joystick_SixDOFposeList = [0.0]*6
+            Joystick_SixDOFposeIncrementList = [0.0]*6
+
+            for AxisHatButtonOrBallTo6DOFposeMappingDict in Joystick_AxisHatButtonOrBallTo6DOFposeMapping_ListOfDicts:
+
+                AxisName = AxisHatButtonOrBallTo6DOFposeMappingDict["AxisName"]
+                IncrementSize = AxisHatButtonOrBallTo6DOFposeMappingDict["IncrementSize"]
+                PrimaryAxisHatButtonOrBallIndex = AxisHatButtonOrBallTo6DOFposeMappingDict["PrimaryAxisHatButtonOrBallIndex"]
+                SecondaryAxisHatButtonOrBallIndex = AxisHatButtonOrBallTo6DOFposeMappingDict["SecondaryAxisHatButtonOrBallIndex"]
+
+                DictThatMapsFromAxisNameEnglishStringToSixDOFposeIndex = dict([("X", 0), ("Y", 1), ("Z", 2), ("RX", 3), ("RY", 4), ("RZ", 5)])
+
+                if AxisName in DictThatMapsFromAxisNameEnglishStringToSixDOFposeIndex:
+                    SixDOFposeIndex = DictThatMapsFromAxisNameEnglishStringToSixDOFposeIndex[AxisName]
+
+                    Joystick_SixDOFposeIncrementList[SixDOFposeIndex] = IncrementSize
+
+                    if AxisHatButtonOrBallTo6DOFposeMappingDict["AxisHatButtonOrBallType"] == "AXIS":
+                        Joystick_SixDOFposeList[SixDOFposeIndex] = Joystick_MostRecentDict_Joystick_Axis_Value_List[PrimaryAxisHatButtonOrBallIndex]
+
+                    elif AxisHatButtonOrBallTo6DOFposeMappingDict["AxisHatButtonOrBallType"] == "HAT":
+                        Joystick_SixDOFposeList[SixDOFposeIndex] = Joystick_MostRecentDict_Joystick_Hat_Value_List[PrimaryAxisHatButtonOrBallIndex][SecondaryAxisHatButtonOrBallIndex]
+
+                    else:
+                        print("In JoystickControl, only AXIS and HAT can be used to control the UR5.") #Nothing other than an axis or hat can be used as an input currently (no buttons or balls).
+
+            #############################################tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt######
+
+            print("Joystick_SixDOFposeList: " + str(Joystick_SixDOFposeList) + ", Joystick_SixDOFposeIncrementList: " + str(Joystick_SixDOFposeIncrementList))
+
+
+
+            # SHOULD I ADD BACK IN Input_RotationMatrixListsOfLists
+            GeneralizedControlForRateControlInput(Input_TranslationList=Joystick_SixDOFposeList[0:3],
+                               Input_TranslationIncrementList=Joystick_SixDOFposeIncrementList[0:3],
+                               Input_TranslationClutch_State=Joystick_TranslationClutch_State,
+                               Input_RotationList=Joystick_SixDOFposeList[3:],
+                               Input_RotationIncrementList=Joystick_SixDOFposeIncrementList[3:],
+                               Input_RotationClutch_State=Joystick_RotationClutch_State,
+                               Input_OPEN_FLAG=Joystick_OPEN_FLAG)
+            #'''
             ###################################################
             ###################################################
 
@@ -3186,15 +4214,15 @@ if __name__ == '__main__':
                     SecondaryAxisHatButtonOrBallIndex = AxisHatButtonOrBallTo6DOFposeMappingDict["SecondaryAxisHatButtonOrBallIndex"]
 
                     if AxisHatButtonOrBallTo6DOFposeMappingDict["AxisHatButtonOrBallType"] == "AXIS":
-                        RobotiqGripper2F85_Position_ToBeSet = RobotiqGripper2F85_Position_ToBeSet + IncrementSize*JOYSTICK_MostRecentDict_Joystick_Axis_Value_List[PrimaryAxisHatButtonOrBallIndex]
+                        RobotiqGripper2F85_Position_ToBeSet = RobotiqGripper2F85_Position_ToBeSet + IncrementSize*Joystick_MostRecentDict_Joystick_Axis_Value_List[PrimaryAxisHatButtonOrBallIndex]
 
                     elif AxisHatButtonOrBallTo6DOFposeMappingDict["AxisHatButtonOrBallType"] == "HAT":
-                        RobotiqGripper2F85_Position_ToBeSet = RobotiqGripper2F85_Position_ToBeSet + IncrementSize*JOYSTICK_MostRecentDict_Joystick_Hat_Value_List[PrimaryAxisHatButtonOrBallIndex][SecondaryAxisHatButtonOrBallIndex]
+                        RobotiqGripper2F85_Position_ToBeSet = RobotiqGripper2F85_Position_ToBeSet + IncrementSize*Joystick_MostRecentDict_Joystick_Hat_Value_List[PrimaryAxisHatButtonOrBallIndex][SecondaryAxisHatButtonOrBallIndex]
 
                     elif AxisHatButtonOrBallTo6DOFposeMappingDict["AxisHatButtonOrBallType"] == "BUTTON":
                         #PrimaryAxisHatButtonOrBallIndex is 1 button (for opening), and SecondaryAxisHatButtonOrBallIndex is another button (for closing).
                         #If both are pressed at once, then nothing will happen as they cancel eachother out.
-                        RobotiqGripper2F85_Position_ToBeSet = RobotiqGripper2F85_Position_ToBeSet + IncrementSize*JOYSTICK_MostRecentDict_Joystick_Button_Value_List[PrimaryAxisHatButtonOrBallIndex] - IncrementSize*JOYSTICK_MostRecentDict_Joystick_Button_Value_List[SecondaryAxisHatButtonOrBallIndex]
+                        RobotiqGripper2F85_Position_ToBeSet = RobotiqGripper2F85_Position_ToBeSet + IncrementSize*Joystick_MostRecentDict_Joystick_Button_Value_List[PrimaryAxisHatButtonOrBallIndex] - IncrementSize*Joystick_MostRecentDict_Joystick_Button_Value_List[SecondaryAxisHatButtonOrBallIndex]
 
                     else:
                         print("In JoystickControl, only AXIS, HAT, and BUTTON can be specified to control the RobotiqGripper2F85.") #Nothing other than an axis or hat can be used as an input currently (no buttons or balls).
@@ -3212,10 +4240,50 @@ if __name__ == '__main__':
 
         ###################################################
         ###################################################
+        ################################################### unicorn
+        if ControlType == "ArucoTagControl":
+
+            '''
+            if UR5arm_MostRecentDict_ToolVectorActual_IsItInitializedFlag == 1 and ArucoTag_OPEN_FLAG == 1 and ArucoTag_TranslationClutch_State == 1: #dragon
+
+                ArucoTag_AddToUR5armCurrentPositionList = numpy.array(ArucoTag_RotationMatrixListsOfLists).dot(numpy.array(ArucoTag_PositionList) - numpy.array(ArucoTag_PositionList_AtTimeOfClutchIn)).tolist()
+
+                #We're locking to UR5arm_MostRecentDict_ToolVectorActual_AtTimeOfClutchIn, not updating based on actual each function.
+                UR5arm_ToolVectorActual_ToBeSet = list(UR5arm_MostRecentDict_ToolVectorActual_AtTimeOfClutchIn)
+
+                ###################################################
+                ###################################################
+                for Index in range(0,3):
+                    UR5arm_ToolVectorActual_ToBeSet[Index] = UR5arm_ToolVectorActual_ToBeSet[Index]  + ArucoTag_AddToUR5armCurrentPositionList[Index]
+                ###################################################
+                ###################################################
+
+                UR5arm_PositionControl_NeedsToBeChangedFlag = 1
+
+            else:
+                UR5arm_ToolVectorActual_ToBeSet = list(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual)
+                ArucoTag_AddToUR5armCurrentPositionList = [0.0]*3
+            '''
+
+            GeneralizedControlForPositionInput(Input_RotationMatrixListsOfLists=ArucoTag_RotationMatrixListsOfLists,
+                               Input_TranslationList=ArucoTag_PositionList,
+                               Input_TranslationList_AtTimeOfClutchIn=ArucoTag_PositionList_AtTimeOfClutchIn,
+                               Input_TranslationClutch_State=ArucoTag_TranslationClutch_State,
+                               Input_RotationList=ArucoTag_PositionList,
+                               Input_RotationList_AtTimeOfClutchIn=ArucoTag_PositionList_AtTimeOfClutchIn,
+                               Input_RotationClutch_State=ArucoTag_RotationClutch_State,
+                               Input_OPEN_FLAG=ArucoTag_OPEN_FLAG)
+        ###################################################
+        ###################################################
+        ###################################################
+
+        ###################################################
+        ###################################################
         ###################################################
         if ControlType == "ZEDcontrol":
 
-            if UR5arm_MostRecentDict_ToolVectorActual_IsItInitializedFlag == 1 and ZEDasHandController_OPEN_FLAG == 1 and ZEDasHandController_Trigger_State == 1: #dragon
+            '''
+            if UR5arm_MostRecentDict_ToolVectorActual_IsItInitializedFlag == 1 and ZEDasHandController_OPEN_FLAG == 1 and ZEDasHandController_TranslationClutch_State == 1: #dragon
 
                 ZEDasHandController_AddToUR5armCurrentPositionList = numpy.array(ZEDasHandController_RotationMatrixListsOfLists).dot(numpy.array(ZEDasHandController_PositionList) - numpy.array(ZEDasHandController_PositionList_AtTimeOfClutchIn)).tolist()
 
@@ -3234,6 +4302,16 @@ if __name__ == '__main__':
             else:
                 UR5arm_ToolVectorActual_ToBeSet = list(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual)
                 ZEDasHandController_AddToUR5armCurrentPositionList = [0.0]*3
+            '''
+            
+            GeneralizedControlForPositionInput(Input_RotationMatrixListsOfLists=ZEDasHandController_RotationMatrixListsOfLists,
+                               Input_TranslationList=ZEDasHandController_PositionList,
+                               Input_TranslationList_AtTimeOfClutchIn=ZEDasHandController_PositionList_AtTimeOfClutchIn,
+                               Input_TranslationClutch_State=ZEDasHandController_TranslationClutch_State,
+                               Input_RotationList=ZEDasHandController_RollPitchYaw_AbtXYZ_List_Radians,
+                               Input_RotationList_AtTimeOfClutchIn=ZEDasHandController_RollPitchYaw_AbtXYZ_List_Radians_AtTimeOfClutchIn,
+                               Input_RotationClutch_State=ZEDasHandController_RotationClutch_State,
+                               Input_OPEN_FLAG=ZEDasHandController_OPEN_FLAG)
 
         ###################################################
         ###################################################
@@ -3401,7 +4479,7 @@ if __name__ == '__main__':
     #################################################
 
     #################################################
-    if MYPRINT_OPEN_FLAG == 1:
+    if MyPrint_OPEN_FLAG == 1:
         MyPrint_ReubenPython2and3ClassObject.ExitProgram_Callback()
     #################################################
 
@@ -3427,8 +4505,13 @@ if __name__ == '__main__':
     #################################################
 
     #################################################
-    if JOYSTICK_OPEN_FLAG == 1:
+    if Joystick_OPEN_FLAG == 1:
         JoystickHID_ReubenPython2and3ClassObject.ExitProgram_Callback()
+    #################################################
+
+    #################################################
+    if ArucoTag_OPEN_FLAG == 1:
+        ArucoTagDetectionFromCameraFeed_ReubenPython3ClassObject.ExitProgram_Callback()
     #################################################
 
     #################################################
