@@ -3920,9 +3920,9 @@ if __name__ == '__main__':
                 if ArucoTag_MarkerIDToDetect_PrimaryMarker in ArucoTag_MostRecentDict_DetectedArucoTag_InfoDict and ArucoTag_MarkerIDToDetect_SecondaryMarker in ArucoTag_MostRecentDict_DetectedArucoTag_InfoDict:
                     if abs(ArucoTag_DetectionTimeInMilliseconds_PrimaryMarker - ArucoTag_DetectionTimeInMilliseconds_SecondaryMarker) < 30*ArucoTag_HowManyFramesAcceptedBetweenMarkers: #Both markers detected within N frames
                         pass
-                        #LineFromMarker0to1_NumpyArray = numpy.array(ArucoTag_TranslationVectorOfMarkerCenter_PythonList_SecondaryMarker) - numpy.array(ArucoTag_TranslationVectorOfMarkerCenter_PythonList_PrimaryMarker)
-                        #LineFromMarker0to1_DistanceMM = numpy.linalg.norm(LineFromMarker0to1_NumpyArray)
-                        #LineFromMarker0to1_AngleWRTground = -1.0*numpy.rad2deg(numpy.arctan2(LineFromMarker0to1_NumpyArray[1], LineFromMarker0to1_NumpyArray[0]))
+                        #LineFromPrimaryMarkerToSecondaryMarker_NumpyArray = numpy.array(ArucoTag_TranslationVectorOfMarkerCenter_PythonList_SecondaryMarker) - numpy.array(ArucoTag_TranslationVectorOfMarkerCenter_PythonList_PrimaryMarker)
+                        #LineFromPrimaryMarkerToSecondaryMarker_DistanceMM = numpy.linalg.norm(LineFromPrimaryMarkerToSecondaryMarker_NumpyArray)
+                        #LineFromPrimaryMarkerToSecondaryMarker_AngleWRTground = -1.0*numpy.rad2deg(numpy.arctan2(LineFromPrimaryMarkerToSecondaryMarker_NumpyArray[1], LineFromPrimaryMarkerToSecondaryMarker_NumpyArray[0]))
 
                     else:
                         pass
