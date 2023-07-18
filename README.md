@@ -14,7 +14,7 @@ www.reubotics.com
 
 Apache 2 License
 
-Software Revision E, 05/10/2023
+Software Revision F, 07/18/2023
 
 UR5arm_ReubenPython2and3Class.py, test_program_for_UR5arm_ReubenPython2and3Class.py, and Teleop_UR5arm.py verified working on:
 
