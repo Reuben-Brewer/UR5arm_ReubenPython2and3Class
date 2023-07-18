@@ -6,7 +6,7 @@ reuben.brewer@gmail.com
 www.reubotics.com
 
 Apache 2 License
-Software Revision E, 05/10/2023
+Software Revision F, 07/18/2023
 
 Verified working on: Python 3.8 for Windows 10 64-bit, Ubuntu 20.04, and Raspberry Pi Buster (no Mac testing yet).
 '''
@@ -14,9 +14,6 @@ Verified working on: Python 3.8 for Windows 10 64-bit, Ubuntu 20.04, and Raspber
 __author__ = 'reuben.brewer'
 
 #########################################################
-#https://github.com/Reuben-Brewer/UR5arm_ReubenPython2and3Class
-import SharedGlobals_Teleop_UR5arm #MUST BE IMPORTED FIRST
-
 #https://github.com/Reuben-Brewer/ArucoTagDetectionFromCameraFeed_ReubenPython3Class
 from ArucoTagDetectionFromCameraFeed_ReubenPython3Class import *
 
@@ -259,7 +256,7 @@ def LoadAndParseJSONfile_Keyboard():
 
     Keyboard_KeysToTeleopControlsMapping_DictOfDicts_FormattedAsNicelyPrintedString = ConvertDictToProperlyFormattedStringForPrinting(Keyboard_KeysToTeleopControlsMapping_DictOfDicts, NumberOfDecimalsPlaceToUse = 2, NumberOfEntriesPerLine = 1, NumberOfTabsBetweenItems = 1)
 
-    SharedGlobals_Teleop_UR5arm.Keyboard_KeysToTeleopControlsMapping_DictOfDicts = Keyboard_KeysToTeleopControlsMapping_DictOfDicts
+    Keyboard_KeysToTeleopControlsMapping_DictOfDicts = Keyboard_KeysToTeleopControlsMapping_DictOfDicts
 
 #######################################################################################################################
 #######################################################################################################################
@@ -453,7 +450,7 @@ def CreateCSVfileForTrajectoryDataAndStartWritingData():
 
     try:
         if UR5arm_Zero_UR5arm_MostRecentDict_ToolVectorActual_WhenCreatingCSVfileForTrajectoryData_Flag == 1:
-            UR5arm_MostRecentDict_ToolVectorActual_SnapshotAtTimeOfCreatingCSVfileForTrajectoryData = SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual
+            UR5arm_MostRecentDict_ToolVectorActual_SnapshotAtTimeOfCreatingCSVfileForTrajectoryData = UR5arm_MostRecentDict_ToolVectorActual
         else:
             UR5arm_MostRecentDict_ToolVectorActual_SnapshotAtTimeOfCreatingCSVfileForTrajectoryData = [0.0]*6
 
@@ -712,10 +709,11 @@ def getTimeStampString():
 #######################################################################################################################
 #######################################################################################################################
 def ExitProgram_Callback():
+    global EXIT_PROGRAM_FLAG
 
     print("ExitProgram_Callback event fired!")
 
-    SharedGlobals_Teleop_UR5arm.EXIT_PROGRAM_FLAG = 1
+    EXIT_PROGRAM_FLAG = 1
 #######################################################################################################################
 #######################################################################################################################
 
@@ -948,9 +946,9 @@ def KeyboardMapKeysToCallbackFunctions():
     keyboard.unhook_all() #Remove all current mappings
 
     ###############################################
-    for AxisNameAsKey in SharedGlobals_Teleop_UR5arm.Keyboard_KeysToTeleopControlsMapping_DictOfDicts:
+    for AxisNameAsKey in Keyboard_KeysToTeleopControlsMapping_DictOfDicts:
 
-            KeyToTeleopControlsMappingDict = SharedGlobals_Teleop_UR5arm.Keyboard_KeysToTeleopControlsMapping_DictOfDicts[AxisNameAsKey]
+            KeyToTeleopControlsMappingDict = Keyboard_KeysToTeleopControlsMapping_DictOfDicts[AxisNameAsKey]
 
             KeyName = KeyToTeleopControlsMappingDict["KeyName"]
             OnPressCallbackFunctionNameString = KeyToTeleopControlsMappingDict["OnPressCallbackFunctionNameString"]
@@ -970,23 +968,32 @@ def KeyboardMapKeysToCallbackFunctions():
 #######################################################################################################################
 #######################################################################################################################
 def DedicatedKeyboardListeningThread():
+    global EXIT_PROGRAM_FLAG
+    global Keyboard_OPEN_FLAG
+    global DedicatedKeyboardListeningThread_StillRunningFlag
+    global CurrentTime_CalculatedFromDedicatedKeyboardListeningThread
+    global StartingTime_CalculatedFromDedicatedKeyboardListeningThread
+    global BeepNeedsToBePlayedFlag_RecordNewWaypoint_JointSpace
+    global BeepNeedsToBePlayedFlag_RecordNewWaypoint_CartesianSpace
+    global DedicatedKeyboardListeningThread_TimeToSleepEachLoop
+    global DedicatedKeyboardListeningThread_StillRunningFlag
 
     print("Started DedicatedKeyboardListeningThread for UR5arm_ReubenPython2and3Class object.")
-    SharedGlobals_Teleop_UR5arm.DedicatedKeyboardListeningThread_StillRunningFlag = 1
+    DedicatedKeyboardListeningThread_StillRunningFlag = 1
 
-    SharedGlobals_Teleop_UR5arm.StartingTime_CalculatedFromDedicatedKeyboardListeningThread = getPreciseSecondsTimeStampString()
+    StartingTime_CalculatedFromDedicatedKeyboardListeningThread = getPreciseSecondsTimeStampString()
 
-    SharedGlobals_Teleop_UR5arm.Keyboard_OPEN_FLAG = 1
+    Keyboard_OPEN_FLAG = 1
 
     ###############################################
-    while SharedGlobals_Teleop_UR5arm.EXIT_PROGRAM_FLAG == 0:
+    while EXIT_PROGRAM_FLAG == 0:
         try:
             ###############################################
-            SharedGlobals_Teleop_UR5arm.CurrentTime_CalculatedFromDedicatedKeyboardListeningThread = getPreciseSecondsTimeStampString() - SharedGlobals_Teleop_UR5arm.StartingTime_CalculatedFromDedicatedKeyboardListeningThread
+            CurrentTime_CalculatedFromDedicatedKeyboardListeningThread = getPreciseSecondsTimeStampString() - StartingTime_CalculatedFromDedicatedKeyboardListeningThread
             ###############################################
 
             ###############################################
-            if SharedGlobals_Teleop_UR5arm.BeepNeedsToBePlayedFlag_RecordNewWaypoint_JointSpace == 1:
+            if BeepNeedsToBePlayedFlag_RecordNewWaypoint_JointSpace == 1:
                 if platform.system() == "Windows":
                     winsound.Beep(int(4000), int(500))
                 else:
@@ -996,11 +1003,11 @@ def DedicatedKeyboardListeningThread():
                         exceptions = sys.exc_info()[0]
                         print("ERROR BEEPING ON RASPBERRY PI, Exceptions: %s" % exceptions)
 
-                SharedGlobals_Teleop_UR5arm.BeepNeedsToBePlayedFlag_RecordNewWaypoint_JointSpace = 0
+                BeepNeedsToBePlayedFlag_RecordNewWaypoint_JointSpace = 0
             ###############################################
 
             ###############################################
-            if SharedGlobals_Teleop_UR5arm.BeepNeedsToBePlayedFlag_RecordNewWaypoint_CartesianSpace == 1:
+            if BeepNeedsToBePlayedFlag_RecordNewWaypoint_CartesianSpace == 1:
                 if platform.system() == "Windows":
                     winsound.Beep(int(8000), int(500))
                 else:
@@ -1010,14 +1017,14 @@ def DedicatedKeyboardListeningThread():
                         exceptions = sys.exc_info()[0]
                         print("ERROR BEEPING ON RASPBERRY PI, Exceptions: %s" % exceptions)
 
-                SharedGlobals_Teleop_UR5arm.BeepNeedsToBePlayedFlag_RecordNewWaypoint_CartesianSpace = 0
+                BeepNeedsToBePlayedFlag_RecordNewWaypoint_CartesianSpace = 0
             ###############################################
 
             ############################################### USE THE TIME.SLEEP() TO SET THE LOOP FREQUENCY
             ###############################################
             ###############################################
-            if SharedGlobals_Teleop_UR5arm.DedicatedKeyboardListeningThread_TimeToSleepEachLoop > 0.0:
-                time.sleep(SharedGlobals_Teleop_UR5arm.DedicatedKeyboardListeningThread_TimeToSleepEachLoop)
+            if DedicatedKeyboardListeningThread_TimeToSleepEachLoop > 0.0:
+                time.sleep(DedicatedKeyboardListeningThread_TimeToSleepEachLoop)
             ###############################################
             ###############################################
             ###############################################
@@ -1029,19 +1036,21 @@ def DedicatedKeyboardListeningThread():
     ###############################################
 
     print("Exited DedicatedKeyboardListeningThread.")
-    SharedGlobals_Teleop_UR5arm.DedicatedKeyboardListeningThread_StillRunningFlag = 0
+    DedicatedKeyboardListeningThread_StillRunningFlag = 0
 #######################################################################################################################
 #######################################################################################################################
 
 #######################################################################################################################
 #######################################################################################################################
 def KeyPressResponse_RecordNewWaypoint_JointSpace(event):
+    global UR5arm_MostRecentDict_JointAngleList_Deg
+    global BeepNeedsToBePlayedFlag_RecordNewWaypoint_JointSpace
 
-    KeyPressResponse_RecordNewWaypoint_JointSpace_TextToPrint = ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_JointAngleList_Deg, 0, 5)
+    KeyPressResponse_RecordNewWaypoint_JointSpace_TextToPrint = ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(UR5arm_MostRecentDict_JointAngleList_Deg, 0, 5)
     KeyPressResponse_RecordNewWaypoint_JointSpace_TextToPrint = KeyPressResponse_RecordNewWaypoint_JointSpace_TextToPrint.replace("+","")
     print(KeyPressResponse_RecordNewWaypoint_JointSpace_TextToPrint)
 
-    SharedGlobals_Teleop_UR5arm.BeepNeedsToBePlayedFlag_RecordNewWaypoint_JointSpace = 1
+    BeepNeedsToBePlayedFlag_RecordNewWaypoint_JointSpace = 1
 
     #print("KeyPressResponse_RecordNewWaypoint_JointSpace event fired!")
 #######################################################################################################################
@@ -1050,12 +1059,14 @@ def KeyPressResponse_RecordNewWaypoint_JointSpace(event):
 #######################################################################################################################
 #######################################################################################################################
 def KeyPressResponse_RecordNewWaypoint_CartesianSpace(event):
+    global UR5arm_MostRecentDict_ToolVectorActual
+    global BeepNeedsToBePlayedFlag_RecordNewWaypoint_CartesianSpace
 
-    KeyPressResponse_RecordNewWaypoint_CartesianSpace_TextToPrint = ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual, 0, 5)
+    KeyPressResponse_RecordNewWaypoint_CartesianSpace_TextToPrint = ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(UR5arm_MostRecentDict_ToolVectorActual, 0, 5)
     KeyPressResponse_RecordNewWaypoint_CartesianSpace_TextToPrint = KeyPressResponse_RecordNewWaypoint_CartesianSpace_TextToPrint.replace("+","")
     print(KeyPressResponse_RecordNewWaypoint_CartesianSpace_TextToPrint)
 
-    SharedGlobals_Teleop_UR5arm.BeepNeedsToBePlayedFlag_RecordNewWaypoint_CartesianSpace = 1
+    BeepNeedsToBePlayedFlag_RecordNewWaypoint_CartesianSpace = 1
 
     #print("KeyPressResponse_RecordNewWaypoint_CartesianSpace event fired!")
 #######################################################################################################################
@@ -1064,8 +1075,9 @@ def KeyPressResponse_RecordNewWaypoint_CartesianSpace(event):
 #######################################################################################################################
 #######################################################################################################################
 def KeyPressResponse_KeyboardTranslationClutch_START(event):
+    global KeyPressResponse_Keyboard_TranslationClutch_State
 
-    SharedGlobals_Teleop_UR5arm.KeyPressResponse_Keyboard_TranslationClutch_State = 1
+    KeyPressResponse_Keyboard_TranslationClutch_State = 1
 
     #print("KeyPressResponse_KeyboardTranslationClutch_START event fired!")
 #######################################################################################################################
@@ -1074,8 +1086,9 @@ def KeyPressResponse_KeyboardTranslationClutch_START(event):
 #######################################################################################################################
 #######################################################################################################################
 def KeyPressResponse_KeyboardTranslationClutch_STOP(event):
+    global KeyPressResponse_Keyboard_TranslationClutch_State
 
-    SharedGlobals_Teleop_UR5arm.KeyPressResponse_Keyboard_TranslationClutch_State = 0
+    KeyPressResponse_Keyboard_TranslationClutch_State = 0
 
     #print("KeyPressResponse_KeyboardTranslationClutch_STOP event fired!")
 #######################################################################################################################
@@ -1084,8 +1097,9 @@ def KeyPressResponse_KeyboardTranslationClutch_STOP(event):
 #######################################################################################################################
 #######################################################################################################################
 def KeyPressResponse_KeyboardRotationClutch_START(event):
+    global KeyPressResponse_Keyboard_RotationClutch_State
 
-    SharedGlobals_Teleop_UR5arm.KeyPressResponse_Keyboard_RotationClutch_State = 1
+    KeyPressResponse_Keyboard_RotationClutch_State = 1
 
     #print("KeyPressResponse_KeyboardRotationClutch_START event fired!")
 #######################################################################################################################
@@ -1094,8 +1108,9 @@ def KeyPressResponse_KeyboardRotationClutch_START(event):
 #######################################################################################################################
 #######################################################################################################################
 def KeyPressResponse_KeyboardRotationClutch_STOP(event):
+    global KeyPressResponse_Keyboard_RotationClutch_State
 
-    SharedGlobals_Teleop_UR5arm.KeyPressResponse_Keyboard_RotationClutch_State = 0
+    KeyPressResponse_Keyboard_RotationClutch_State = 0
 
     #print("KeyPressResponse_KeyboardRotationClutch_STOP event fired!")
 #######################################################################################################################
@@ -1104,8 +1119,9 @@ def KeyPressResponse_KeyboardRotationClutch_STOP(event):
 #######################################################################################################################
 #######################################################################################################################
 def KeyPressResponse_IncrementURtoolTipInX_START(event):
+    global KeyPressResponse_IncrementURtoolTipInX_NeedsToBeChangedFlag
 
-    SharedGlobals_Teleop_UR5arm.KeyPressResponse_IncrementURtoolTipInX_NeedsToBeChangedFlag = 1
+    KeyPressResponse_IncrementURtoolTipInX_NeedsToBeChangedFlag = 1
 
     #print("KeyPressResponse_IncrementURtoolTipInX_START event fired!")
 #######################################################################################################################
@@ -1114,8 +1130,9 @@ def KeyPressResponse_IncrementURtoolTipInX_START(event):
 #######################################################################################################################
 #######################################################################################################################
 def KeyPressResponse_IncrementURtoolTipInX_STOP(event):
+    global KeyPressResponse_IncrementURtoolTipInX_NeedsToBeChangedFlag
 
-    SharedGlobals_Teleop_UR5arm.KeyPressResponse_IncrementURtoolTipInX_NeedsToBeChangedFlag = 0
+    KeyPressResponse_IncrementURtoolTipInX_NeedsToBeChangedFlag = 0
 
     #print("KeyPressResponse_IncrementURtoolTipInX_STOP event fired!")
 #######################################################################################################################
@@ -1124,8 +1141,9 @@ def KeyPressResponse_IncrementURtoolTipInX_STOP(event):
 #######################################################################################################################
 #######################################################################################################################
 def KeyPressResponse_DecrementURtoolTipInX_START(event):
+    global KeyPressResponse_DecrementURtoolTipInX_NeedsToBeChangedFlag
 
-    SharedGlobals_Teleop_UR5arm.KeyPressResponse_DecrementURtoolTipInX_NeedsToBeChangedFlag = 1
+    KeyPressResponse_DecrementURtoolTipInX_NeedsToBeChangedFlag = 1
 
     #print("KeyPressResponse_DecrementURtoolTipInX_START event fired!")
 #######################################################################################################################
@@ -1134,8 +1152,9 @@ def KeyPressResponse_DecrementURtoolTipInX_START(event):
 #######################################################################################################################
 #######################################################################################################################
 def KeyPressResponse_DecrementURtoolTipInX_STOP(event):
+    global KeyPressResponse_DecrementURtoolTipInX_NeedsToBeChangedFlag
 
-    SharedGlobals_Teleop_UR5arm.KeyPressResponse_DecrementURtoolTipInX_NeedsToBeChangedFlag = 0
+    KeyPressResponse_DecrementURtoolTipInX_NeedsToBeChangedFlag = 0
 
     #print("KeyPressResponse_DecrementURtoolTipInX_STOP event fired!")
 #######################################################################################################################
@@ -1144,8 +1163,9 @@ def KeyPressResponse_DecrementURtoolTipInX_STOP(event):
 #######################################################################################################################
 #######################################################################################################################
 def KeyPressResponse_IncrementURtoolTipInY_START(event):
+    global KeyPressResponse_IncrementURtoolTipInY_NeedsToBeChangedFlag
 
-    SharedGlobals_Teleop_UR5arm.KeyPressResponse_IncrementURtoolTipInY_NeedsToBeChangedFlag = 1
+    KeyPressResponse_IncrementURtoolTipInY_NeedsToBeChangedFlag = 1
 
     #print("KeyPressResponse_IncrementURtoolTipInY_START event fired!")
 #######################################################################################################################
@@ -1154,8 +1174,9 @@ def KeyPressResponse_IncrementURtoolTipInY_START(event):
 #######################################################################################################################
 #######################################################################################################################
 def KeyPressResponse_IncrementURtoolTipInY_STOP(event):
+    global KeyPressResponse_IncrementURtoolTipInY_NeedsToBeChangedFlag
 
-    SharedGlobals_Teleop_UR5arm.KeyPressResponse_IncrementURtoolTipInY_NeedsToBeChangedFlag = 0
+    KeyPressResponse_IncrementURtoolTipInY_NeedsToBeChangedFlag = 0
 
     #print("KeyPressResponse_IncrementURtoolTipInY_STOP event fired!")
 #######################################################################################################################
@@ -1164,8 +1185,9 @@ def KeyPressResponse_IncrementURtoolTipInY_STOP(event):
 #######################################################################################################################
 #######################################################################################################################
 def KeyPressResponse_DecrementURtoolTipInY_START(event):
+    global KeyPressResponse_DecrementURtoolTipInY_NeedsToBeChangedFlag
 
-    SharedGlobals_Teleop_UR5arm.KeyPressResponse_DecrementURtoolTipInY_NeedsToBeChangedFlag = 1
+    KeyPressResponse_DecrementURtoolTipInY_NeedsToBeChangedFlag = 1
 
     #print("KeyPressResponse_DecrementURtoolTipInY_START event fired!")
 #######################################################################################################################
@@ -1174,8 +1196,9 @@ def KeyPressResponse_DecrementURtoolTipInY_START(event):
 #######################################################################################################################
 #######################################################################################################################
 def KeyPressResponse_DecrementURtoolTipInY_STOP(event):
+    global KeyPressResponse_DecrementURtoolTipInY_NeedsToBeChangedFlag
 
-    SharedGlobals_Teleop_UR5arm.KeyPressResponse_DecrementURtoolTipInY_NeedsToBeChangedFlag = 0
+    KeyPressResponse_DecrementURtoolTipInY_NeedsToBeChangedFlag = 0
 
     #print("KeyPressResponse_DecrementURtoolTipInY_STOP event fired!")
 #######################################################################################################################
@@ -1184,8 +1207,9 @@ def KeyPressResponse_DecrementURtoolTipInY_STOP(event):
 #######################################################################################################################
 #######################################################################################################################
 def KeyPressResponse_IncrementURtoolTipInZ_START(event):
+    global KeyPressResponse_IncrementURtoolTipInZ_NeedsToBeChangedFlag
 
-    SharedGlobals_Teleop_UR5arm.KeyPressResponse_IncrementURtoolTipInZ_NeedsToBeChangedFlag = 1
+    KeyPressResponse_IncrementURtoolTipInZ_NeedsToBeChangedFlag = 1
 
     #print("KeyPressResponse_IncrementURtoolTipInZ_START event fired!")
 #######################################################################################################################
@@ -1194,8 +1218,9 @@ def KeyPressResponse_IncrementURtoolTipInZ_START(event):
 #######################################################################################################################
 #######################################################################################################################
 def KeyPressResponse_IncrementURtoolTipInZ_STOP(event):
+    global KeyPressResponse_IncrementURtoolTipInZ_NeedsToBeChangedFlag
 
-    SharedGlobals_Teleop_UR5arm.KeyPressResponse_IncrementURtoolTipInZ_NeedsToBeChangedFlag = 0
+    KeyPressResponse_IncrementURtoolTipInZ_NeedsToBeChangedFlag = 0
 
     #print("KeyPressResponse_IncrementURtoolTipInZ_STOP event fired!")
 #######################################################################################################################
@@ -1204,8 +1229,9 @@ def KeyPressResponse_IncrementURtoolTipInZ_STOP(event):
 #######################################################################################################################
 #######################################################################################################################
 def KeyPressResponse_DecrementURtoolTipInZ_START(event):
+    global KeyPressResponse_DecrementURtoolTipInZ_NeedsToBeChangedFlag
 
-    SharedGlobals_Teleop_UR5arm.KeyPressResponse_DecrementURtoolTipInZ_NeedsToBeChangedFlag = 1
+    KeyPressResponse_DecrementURtoolTipInZ_NeedsToBeChangedFlag = 1
 
     #print("KeyPressResponse_DecrementURtoolTipInZ_START event fired!")
 #######################################################################################################################
@@ -1214,8 +1240,9 @@ def KeyPressResponse_DecrementURtoolTipInZ_START(event):
 #######################################################################################################################
 #######################################################################################################################
 def KeyPressResponse_DecrementURtoolTipInZ_STOP(event):
+    global KeyPressResponse_DecrementURtoolTipInZ_NeedsToBeChangedFlag
 
-    SharedGlobals_Teleop_UR5arm.KeyPressResponse_DecrementURtoolTipInZ_NeedsToBeChangedFlag = 0
+    KeyPressResponse_DecrementURtoolTipInZ_NeedsToBeChangedFlag = 0
 
     #print("KeyPressResponse_DecrementURtoolTipInZ_STOP event fired!")
 #######################################################################################################################
@@ -1224,8 +1251,9 @@ def KeyPressResponse_DecrementURtoolTipInZ_STOP(event):
 #######################################################################################################################
 #######################################################################################################################
 def KeyPressResponse_OpenRobotiqGripper2F85_START(event):
+    global KeyPressResponse_OpenRobotiqGripper2F85_NeedsToBeChangedFlag
 
-    SharedGlobals_Teleop_UR5arm.KeyPressResponse_OpenRobotiqGripper2F85_NeedsToBeChangedFlag = 1
+    KeyPressResponse_OpenRobotiqGripper2F85_NeedsToBeChangedFlag = 1
 
     #print("KeyPressResponse_OpenRobotiqGripper2F85_START event fired!")
 #######################################################################################################################
@@ -1234,8 +1262,9 @@ def KeyPressResponse_OpenRobotiqGripper2F85_START(event):
 #######################################################################################################################
 #######################################################################################################################
 def KeyPressResponse_OpenRobotiqGripper2F85_STOP(event):
+    global KeyPressResponse_OpenRobotiqGripper2F85_NeedsToBeChangedFlag
 
-    SharedGlobals_Teleop_UR5arm.KeyPressResponse_OpenRobotiqGripper2F85_NeedsToBeChangedFlag = 0
+    KeyPressResponse_OpenRobotiqGripper2F85_NeedsToBeChangedFlag = 0
 
     #print("KeyPressResponse_OpenRobotiqGripper2F85_STOP event fired!")
 #######################################################################################################################
@@ -1244,8 +1273,9 @@ def KeyPressResponse_OpenRobotiqGripper2F85_STOP(event):
 #######################################################################################################################
 #######################################################################################################################
 def KeyPressResponse_CloseRobotiqGripper2F85_START(event):
+    global KeyPressResponse_CloseRobotiqGripper2F85_NeedsToBeChangedFlag
 
-    SharedGlobals_Teleop_UR5arm.KeyPressResponse_CloseRobotiqGripper2F85_NeedsToBeChangedFlag = 1
+    KeyPressResponse_CloseRobotiqGripper2F85_NeedsToBeChangedFlag = 1
 
     #print("KeyPressResponse_CloseRobotiqGripper2F85_START event fired!")
 #######################################################################################################################
@@ -1254,8 +1284,9 @@ def KeyPressResponse_CloseRobotiqGripper2F85_START(event):
 #######################################################################################################################
 #######################################################################################################################
 def KeyPressResponse_CloseRobotiqGripper2F85_STOP(event):
+    global KeyPressResponse_CloseRobotiqGripper2F85_NeedsToBeChangedFlag
 
-    SharedGlobals_Teleop_UR5arm.KeyPressResponse_CloseRobotiqGripper2F85_NeedsToBeChangedFlag = 0
+    KeyPressResponse_CloseRobotiqGripper2F85_NeedsToBeChangedFlag = 0
 
     #print("KeyPressResponse_CloseRobotiqGripper2F85_STOP event fired!")
 #######################################################################################################################
@@ -1264,6 +1295,7 @@ def KeyPressResponse_CloseRobotiqGripper2F85_STOP(event):
 #######################################################################################################################
 #######################################################################################################################
 def GUI_update_clock():
+    global EXIT_PROGRAM_FLAG
     global root
     global USE_GUI_FLAG
     global GUI_RootAfterCallbackInterval_Milliseconds
@@ -1286,6 +1318,9 @@ def GUI_update_clock():
     global UR5arm_ToolVectorActual_ToBeSet
     global UR5arm_MostRecentDict_Label
     global UR5arm_MostRecentDict
+    global UR5arm_MostRecentDict_JointAngleList_Deg
+    global UR5arm_MostRecentDict_JointAngleList_Rad
+    global UR5arm_MostRecentDict_ToolVectorActual
 
     global RobotiqGripper2F85_Position_ToBeSet
     global RobotiqGripper2F85_Speed_ToBeSet
@@ -1309,6 +1344,17 @@ def GUI_update_clock():
 
     global KeyboardInfo_Label
     global Keyboard_KeysToTeleopControlsMapping_DictOfDicts_FormattedAsNicelyPrintedString
+    global KeyPressResponse_DecrementURtoolTipInX_NeedsToBeChangedFlag
+    global KeyPressResponse_IncrementURtoolTipInX_NeedsToBeChangedFlag
+    global KeyPressResponse_DecrementURtoolTipInY_NeedsToBeChangedFlag
+    global KeyPressResponse_IncrementURtoolTipInY_NeedsToBeChangedFlag
+    global KeyPressResponse_DecrementURtoolTipInZ_NeedsToBeChangedFlag
+    global KeyPressResponse_IncrementURtoolTipInZ_NeedsToBeChangedFlag
+    global KeyPressResponse_OpenRobotiqGripper2F85_NeedsToBeChangedFlag
+    global KeyPressResponse_CloseRobotiqGripper2F85_NeedsToBeChangedFlag
+    global KeyPressResponse_Keyboard_TranslationClutch_State
+    global KeyPressResponse_Keyboard_RotationClutch_State
+    global Keyboard_AddToUR5armCurrentPositionList
 
     global JoystickHID_ReubenPython2and3ClassObject
     global Joystick_OPEN_FLAG
@@ -1351,7 +1397,7 @@ def GUI_update_clock():
 
     global ControlType_StartingValue
     global ControlType_AcceptableValues
-    global SharedGlobals_Teleop_UR5arm_MainThread_TimeToSleepEachLoop
+    global Teleop_UR5arm_MainThread_TimeToSleepEachLoop
     global ZEDasHandController_PositionList_ScalingFactorList
     global ZEDasHandController_RollPitchYaw_AbtXYZ_List_ScalingFactorList
 
@@ -1366,8 +1412,8 @@ def GUI_update_clock():
     global CSVfileForTrajectoryData_SaveFlag_Button
     global UR5arm_MostRecentDict_ToolVectorActual_MotionFromSnapshotAtTimeOfCreatingCSVfileForTrajectoryData
 
-    if USE_GUI_FLAG == 1:
-        if SharedGlobals_Teleop_UR5arm.EXIT_PROGRAM_FLAG == 0:
+    if EXIT_PROGRAM_FLAG == 0:
+        if USE_GUI_FLAG == 1:
 
             #########################################################
             #########################################################
@@ -1387,9 +1433,9 @@ def GUI_update_clock():
                                 "\nGUIthread, Time: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(CurrentTime_CalculatedFromGUIthread, 0, 3) +\
                                 "\t\t\tFrequency: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(DataStreamingFrequency_CalculatedFromGUIthread, 0, 3) +\
                                 "\nControlType: " + ControlType + \
-                                "\nUR5arm_MostRecentDict_JointAngleList_Deg: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_JointAngleList_Deg, 0, 5) +\
-                                "\nUR5arm_MostRecentDict_JointAngleList_Rad: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_JointAngleList_Rad, 0, 5) +\
-                                "\nUR5, ToolVectorActual: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual, 0, 5) +\
+                                "\nUR5arm_MostRecentDict_JointAngleList_Deg: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(UR5arm_MostRecentDict_JointAngleList_Deg, 0, 5) +\
+                                "\nUR5arm_MostRecentDict_JointAngleList_Rad: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(UR5arm_MostRecentDict_JointAngleList_Rad, 0, 5) +\
+                                "\nUR5, ToolVectorActual: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(UR5arm_MostRecentDict_ToolVectorActual, 0, 5) +\
                                 "\nUR5, ToolVectorActual_ToBeSet: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(UR5arm_ToolVectorActual_ToBeSet, 0, 5) +\
                                 "\nRobotiqGripper2F85, Position Speed Force: " + str([RobotiqGripper2F85_Position_ToBeSet, RobotiqGripper2F85_Speed_ToBeSet, RobotiqGripper2F85_Force_ToBeSet]) + \
                                 "\nCSVfileForTrajectoryData_SaveFlag: " + str(CSVfileForTrajectoryData_SaveFlag) +\
@@ -1400,17 +1446,17 @@ def GUI_update_clock():
 
                 #########################################################
                 #########################################################
-                KeyboardInfo_Label["text"] = "Keyboard flags: " + str([SharedGlobals_Teleop_UR5arm.KeyPressResponse_DecrementURtoolTipInX_NeedsToBeChangedFlag,
-                                                            SharedGlobals_Teleop_UR5arm.KeyPressResponse_IncrementURtoolTipInX_NeedsToBeChangedFlag,
-                                                            SharedGlobals_Teleop_UR5arm.KeyPressResponse_DecrementURtoolTipInY_NeedsToBeChangedFlag,
-                                                            SharedGlobals_Teleop_UR5arm.KeyPressResponse_IncrementURtoolTipInY_NeedsToBeChangedFlag,
-                                                            SharedGlobals_Teleop_UR5arm.KeyPressResponse_DecrementURtoolTipInZ_NeedsToBeChangedFlag,
-                                                            SharedGlobals_Teleop_UR5arm.KeyPressResponse_IncrementURtoolTipInZ_NeedsToBeChangedFlag,
-                                                            SharedGlobals_Teleop_UR5arm.KeyPressResponse_OpenRobotiqGripper2F85_NeedsToBeChangedFlag,
-                                                            SharedGlobals_Teleop_UR5arm.KeyPressResponse_CloseRobotiqGripper2F85_NeedsToBeChangedFlag,
-                                                            SharedGlobals_Teleop_UR5arm.KeyPressResponse_Keyboard_TranslationClutch_State,
-                                                            SharedGlobals_Teleop_UR5arm.KeyPressResponse_Keyboard_RotationClutch_State]) + \
-                                "\nKeyboard_AddToUR5armCurrentPositionList: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(SharedGlobals_Teleop_UR5arm.Keyboard_AddToUR5armCurrentPositionList, 0, 3) +\
+                KeyboardInfo_Label["text"] = "Keyboard flags: " + str([KeyPressResponse_DecrementURtoolTipInX_NeedsToBeChangedFlag,
+                                                            KeyPressResponse_IncrementURtoolTipInX_NeedsToBeChangedFlag,
+                                                            KeyPressResponse_DecrementURtoolTipInY_NeedsToBeChangedFlag,
+                                                            KeyPressResponse_IncrementURtoolTipInY_NeedsToBeChangedFlag,
+                                                            KeyPressResponse_DecrementURtoolTipInZ_NeedsToBeChangedFlag,
+                                                            KeyPressResponse_IncrementURtoolTipInZ_NeedsToBeChangedFlag,
+                                                            KeyPressResponse_OpenRobotiqGripper2F85_NeedsToBeChangedFlag,
+                                                            KeyPressResponse_CloseRobotiqGripper2F85_NeedsToBeChangedFlag,
+                                                            KeyPressResponse_Keyboard_TranslationClutch_State,
+                                                            KeyPressResponse_Keyboard_RotationClutch_State]) + \
+                                "\nKeyboard_AddToUR5armCurrentPositionList: " + ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(Keyboard_AddToUR5armCurrentPositionList, 0, 3) +\
                                 "\nKeyboard_KeysToTeleopControlsMapping_DictOfDicts: " + \
                                 "\n" + Keyboard_KeysToTeleopControlsMapping_DictOfDicts_FormattedAsNicelyPrintedString
                 #########################################################
@@ -1776,7 +1822,7 @@ def GUI_Thread():
         UR5arm_MostRecentDict_Label.grid(row=0, column=0, padx=1, pady=1, columnspan=1, rowspan=1)
     ###########################################################
     ###########################################################
-    
+
     ###########################################################
     ###########################################################
     global CSVfileForTrajectoryData_SaveFlag_Button
@@ -2135,6 +2181,8 @@ def UpdateGUItabObjectsOrderedDict():
     global RobotiqGripper2F85_OPEN_FLAG
     global SHOW_IN_GUI_RobotiqGripper2F85_FLAG
 
+    global Keyboard_OPEN_FLAG
+
     global USE_Joystick_FLAG
     global Joystick_OPEN_FLAG
     global SHOW_IN_GUI_Joystick_FLAG
@@ -2174,7 +2222,7 @@ def UpdateGUItabObjectsOrderedDict():
         GUItabObjectsOrderedDict["MainControls"]["OpenFlag"] = 1
         GUItabObjectsOrderedDict["UR5arm"]["OpenFlag"] = UR5arm_OPEN_FLAG
         GUItabObjectsOrderedDict["RobotiqGripper2F85"]["OpenFlag"] = RobotiqGripper2F85_OPEN_FLAG
-        GUItabObjectsOrderedDict["Keyboard"]["OpenFlag"] = SharedGlobals_Teleop_UR5arm.Keyboard_OPEN_FLAG
+        GUItabObjectsOrderedDict["Keyboard"]["OpenFlag"] = Keyboard_OPEN_FLAG
         GUItabObjectsOrderedDict["Joystick"]["OpenFlag"] = Joystick_OPEN_FLAG
         GUItabObjectsOrderedDict["ArucoTagDetection"]["OpenFlag"] = ArucoTag_OPEN_FLAG
         GUItabObjectsOrderedDict["ZEDasHandController"]["OpenFlag"] = ZEDasHandController_OPEN_FLAG
@@ -2201,6 +2249,7 @@ def GeneralizedControlForPositionInput(Input_RotationMatrixListsOfLists, Input_T
     global UR5arm_MostRecentDict_ToolVectorActual_IsItInitializedFlag
     global UR5arm_ToolVectorActual_ToBeSet
     global UR5arm_PositionControl_NeedsToBeChangedFlag
+    global UR5arm_MostRecentDict_ToolVectorActual
 
     try:
 
@@ -2212,33 +2261,33 @@ def GeneralizedControlForPositionInput(Input_RotationMatrixListsOfLists, Input_T
             #######################################################################################################################
             #######################################################################################################################
             if Input_TranslationClutch_State == 1 or Input_RotationClutch_State == 1:
-                
+
                 # We're locking to UR5arm_MostRecentDict_ToolVectorActual_AtTimeOfClutchIn, not updating based on actual each function.
                 UR5arm_ToolVectorActual_ToBeSet = list(UR5arm_MostRecentDict_ToolVectorActual_AtTimeOfClutchIn)
-                
+
                 ####################################################################################################################### Translation
                 if Input_TranslationClutch_State == 1:
-    
+
                     TranslationList_AddToUR5armCurrent = numpy.array(Input_RotationMatrixListsOfLists).dot(numpy.array(Input_TranslationList) - numpy.array(Input_TranslationList_AtTimeOfClutchIn)).tolist()
-        
+
                     ###################################################
                     for Index in range(0,3):
                         UR5arm_ToolVectorActual_ToBeSet[Index] = UR5arm_ToolVectorActual_ToBeSet[Index]  + TranslationList_AddToUR5armCurrent[Index]
                     ###################################################
-    
+
                     UR5arm_PositionControl_NeedsToBeChangedFlag = 1
                 #######################################################################################################################
-                
+
                 ####################################################################################################################### Rotation
                 if Input_RotationClutch_State == 1:
-    
+
                     RotationList_AddToUR5armCurrent = numpy.array(Input_RotationMatrixListsOfLists).dot(numpy.array(Input_RotationList) - numpy.array(Input_RotationList_AtTimeOfClutchIn)).tolist()
-    
+
                     ###################################################
                     for Index in range(3,6): #3, 4, 5
                         UR5arm_ToolVectorActual_ToBeSet[Index] = UR5arm_ToolVectorActual_ToBeSet[Index]  + RotationList_AddToUR5armCurrent[Index-3]
                     ###################################################
-                    
+
                     UR5arm_PositionControl_NeedsToBeChangedFlag = 1
                 #######################################################################################################################
 
@@ -2248,11 +2297,11 @@ def GeneralizedControlForPositionInput(Input_RotationMatrixListsOfLists, Input_T
         #######################################################################################################################
         #######################################################################################################################
         #######################################################################################################################
-            
+
     except:
         exceptions = sys.exc_info()[0]
         print("GeneralizedControlForPositionInput, exceptions: %s" % exceptions)
-        UR5arm_ToolVectorActual_ToBeSet = list(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual)
+        UR5arm_ToolVectorActual_ToBeSet = list(UR5arm_MostRecentDict_ToolVectorActual)
         traceback.print_exc()
 
 #######################################################################################################################
@@ -2269,6 +2318,9 @@ def GeneralizedControlForRateControlInput(Input_TranslationList, Input_Translati
     global UR5arm_MostRecentDict_ToolVectorActual_IsItInitializedFlag
     global UR5arm_ToolVectorActual_ToBeSet
     global UR5arm_PositionControl_NeedsToBeChangedFlag
+    global UR5arm_MostRecentDict_ToolVectorActual
+    global UR5arm_MostRecentDict_ToolTip_RotationEulerList_Radians
+    global UR5arm_MostRecentDict_ToolVectorActual
 
     try:
 
@@ -2280,31 +2332,31 @@ def GeneralizedControlForRateControlInput(Input_TranslationList, Input_Translati
             #######################################################################################################################
             #######################################################################################################################
             if Input_TranslationClutch_State == 1 or Input_RotationClutch_State == 1:
-                
-                UR5arm_ToolVectorActual_ToBeSet = list(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual)
-                
+
+                UR5arm_ToolVectorActual_ToBeSet = list(UR5arm_MostRecentDict_ToolVectorActual)
+
                 ####################################################################################################################### Translation
                 if Input_TranslationClutch_State == 1:
-    
+
                     TranslationList_AddToUR5armCurrent = numpy.array(numpy.array(Input_TranslationList)*numpy.array(Input_TranslationIncrementList)).tolist()
-        
+
                     ###################################################
                     for Index in range(0,3):
                         UR5arm_ToolVectorActual_ToBeSet[Index] = UR5arm_ToolVectorActual_ToBeSet[Index]  + TranslationList_AddToUR5armCurrent[Index]
                     ###################################################
-    
+
                     UR5arm_PositionControl_NeedsToBeChangedFlag = 1
                 #######################################################################################################################
-                
+
                 ####################################################################################################################### Rotation
                 if Input_RotationClutch_State == 1:
-    
+
                     RotationList_AddToUR5armCurrent_RotationEulerList_Radians = numpy.array(numpy.array(Input_RotationList)*numpy.array(Input_RotationIncrementList)).tolist()
 
                     ###################################################
                     RotationEulerList = [0.0]*3
                     for Index in range(0, 3):
-                        RotationEulerList[Index] = SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolTip_RotationEulerList_Radians[Index] + RotationList_AddToUR5armCurrent_RotationEulerList_Radians[Index]
+                        RotationEulerList[Index] = UR5arm_MostRecentDict_ToolTip_RotationEulerList_Radians[Index] + RotationList_AddToUR5armCurrent_RotationEulerList_Radians[Index]
 
                     RotationObjectScipy_Joystick_AddToUR5armCurrentPositionList = Rotation.from_euler('xyz', RotationEulerList, degrees=False)
                     RotationAxisAngleList_Joystick_AddToUR5armCurrentPositionList = RotationObjectScipy_Joystick_AddToUR5armCurrentPositionList.as_rotvec()
@@ -2314,7 +2366,7 @@ def GeneralizedControlForRateControlInput(Input_TranslationList, Input_Translati
                     for Index in range(3,6): #3, 4, 5
                         UR5arm_ToolVectorActual_ToBeSet[Index] = RotationAxisAngleList_Joystick_AddToUR5armCurrentPositionList[Index-3]
                     ###################################################
-                    
+
                     UR5arm_PositionControl_NeedsToBeChangedFlag = 1
                 #######################################################################################################################
 
@@ -2324,11 +2376,11 @@ def GeneralizedControlForRateControlInput(Input_TranslationList, Input_Translati
         #######################################################################################################################
         #######################################################################################################################
         #######################################################################################################################
-            
+
     except:
         exceptions = sys.exc_info()[0]
         print("GeneralizedControlForPositionInput, exceptions: %s" % exceptions)
-        UR5arm_ToolVectorActual_ToBeSet = list(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual)
+        UR5arm_ToolVectorActual_ToBeSet = list(UR5arm_MostRecentDict_ToolVectorActual)
         traceback.print_exc()
 
 #######################################################################################################################
@@ -2339,6 +2391,13 @@ def GeneralizedControlForRateControlInput(Input_TranslationList, Input_Translati
 #######################################################################################################################
 #######################################################################################################################
 if __name__ == '__main__':
+
+    ################################################
+    ################################################
+    global EXIT_PROGRAM_FLAG
+    EXIT_PROGRAM_FLAG = 0
+    ################################################
+    ################################################
 
     ################################################
     ################################################
@@ -2509,6 +2568,7 @@ if __name__ == '__main__':
     global UR5arm_DedicatedTxThread_TxMessageToSend_Queue_MaxSize
     global UR5arm_Payload_MassKG_ToBeCommanded
     global UR5arm_Payload_CoGmetersList_ToBeCommanded
+    global UR5arm_OutputFlangCoordinateSystem_to_TCPtoolCenterPoint_6DOFposeList_ToBeCommanded
     global UR5arm_Velocity
     global UR5arm_Acceleration
     global UR5arm_MultiprocessingQueue_Rx_MaxSize
@@ -2541,6 +2601,12 @@ if __name__ == '__main__':
     global RobotiqGripper2F85_DesiredSerialNumber
     global RobotiqGripper2F85_DesiredSlaveID
     global RobotiqGripper2F85_MainThread_TimeToSleepEachLoop
+    global RobotiqGripper2F85_Position_Min
+    global RobotiqGripper2F85_Speed_Min
+    global RobotiqGripper2F85_Force_Min
+    global RobotiqGripper2F85_Position_Max
+    global RobotiqGripper2F85_Speed_Max
+    global RobotiqGripper2F85_Force_Max
     global RobotiqGripper2F85_Position_Starting
     global RobotiqGripper2F85_Speed_Starting
     global RobotiqGripper2F85_Force_Starting
@@ -2702,10 +2768,35 @@ if __name__ == '__main__':
     global UR5arm_MostRecentDict
     UR5arm_MostRecentDict = dict()
 
-    #Defined in SharedGlobals_Teleop_UR5arm.py:
-    #global UR5arm_MostRecentDict_JointAngleList_Deg
-    #global UR5arm_MostRecentDict_JointAngleList_Rad
-    #global UR5arm_MostRecentDict_ToolVectorActual
+    global UR5arm_MostRecentDict_JointAngleList_Rad
+    UR5arm_MostRecentDict_JointAngleList_Rad = [-11111.0] * 6
+
+    global UR5arm_MostRecentDict_JointAngleList_Deg
+    UR5arm_MostRecentDict_JointAngleList_Deg = [-11111.0] * 6
+
+    global UR5arm_MostRecentDict_ToolVectorActual
+    UR5arm_MostRecentDict_ToolVectorActual = [-11111.0] * 6
+
+    global UR5arm_MostRecentDict_ToolTip_XYZ_Meters
+    UR5arm_MostRecentDict_ToolTip_XYZ_Meters = [-11111.0] * 3
+
+    global UR5arm_MostRecentDict_ToolTip_RotationEulerList_Radians
+    UR5arm_MostRecentDict_ToolTip_RotationEulerList_Radians = [-11111.0] * 3
+
+    global UR5arm_MostRecentDict_ToolTip_RotationEulerList_Degrees
+    UR5arm_MostRecentDict_ToolTip_RotationEulerList_Degrees = [-11111.0] * 3
+
+    global UR5arm_MostRecentDict_ToolTipSpeedsCartestian_TCPspeedActual
+    UR5arm_MostRecentDict_ToolTipSpeedsCartestian_TCPspeedActual = [-11111.0] * 6
+
+    global UR5arm_MostRecentDict_ToolTipSpeedsCartestian_LinearXYZnorm_MetersPerSec
+    UR5arm_MostRecentDict_ToolTipSpeedsCartestian_LinearXYZnorm_MetersPerSec = -11111.0
+
+    global UR5arm_MostRecentDict_DataStreamingFrequency_CalculatedFromDedicatedRxThread
+    UR5arm_MostRecentDict_DataStreamingFrequency_CalculatedFromDedicatedRxThread = -11111.0
+
+    global UR5arm_MostRecentDict_Time
+    UR5arm_MostRecentDict_Time = -11111.0
 
     global UR5arm_MostRecentDict_ToolVectorActual_AtTimeOfClutchIn
     UR5arm_MostRecentDict_ToolVectorActual_AtTimeOfClutchIn = [-11111.0]*6
@@ -2826,7 +2917,7 @@ if __name__ == '__main__':
 
     global ZEDasHandController_TranslationClutch_State_last
     ZEDasHandController_TranslationClutch_State_last = -1
-    
+
     global ZEDasHandController_RotationClutch_State
     ZEDasHandController_RotationClutch_State = -1
 
@@ -2859,10 +2950,10 @@ if __name__ == '__main__':
 
     global RobotiqGripper2F85_Position_ToBeSet
     RobotiqGripper2F85_Position_ToBeSet = RobotiqGripper2F85_Position_Starting
-    
+
     global RobotiqGripper2F85_Speed_ToBeSet
     RobotiqGripper2F85_Speed_ToBeSet = RobotiqGripper2F85_Speed_Starting
-    
+
     global RobotiqGripper2F85_Force_ToBeSet
     RobotiqGripper2F85_Force_ToBeSet = RobotiqGripper2F85_Force_Starting
 
@@ -3045,7 +3136,7 @@ if __name__ == '__main__':
     DataStreamingDeltaT_CalculatedFromMainThread = -1
     #################################################
     #################################################
-    
+
     #################################################
     #################################################
     global LoopCounter_CalculatedFromGUIthread
@@ -3089,17 +3180,73 @@ if __name__ == '__main__':
     #################################################
     global GUItabObjectsOrderedDict
     GUItabObjectsOrderedDict = OrderedDict()
-
-    UpdateGUItabObjectsOrderedDict()
     #################################################
     #################################################
 
     #################################################
     #################################################
-    #All Keyboard variables defined in SharedGlobals_Teleop_UR5arm.py:
-    #global DedicatedKeyboardListeningThread_StillRunningFlag
-    #global KeyPressResponse_IncrementURtoolTipInX_NeedsToBeChangedFlag
-    #etc.
+    global Keyboard_OPEN_FLAG
+    Keyboard_OPEN_FLAG = -1
+
+    global DedicatedKeyboardListeningThread_StillRunningFlag
+    DedicatedKeyboardListeningThread_StillRunningFlag = 0
+
+    global CurrentTime_CalculatedFromDedicatedKeyboardListeningThread
+    CurrentTime_CalculatedFromDedicatedKeyboardListeningThread = -11111.0
+
+    global StartingTime_CalculatedFromDedicatedKeyboardListeningThread
+    StartingTime_CalculatedFromDedicatedKeyboardListeningThread = -11111.0
+
+    global LastTime_CalculatedFromDedicatedKeyboardListeningThread
+    LastTime_CalculatedFromDedicatedKeyboardListeningThread = -11111.0
+
+    global DataStreamingFrequency_CalculatedFromDedicatedKeyboardListeningThread
+    DataStreamingFrequency_CalculatedFromDedicatedKeyboardListeningThread = -11111.0
+
+    global DataStreamingDeltaT_CalculatedFromDedicatedKeyboardListeningThread
+    DataStreamingDeltaT_CalculatedFromDedicatedKeyboardListeningThread = -11111.0
+
+    global DedicatedKeyboardListeningThread_TimeToSleepEachLoop
+    DedicatedKeyboardListeningThread_TimeToSleepEachLoop = 0.020
+
+    global BeepNeedsToBePlayedFlag_RecordNewWaypoint_JointSpace
+    BeepNeedsToBePlayedFlag_RecordNewWaypoint_JointSpace = 0
+
+    global BeepNeedsToBePlayedFlag_RecordNewWaypoint_CartesianSpace
+    BeepNeedsToBePlayedFlag_RecordNewWaypoint_CartesianSpace = 0
+
+    global KeyPressResponse_Keyboard_TranslationClutch_State
+    KeyPressResponse_Keyboard_TranslationClutch_State = 0
+
+    global KeyPressResponse_Keyboard_RotationClutch_State
+    KeyPressResponse_Keyboard_RotationClutch_State = 0
+
+    global KeyPressResponse_IncrementURtoolTipInX_NeedsToBeChangedFlag
+    KeyPressResponse_IncrementURtoolTipInX_NeedsToBeChangedFlag = 0
+
+    global KeyPressResponse_DecrementURtoolTipInX_NeedsToBeChangedFlag
+    KeyPressResponse_DecrementURtoolTipInX_NeedsToBeChangedFlag = 0
+
+    global KeyPressResponse_IncrementURtoolTipInY_NeedsToBeChangedFlag
+    KeyPressResponse_IncrementURtoolTipInY_NeedsToBeChangedFlag = 0
+
+    global KeyPressResponse_DecrementURtoolTipInY_NeedsToBeChangedFlag
+    KeyPressResponse_DecrementURtoolTipInY_NeedsToBeChangedFlag = 0
+
+    global KeyPressResponse_IncrementURtoolTipInZ_NeedsToBeChangedFlag
+    KeyPressResponse_IncrementURtoolTipInZ_NeedsToBeChangedFlag = 0
+
+    global KeyPressResponse_DecrementURtoolTipInZ_NeedsToBeChangedFlag
+    KeyPressResponse_DecrementURtoolTipInZ_NeedsToBeChangedFlag = 0
+
+    global Keyboard_AddToUR5armCurrentPositionList
+    Keyboard_AddToUR5armCurrentPositionList = [-11111.0]*6
+
+    global KeyPressResponse_OpenRobotiqGripper2F85_NeedsToBeChangedFlag
+    KeyPressResponse_OpenRobotiqGripper2F85_NeedsToBeChangedFlag = 0
+
+    global KeyPressResponse_CloseRobotiqGripper2F85_NeedsToBeChangedFlag
+    KeyPressResponse_CloseRobotiqGripper2F85_NeedsToBeChangedFlag = 0
     #################################################
     #################################################
 
@@ -3221,6 +3368,7 @@ if __name__ == '__main__':
                                                         ("StartingPoseJointAngleList_Deg", list(UR5arm_PositionControl_ServoJ_MoveThroughListOfPoses_SafeReturnToStartingPoseFromAnywhere)[0]["JointAngleList_Deg"]),
                                                         ("Payload_MassKG_ToBeCommanded", UR5arm_Payload_MassKG_ToBeCommanded),
                                                         ("Payload_CoGmetersList_ToBeCommanded", UR5arm_Payload_CoGmetersList_ToBeCommanded),
+                                                        ("OutputFlangCoordinateSystem_to_TCPtoolCenterPoint_6DOFposeList_ToBeCommanded", UR5arm_OutputFlangCoordinateSystem_to_TCPtoolCenterPoint_6DOFposeList_ToBeCommanded),
                                                         ("Acceleration", UR5arm_Acceleration),
                                                         ("Velocity", UR5arm_Velocity),
                                                         ("JointAngleCommandIncrementDecrement_ValueInDegrees", 1.0),
@@ -3327,15 +3475,21 @@ if __name__ == '__main__':
 
     global RobotiqGripper2F85_ReubenPython2and3ClassObject_setup_dict
     RobotiqGripper2F85_ReubenPython2and3ClassObject_setup_dict = dict([("GUIparametersDict", RobotiqGripper2F85_ReubenPython2and3ClassObject_GUIparametersDict),
-                                                                        ("DesiredSerialNumber", RobotiqGripper2F85_DesiredSerialNumber), #CHANGE THIS TO MATCH YOUR UNIQUE USB-to-RS485serial converter
-                                                                        ("DesiredSlaveID", RobotiqGripper2F85_DesiredSlaveID), #Gripper's default is 9
-                                                                        ("NameToDisplay_UserSet", "Reuben's Test Robotiq 2F85 Gripper"),
-                                                                        ("MainThread_TimeToSleepEachLoop", RobotiqGripper2F85_MainThread_TimeToSleepEachLoop),
-                                                                        ("Position_Starting", RobotiqGripper2F85_Position_Starting),
-                                                                        ("Speed_Starting", RobotiqGripper2F85_Speed_Starting),
-                                                                        ("Force_Starting", RobotiqGripper2F85_Force_Starting),
-                                                                        ("SendPositionSpeedForceCommandToGripper_Queue_MaxSize", 2),
-                                                                        ("SendConfirmationToCommandFlag", 0)])
+                                                                    ("DesiredSerialNumber", RobotiqGripper2F85_DesiredSerialNumber), #CHANGE THIS TO MATCH YOUR UNIQUE USB-to-RS485serial converter
+                                                                    ("DesiredSlaveID", RobotiqGripper2F85_DesiredSlaveID), #Gripper's default is 9
+                                                                    ("NameToDisplay_UserSet", "Reuben's Test Robotiq 2F85 Gripper"),
+                                                                    ("MainThread_TimeToSleepEachLoop", RobotiqGripper2F85_MainThread_TimeToSleepEachLoop),
+                                                                    ("Position_Min", RobotiqGripper2F85_Position_Min),
+                                                                    ("Speed_Min", RobotiqGripper2F85_Speed_Min),
+                                                                    ("Force_Min", RobotiqGripper2F85_Force_Min),
+                                                                    ("Position_Max", RobotiqGripper2F85_Position_Max),
+                                                                    ("Speed_Max", RobotiqGripper2F85_Speed_Max),
+                                                                    ("Force_Max", RobotiqGripper2F85_Force_Max),
+                                                                    ("Position_Starting", RobotiqGripper2F85_Position_Starting),
+                                                                    ("Speed_Starting", RobotiqGripper2F85_Speed_Starting),
+                                                                    ("Force_Starting", RobotiqGripper2F85_Force_Starting),
+                                                                    ("SendPositionSpeedForceCommandToGripper_Queue_MaxSize", 2),
+                                                                    ("SendConfirmationToCommandFlag", 0)])
 
     if USE_RobotiqGripper2F85_FLAG == 1:
         try:
@@ -3615,7 +3769,7 @@ if __name__ == '__main__':
     #################################################
     #################################################
 
-    while(SharedGlobals_Teleop_UR5arm.EXIT_PROGRAM_FLAG == 0):
+    while(EXIT_PROGRAM_FLAG == 0):
         ###################################################################################################### Start GET's
         ######################################################################################################
         ######################################################################################################
@@ -3680,16 +3834,16 @@ if __name__ == '__main__':
 
                     UR5arm_MostRecentDict_ToolVectorActual_IsItInitializedFlag = 1
 
-                    SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_JointAngleList_Deg = UR5arm_MostRecentDict["JointAngleList_Deg"]
-                    SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_JointAngleList_Rad = UR5arm_MostRecentDict["JointAngleList_Rad"]
-                    SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual = UR5arm_MostRecentDict["ToolVectorActual"]
-                    SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolTip_XYZ_Meters = UR5arm_MostRecentDict["ToolTip_XYZ_Meters"]
-                    SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolTip_RotationEulerList_Radians = UR5arm_MostRecentDict["ToolTip_RotationEulerList_Radians"]
-                    SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolTip_RotationEulerList_Degrees = UR5arm_MostRecentDict["ToolTip_RotationEulerList_Degrees"]
-                    SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolTipSpeedsCartestian_TCPspeedActual = UR5arm_MostRecentDict["ToolTipSpeedsCartestian_TCPspeedActual"]
-                    SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolTipSpeedsCartestian_LinearXYZnorm_MetersPerSec = UR5arm_MostRecentDict["ToolTipSpeedsCartestian_LinearXYZnorm_MetersPerSec"]
-                    SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_DataStreamingFrequency_CalculatedFromDedicatedRxThread = UR5arm_MostRecentDict["DataStreamingFrequency_CalculatedFromDedicatedRxThread"]
-                    SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_Time = UR5arm_MostRecentDict["Time"]
+                    UR5arm_MostRecentDict_JointAngleList_Deg = UR5arm_MostRecentDict["JointAngleList_Deg"]
+                    UR5arm_MostRecentDict_JointAngleList_Rad = UR5arm_MostRecentDict["JointAngleList_Rad"]
+                    UR5arm_MostRecentDict_ToolVectorActual = UR5arm_MostRecentDict["ToolVectorActual"]
+                    UR5arm_MostRecentDict_ToolTip_XYZ_Meters = UR5arm_MostRecentDict["ToolTip_XYZ_Meters"]
+                    UR5arm_MostRecentDict_ToolTip_RotationEulerList_Radians = UR5arm_MostRecentDict["ToolTip_RotationEulerList_Radians"]
+                    UR5arm_MostRecentDict_ToolTip_RotationEulerList_Degrees = UR5arm_MostRecentDict["ToolTip_RotationEulerList_Degrees"]
+                    UR5arm_MostRecentDict_ToolTipSpeedsCartestian_TCPspeedActual = UR5arm_MostRecentDict["ToolTipSpeedsCartestian_TCPspeedActual"]
+                    UR5arm_MostRecentDict_ToolTipSpeedsCartestian_LinearXYZnorm_MetersPerSec = UR5arm_MostRecentDict["ToolTipSpeedsCartestian_LinearXYZnorm_MetersPerSec"]
+                    UR5arm_MostRecentDict_DataStreamingFrequency_CalculatedFromDedicatedRxThread = UR5arm_MostRecentDict["DataStreamingFrequency_CalculatedFromDedicatedRxThread"]
+                    UR5arm_MostRecentDict_Time = UR5arm_MostRecentDict["Time"]
 
                     #print("UR5arm_MostRecentDict_Time: " + str(UR5arm_MostRecentDict_Time))
             except:
@@ -3753,14 +3907,14 @@ if __name__ == '__main__':
 
             ###################################################
             if ZEDasHandController_UseTranslationClutchFlag == 1:
-                ZEDasHandController_TranslationClutch_State = SharedGlobals_Teleop_UR5arm.KeyPressResponse_Keyboard_TranslationClutch_State
+                ZEDasHandController_TranslationClutch_State = KeyPressResponse_Keyboard_TranslationClutch_State
             else:
                 ZEDasHandController_TranslationClutch_State = 1
             ###################################################
 
             ###################################################
             if ZEDasHandController_UseRotationClutchFlag == 1:
-                ZEDasHandController_RotationClutch_State = SharedGlobals_Teleop_UR5arm.KeyPressResponse_Keyboard_RotationClutch_State
+                ZEDasHandController_RotationClutch_State = KeyPressResponse_Keyboard_RotationClutch_State
             else:
                 ZEDasHandController_RotationClutch_State = 1
             ###################################################
@@ -3771,7 +3925,7 @@ if __name__ == '__main__':
                 ZEDasHandController_RollPitchYaw_AbtXYZ_List_Radians_AtTimeOfClutchIn = list(ZEDasHandController_RollPitchYaw_AbtXYZ_List_Radians)
                 ZEDasHandController_RollPitchYaw_AbtXYZ_List_Degrees_AtTimeOfClutchIn = list(ZEDasHandController_RollPitchYaw_AbtXYZ_List_Degrees)
 
-                UR5arm_MostRecentDict_ToolVectorActual_AtTimeOfClutchIn = list(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual)
+                UR5arm_MostRecentDict_ToolVectorActual_AtTimeOfClutchIn = list(UR5arm_MostRecentDict_ToolVectorActual)
             ###################################################
 
             ###################################################
@@ -3780,7 +3934,7 @@ if __name__ == '__main__':
                 ZEDasHandController_RollPitchYaw_AbtXYZ_List_Radians_AtTimeOfClutchIn = list(ZEDasHandController_RollPitchYaw_AbtXYZ_List_Radians)
                 ZEDasHandController_RollPitchYaw_AbtXYZ_List_Degrees_AtTimeOfClutchIn = list(ZEDasHandController_RollPitchYaw_AbtXYZ_List_Degrees)
 
-                UR5arm_MostRecentDict_ToolVectorActual_AtTimeOfClutchIn = list(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual)
+                UR5arm_MostRecentDict_ToolVectorActual_AtTimeOfClutchIn = list(UR5arm_MostRecentDict_ToolVectorActual)
             ###################################################
 
             ###################################################
@@ -3840,14 +3994,14 @@ if __name__ == '__main__':
             ###################################################
             if Joystick_UseTranslationClutchFlag == 1:
                 #Joystick_TranslationClutch_State = Joystick_MostRecentDict_Joystick_Button_Value_List[Joystick_Clutch_Button_Index_ToDisplayAsDotColorOn2DdotDisplay]
-                Joystick_TranslationClutch_State = SharedGlobals_Teleop_UR5arm.KeyPressResponse_Keyboard_TranslationClutch_State
+                Joystick_TranslationClutch_State = KeyPressResponse_Keyboard_TranslationClutch_State
             else:
                 Joystick_TranslationClutch_State = 1
             ###################################################
 
             ###################################################
             if Joystick_UseRotationClutchFlag == 1:
-                Joystick_RotationClutch_State = SharedGlobals_Teleop_UR5arm.KeyPressResponse_Keyboard_RotationClutch_State
+                Joystick_RotationClutch_State = KeyPressResponse_Keyboard_RotationClutch_State
             else:
                 Joystick_RotationClutch_State = 1
             ###################################################
@@ -3859,7 +4013,7 @@ if __name__ == '__main__':
                 #Joystick_RollPitchYaw_AbtXYZ_List_Degrees_AtTimeOfClutchIn = list(Joystick_RollPitchYaw_AbtXYZ_List_Degrees)
                 #Joystick_RollPitchYaw_AbtXYZ_List_Radians_AtTimeOfClutchIn = list(Joystick_RollPitchYaw_AbtXYZ_List_Radians)
 
-                #UR5arm_MostRecentDict_ToolVectorActual_AtTimeOfClutchIn = list(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual)
+                #UR5arm_MostRecentDict_ToolVectorActual_AtTimeOfClutchIn = list(UR5arm_MostRecentDict_ToolVectorActual)
             ###################################################
 
             ###################################################
@@ -3869,7 +4023,7 @@ if __name__ == '__main__':
                 #Joystick_RollPitchYaw_AbtXYZ_List_Degrees_AtTimeOfClutchIn = list(Joystick_RollPitchYaw_AbtXYZ_List_Degrees)
                 #Joystick_RollPitchYaw_AbtXYZ_List_Radians_AtTimeOfClutchIn = list(Joystick_RollPitchYaw_AbtXYZ_List_Radians)
 
-                #UR5arm_MostRecentDict_ToolVectorActual_AtTimeOfClutchIn = list(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual)
+                #UR5arm_MostRecentDict_ToolVectorActual_AtTimeOfClutchIn = list(UR5arm_MostRecentDict_ToolVectorActual)
             ###################################################
 
             ###################################################
@@ -3879,7 +4033,7 @@ if __name__ == '__main__':
 
             ###################################################
             ################################################### Important to have the clutch code outside of new data loop so that we can de-clutch even without new data.
-                
+
         ###################################################
         ###################################################
         ###################################################
@@ -3934,7 +4088,7 @@ if __name__ == '__main__':
                 ArucoTag_RollPitchYaw_AbtXYZ_List_Degrees = ArucoTag_RotationVectorOfMarkerCenter_EulerAnglesXYZrollPitchYawInDegrees_PythonList_PrimaryMarker
                 ArucoTag_RollPitchYaw_AbtXYZ_List_Radians = ArucoTag_RotationVectorOfMarkerCenter_EulerAnglesXYZrollPitchYawInRadians_PythonList_PrimaryMarker
                 #################################################
-                
+
                 ###################################################
                 for Index in range(0,3):
                     ArucoTag_PositionList[Index] = ArucoTag_PositionList[Index]*ArucoTag_PositionList_ScalingFactorList[Index]
@@ -3950,14 +4104,14 @@ if __name__ == '__main__':
 
             ###################################################
             if ArucoTag_UseTranslationClutchFlag == 1:
-                ArucoTag_TranslationClutch_State = SharedGlobals_Teleop_UR5arm.KeyPressResponse_Keyboard_TranslationClutch_State
+                ArucoTag_TranslationClutch_State = KeyPressResponse_Keyboard_TranslationClutch_State
             else:
                 ArucoTag_TranslationClutch_State = 1
             ###################################################
 
             ###################################################
             if ArucoTag_UseRotationClutchFlag == 1:
-                ArucoTag_RotationClutch_State = SharedGlobals_Teleop_UR5arm.KeyPressResponse_Keyboard_RotationClutch_State
+                ArucoTag_RotationClutch_State = KeyPressResponse_Keyboard_RotationClutch_State
             else:
                 ArucoTag_RotationClutch_State = 1
             ###################################################
@@ -3968,7 +4122,7 @@ if __name__ == '__main__':
                 ArucoTag_RollPitchYaw_AbtXYZ_List_Degrees_AtTimeOfClutchIn = list(ArucoTag_RollPitchYaw_AbtXYZ_List_Degrees)
                 ArucoTag_RollPitchYaw_AbtXYZ_List_Radians_AtTimeOfClutchIn = list(ArucoTag_RollPitchYaw_AbtXYZ_List_Radians)
 
-                UR5arm_MostRecentDict_ToolVectorActual_AtTimeOfClutchIn = list(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual)
+                UR5arm_MostRecentDict_ToolVectorActual_AtTimeOfClutchIn = list(UR5arm_MostRecentDict_ToolVectorActual)
             ###################################################
 
             ###################################################
@@ -3977,7 +4131,7 @@ if __name__ == '__main__':
                 ArucoTag_RollPitchYaw_AbtXYZ_List_Degrees_AtTimeOfClutchIn = list(ArucoTag_RollPitchYaw_AbtXYZ_List_Degrees)
                 ArucoTag_RollPitchYaw_AbtXYZ_List_Radians_AtTimeOfClutchIn = list(ArucoTag_RollPitchYaw_AbtXYZ_List_Radians)
 
-                UR5arm_MostRecentDict_ToolVectorActual_AtTimeOfClutchIn = list(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual)
+                UR5arm_MostRecentDict_ToolVectorActual_AtTimeOfClutchIn = list(UR5arm_MostRecentDict_ToolVectorActual)
             ###################################################
 
             ###################################################
@@ -4023,21 +4177,21 @@ if __name__ == '__main__':
 
             ###################################################
             ###################################################
-            if SharedGlobals_Teleop_UR5arm.KeyPressResponse_OpenRobotiqGripper2F85_NeedsToBeChangedFlag  == 1:
-                RobotiqGripper2F85_Position_ToBeSet = LimitNumber_FloatOutputOnly(0.0, 255.0, RobotiqGripper2F85_Position_ToBeSet + SharedGlobals_Teleop_UR5arm.Keyboard_KeysToTeleopControlsMapping_DictOfDicts["OpenRobotiqGripper2F85"]["IncrementSize"])
+            if KeyPressResponse_OpenRobotiqGripper2F85_NeedsToBeChangedFlag  == 1:
+                RobotiqGripper2F85_Position_ToBeSet = LimitNumber_FloatOutputOnly(0.0, 255.0, RobotiqGripper2F85_Position_ToBeSet + Keyboard_KeysToTeleopControlsMapping_DictOfDicts["OpenRobotiqGripper2F85"]["IncrementSize"])
 
                 RobotiqGripper2F85_PositionSpeedOrForce_NeedsToBeChangedFlag = 1
-                #SharedGlobals_Teleop_UR5arm.KeyPressResponse_OpenRobotiqGripper2F85_NeedsToBeChangedFlag = 0 #HANDLED INSTEAD BY THE REVERSE KEY-PRESS
+                #KeyPressResponse_OpenRobotiqGripper2F85_NeedsToBeChangedFlag = 0 #HANDLED INSTEAD BY THE REVERSE KEY-PRESS
             ###################################################
             ###################################################
 
             ###################################################
             ###################################################
-            if SharedGlobals_Teleop_UR5arm.KeyPressResponse_CloseRobotiqGripper2F85_NeedsToBeChangedFlag  == 1:
-                RobotiqGripper2F85_Position_ToBeSet = LimitNumber_FloatOutputOnly(0.0, 255.0, RobotiqGripper2F85_Position_ToBeSet + SharedGlobals_Teleop_UR5arm.Keyboard_KeysToTeleopControlsMapping_DictOfDicts["CloseRobotiqGripper2F85"]["IncrementSize"])
+            if KeyPressResponse_CloseRobotiqGripper2F85_NeedsToBeChangedFlag  == 1:
+                RobotiqGripper2F85_Position_ToBeSet = LimitNumber_FloatOutputOnly(0.0, 255.0, RobotiqGripper2F85_Position_ToBeSet + Keyboard_KeysToTeleopControlsMapping_DictOfDicts["CloseRobotiqGripper2F85"]["IncrementSize"])
 
                 RobotiqGripper2F85_PositionSpeedOrForce_NeedsToBeChangedFlag = 1
-                #SharedGlobals_Teleop_UR5arm.KeyPressResponse_CloseRobotiqGripper2F85_NeedsToBeChangedFlag = 0 #HANDLED INSTEAD BY THE REVERSE KEY-PRESS
+                #KeyPressResponse_CloseRobotiqGripper2F85_NeedsToBeChangedFlag = 0 #HANDLED INSTEAD BY THE REVERSE KEY-PRESS
             ###################################################
             ###################################################
 
@@ -4052,42 +4206,24 @@ if __name__ == '__main__':
 
             if UR5arm_MostRecentDict_ToolVectorActual_IsItInitializedFlag == 1:
 
-                if SharedGlobals_Teleop_UR5arm.KeyPressResponse_IncrementURtoolTipInX_NeedsToBeChangedFlag == 1:
-                    UR5arm_ToolVectorActual_ToBeSet = list(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual)
-                    UR5arm_ToolVectorActual_ToBeSet[0] = UR5arm_ToolVectorActual_ToBeSet[0] + SharedGlobals_Teleop_UR5arm.Keyboard_KeysToTeleopControlsMapping_DictOfDicts["Xincrement"]["IncrementSize"]
-                    UR5arm_PositionControl_NeedsToBeChangedFlag = 1
-                    #SharedGlobals_Teleop_UR5arm.KeyPressResponse_IncrementURtoolTipInX_NeedsToBeChangedFlag = 0 #HANDLED INSTEAD BY THE REVERSE KEY-PRESS
+                ###################################################
+                if KeyPressResponse_Keyboard_RotationClutch_State == 1:
+                    KeyboardX = KeyPressResponse_IncrementURtoolTipInX_NeedsToBeChangedFlag*Keyboard_KeysToTeleopControlsMapping_DictOfDicts["Xincrement"]["RotationIncrementSize"] - KeyPressResponse_DecrementURtoolTipInX_NeedsToBeChangedFlag*Keyboard_KeysToTeleopControlsMapping_DictOfDicts["Xdecrement"]["RotationIncrementSize"]
+                    KeyboardY = KeyPressResponse_IncrementURtoolTipInY_NeedsToBeChangedFlag*Keyboard_KeysToTeleopControlsMapping_DictOfDicts["Yincrement"]["RotationIncrementSize"] - KeyPressResponse_DecrementURtoolTipInY_NeedsToBeChangedFlag*Keyboard_KeysToTeleopControlsMapping_DictOfDicts["Ydecrement"]["RotationIncrementSize"]
+                    KeyboardZ = KeyPressResponse_IncrementURtoolTipInZ_NeedsToBeChangedFlag*Keyboard_KeysToTeleopControlsMapping_DictOfDicts["Zincrement"]["RotationIncrementSize"]  - KeyPressResponse_DecrementURtoolTipInZ_NeedsToBeChangedFlag*Keyboard_KeysToTeleopControlsMapping_DictOfDicts["Zdecrement"]["RotationIncrementSize"]
+                else:
+                    KeyboardX = KeyPressResponse_IncrementURtoolTipInX_NeedsToBeChangedFlag*Keyboard_KeysToTeleopControlsMapping_DictOfDicts["Xincrement"]["TranslationIncrementSize"] - KeyPressResponse_DecrementURtoolTipInX_NeedsToBeChangedFlag*Keyboard_KeysToTeleopControlsMapping_DictOfDicts["Xdecrement"]["TranslationIncrementSize"]
+                    KeyboardY = KeyPressResponse_IncrementURtoolTipInY_NeedsToBeChangedFlag*Keyboard_KeysToTeleopControlsMapping_DictOfDicts["Yincrement"]["TranslationIncrementSize"] - KeyPressResponse_DecrementURtoolTipInY_NeedsToBeChangedFlag*Keyboard_KeysToTeleopControlsMapping_DictOfDicts["Ydecrement"]["TranslationIncrementSize"]
+                    KeyboardZ = KeyPressResponse_IncrementURtoolTipInZ_NeedsToBeChangedFlag*Keyboard_KeysToTeleopControlsMapping_DictOfDicts["Zincrement"]["TranslationIncrementSize"]  - KeyPressResponse_DecrementURtoolTipInZ_NeedsToBeChangedFlag*Keyboard_KeysToTeleopControlsMapping_DictOfDicts["Zdecrement"]["TranslationIncrementSize"]
+                ###################################################
 
-                if SharedGlobals_Teleop_UR5arm.KeyPressResponse_DecrementURtoolTipInX_NeedsToBeChangedFlag == 1:
-                    UR5arm_ToolVectorActual_ToBeSet = list(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual)
-                    UR5arm_ToolVectorActual_ToBeSet[0] = UR5arm_ToolVectorActual_ToBeSet[0] + SharedGlobals_Teleop_UR5arm.Keyboard_KeysToTeleopControlsMapping_DictOfDicts["Xdecrement"]["IncrementSize"]
-                    UR5arm_PositionControl_NeedsToBeChangedFlag = 1
-                    #SharedGlobals_Teleop_UR5arm.KeyPressResponse_DecrementURtoolTipInX_NeedsToBeChangedFlag = 0 #HANDLED INSTEAD BY THE REVERSE KEY-PRESS
-
-                if SharedGlobals_Teleop_UR5arm.KeyPressResponse_IncrementURtoolTipInY_NeedsToBeChangedFlag == 1:
-                    UR5arm_ToolVectorActual_ToBeSet = list(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual)
-                    UR5arm_ToolVectorActual_ToBeSet[1] = UR5arm_ToolVectorActual_ToBeSet[1] + SharedGlobals_Teleop_UR5arm.Keyboard_KeysToTeleopControlsMapping_DictOfDicts["Yincrement"]["IncrementSize"]
-                    UR5arm_PositionControl_NeedsToBeChangedFlag = 1
-                    #SharedGlobals_Teleop_UR5arm.KeyPressResponse_IncrementURtoolTipInY_NeedsToBeChangedFlag = 0 #HANDLED INSTEAD BY THE REVERSE KEY-PRESS
-
-                if SharedGlobals_Teleop_UR5arm.KeyPressResponse_DecrementURtoolTipInY_NeedsToBeChangedFlag == 1:
-                    UR5arm_ToolVectorActual_ToBeSet = list(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual)
-                    UR5arm_ToolVectorActual_ToBeSet[1] = UR5arm_ToolVectorActual_ToBeSet[1] + SharedGlobals_Teleop_UR5arm.Keyboard_KeysToTeleopControlsMapping_DictOfDicts["Ydecrement"]["IncrementSize"]
-                    UR5arm_PositionControl_NeedsToBeChangedFlag = 1
-                    #SharedGlobals_Teleop_UR5arm.KeyPressResponse_DecrementURtoolTipInY_NeedsToBeChangedFlag = 0 #HANDLED INSTEAD BY THE REVERSE KEY-PRESS
-
-                if SharedGlobals_Teleop_UR5arm.KeyPressResponse_IncrementURtoolTipInZ_NeedsToBeChangedFlag == 1:
-                    UR5arm_ToolVectorActual_ToBeSet = list(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual)
-                    UR5arm_ToolVectorActual_ToBeSet[2] = UR5arm_ToolVectorActual_ToBeSet[2] + SharedGlobals_Teleop_UR5arm.Keyboard_KeysToTeleopControlsMapping_DictOfDicts["Zincrement"]["IncrementSize"]
-                    UR5arm_PositionControl_NeedsToBeChangedFlag = 1
-                    #SharedGlobals_Teleop_UR5arm.KeyPressResponse_IncrementURtoolTipInZ_NeedsToBeChangedFlag = 0 #HANDLED INSTEAD BY THE REVERSE KEY-PRESS
-
-                if SharedGlobals_Teleop_UR5arm.KeyPressResponse_DecrementURtoolTipInZ_NeedsToBeChangedFlag == 1:
-                    UR5arm_ToolVectorActual_ToBeSet = list(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual)
-                    UR5arm_ToolVectorActual_ToBeSet[2] = UR5arm_ToolVectorActual_ToBeSet[2] + SharedGlobals_Teleop_UR5arm.Keyboard_KeysToTeleopControlsMapping_DictOfDicts["Zdecrement"]["IncrementSize"]
-                    UR5arm_PositionControl_NeedsToBeChangedFlag = 1
-                    #SharedGlobals_Teleop_UR5arm.KeyPressResponse_DecrementURtoolTipInZ_NeedsToBeChangedFlag = 0 #HANDLED INSTEAD BY THE REVERSE KEY-PRESS
-
+                GeneralizedControlForRateControlInput(Input_TranslationList=[KeyboardX, KeyboardY, KeyboardZ],
+                               Input_TranslationIncrementList=[1.0, 1.0, 1.0],
+                               Input_TranslationClutch_State=(not KeyPressResponse_Keyboard_RotationClutch_State),#KeyPressResponse_Keyboard_TranslationClutch_State,
+                               Input_RotationList=[KeyboardX, KeyboardY, KeyboardZ],
+                               Input_RotationIncrementList=[1.0, 1.0, 1.0],
+                               Input_RotationClutch_State=KeyPressResponse_Keyboard_RotationClutch_State,
+                               Input_OPEN_FLAG=Keyboard_OPEN_FLAG)
         ###################################################
         ###################################################
         ###################################################
@@ -4096,65 +4232,6 @@ if __name__ == '__main__':
         ###################################################
         ###################################################
         if ControlType == "JoystickControl":
-
-            '''
-            ###################################################
-            ###################################################
-            if UR5arm_MostRecentDict_ToolVectorActual_IsItInitializedFlag == 1 and Joystick_OPEN_FLAG == 1:
-
-                if Joystick_TranslationClutch_State == 1:
-
-                    ###################################################
-                    for Index in range(0,6):
-                        AxisHatButtonOrBallTo6DOFposeMappingDict = Joystick_AxisHatButtonOrBallTo6DOFposeMapping_ListOfDicts[Index]
-
-                        IncrementSize = AxisHatButtonOrBallTo6DOFposeMappingDict["IncrementSize"]
-                        PrimaryAxisHatButtonOrBallIndex = AxisHatButtonOrBallTo6DOFposeMappingDict["PrimaryAxisHatButtonOrBallIndex"]
-                        SecondaryAxisHatButtonOrBallIndex = AxisHatButtonOrBallTo6DOFposeMappingDict["SecondaryAxisHatButtonOrBallIndex"]
-
-                        if AxisHatButtonOrBallTo6DOFposeMappingDict["AxisHatButtonOrBallType"] == "AXIS":
-                            Joystick_AddToUR5armCurrentPositionList[Index] = IncrementSize*Joystick_MostRecentDict_Joystick_Axis_Value_List[PrimaryAxisHatButtonOrBallIndex]
-
-                        elif AxisHatButtonOrBallTo6DOFposeMappingDict["AxisHatButtonOrBallType"] == "HAT":
-                            Joystick_AddToUR5armCurrentPositionList[Index] = IncrementSize*Joystick_MostRecentDict_Joystick_Hat_Value_List[PrimaryAxisHatButtonOrBallIndex][SecondaryAxisHatButtonOrBallIndex]
-
-                        else:
-                            print("In JoystickControl, only AXIS and HAT can be used to control the UR5.") #Nothing other than an axis or hat can be used as an input currently (no buttons or balls).
-
-                    ###################################################
-
-                    #We're NOT using UR5arm_MostRecentDict_ToolVectorActual_AtTimeOfClutchIn because the Joystick inputs rate-control, not absolute position.
-                    UR5arm_ToolVectorActual_ToBeSet = list(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual)
-
-                    ###################################################
-                    RotationEulerList = [0.0]*3
-                    RotationEulerList[0] = SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolTip_RotationEulerList_Radians[0] + Joystick_AddToUR5armCurrentPositionList[3]
-                    RotationEulerList[1] = SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolTip_RotationEulerList_Radians[1] + Joystick_AddToUR5armCurrentPositionList[4]
-                    RotationEulerList[2] = SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolTip_RotationEulerList_Radians[2] + Joystick_AddToUR5armCurrentPositionList[5]
-
-                    RotationObjectScipy_Joystick_AddToUR5armCurrentPositionList = Rotation.from_euler('xyz', RotationEulerList, degrees=False)
-                    RotationAxisAngleList_Joystick_AddToUR5armCurrentPositionList = RotationObjectScipy_Joystick_AddToUR5armCurrentPositionList.as_rotvec()
-                    #print("RotationAxisAngleList_Joystick_AddToUR5armCurrentPositionList: " + str(RotationAxisAngleList_Joystick_AddToUR5armCurrentPositionList))
-
-                    ###################################################
-
-                    ###################################################
-                    if Joystick_RotationClutch_State == 0:
-                        for Index in range(0,3):
-                            UR5arm_ToolVectorActual_ToBeSet[Index] = UR5arm_ToolVectorActual_ToBeSet[Index]  + Joystick_AddToUR5armCurrentPositionList[Index]
-
-                    if Joystick_RotationClutch_State == 1:
-                        UR5arm_ToolVectorActual_ToBeSet[3] = RotationAxisAngleList_Joystick_AddToUR5armCurrentPositionList[0]
-                        UR5arm_ToolVectorActual_ToBeSet[4] = RotationAxisAngleList_Joystick_AddToUR5armCurrentPositionList[1]
-                        UR5arm_ToolVectorActual_ToBeSet[5] = RotationAxisAngleList_Joystick_AddToUR5armCurrentPositionList[2]
-                    ###################################################
-
-                    UR5arm_PositionControl_NeedsToBeChangedFlag = 1
-
-            else:
-                UR5arm_ToolVectorActual_ToBeSet = list(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual)
-            '''
-
 
             ###################################################
             Joystick_SixDOFposeList = [0.0]*6
@@ -4185,23 +4262,20 @@ if __name__ == '__main__':
 
             #############################################tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt######
 
-            print("Joystick_SixDOFposeList: " + str(Joystick_SixDOFposeList) + ", Joystick_SixDOFposeIncrementList: " + str(Joystick_SixDOFposeIncrementList))
+            #print("Joystick_SixDOFposeList: " + str(Joystick_SixDOFposeList) + ", Joystick_SixDOFposeIncrementList: " + str(Joystick_SixDOFposeIncrementList))
 
-
-
-            # SHOULD I ADD BACK IN Input_RotationMatrixListsOfLists
+            #SHOULD I ADD BACK IN Input_RotationMatrixListsOfLists
             GeneralizedControlForRateControlInput(Input_TranslationList=Joystick_SixDOFposeList[0:3],
                                Input_TranslationIncrementList=Joystick_SixDOFposeIncrementList[0:3],
-                               Input_TranslationClutch_State=Joystick_TranslationClutch_State,
+                               Input_TranslationClutch_State=(not Joystick_RotationClutch_State),#Joystick_TranslationClutch_State,
                                Input_RotationList=Joystick_SixDOFposeList[3:],
                                Input_RotationIncrementList=Joystick_SixDOFposeIncrementList[3:],
                                Input_RotationClutch_State=Joystick_RotationClutch_State,
                                Input_OPEN_FLAG=Joystick_OPEN_FLAG)
-            #'''
             ###################################################
             ###################################################
 
-            ###################################################
+            ################################################### CRITICAL: THE SPACE MOUSE'S BUTTONS ARE MAPPED TO KEYBOARD STROKES!
             ###################################################
             if RobotiqGripper2F85_OPEN_FLAG == 1:
 
@@ -4243,28 +4317,6 @@ if __name__ == '__main__':
         ################################################### unicorn
         if ControlType == "ArucoTagControl":
 
-            '''
-            if UR5arm_MostRecentDict_ToolVectorActual_IsItInitializedFlag == 1 and ArucoTag_OPEN_FLAG == 1 and ArucoTag_TranslationClutch_State == 1: #dragon
-
-                ArucoTag_AddToUR5armCurrentPositionList = numpy.array(ArucoTag_RotationMatrixListsOfLists).dot(numpy.array(ArucoTag_PositionList) - numpy.array(ArucoTag_PositionList_AtTimeOfClutchIn)).tolist()
-
-                #We're locking to UR5arm_MostRecentDict_ToolVectorActual_AtTimeOfClutchIn, not updating based on actual each function.
-                UR5arm_ToolVectorActual_ToBeSet = list(UR5arm_MostRecentDict_ToolVectorActual_AtTimeOfClutchIn)
-
-                ###################################################
-                ###################################################
-                for Index in range(0,3):
-                    UR5arm_ToolVectorActual_ToBeSet[Index] = UR5arm_ToolVectorActual_ToBeSet[Index]  + ArucoTag_AddToUR5armCurrentPositionList[Index]
-                ###################################################
-                ###################################################
-
-                UR5arm_PositionControl_NeedsToBeChangedFlag = 1
-
-            else:
-                UR5arm_ToolVectorActual_ToBeSet = list(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual)
-                ArucoTag_AddToUR5armCurrentPositionList = [0.0]*3
-            '''
-
             GeneralizedControlForPositionInput(Input_RotationMatrixListsOfLists=ArucoTag_RotationMatrixListsOfLists,
                                Input_TranslationList=ArucoTag_PositionList,
                                Input_TranslationList_AtTimeOfClutchIn=ArucoTag_PositionList_AtTimeOfClutchIn,
@@ -4282,28 +4334,6 @@ if __name__ == '__main__':
         ###################################################
         if ControlType == "ZEDcontrol":
 
-            '''
-            if UR5arm_MostRecentDict_ToolVectorActual_IsItInitializedFlag == 1 and ZEDasHandController_OPEN_FLAG == 1 and ZEDasHandController_TranslationClutch_State == 1: #dragon
-
-                ZEDasHandController_AddToUR5armCurrentPositionList = numpy.array(ZEDasHandController_RotationMatrixListsOfLists).dot(numpy.array(ZEDasHandController_PositionList) - numpy.array(ZEDasHandController_PositionList_AtTimeOfClutchIn)).tolist()
-
-                #We're locking to UR5arm_MostRecentDict_ToolVectorActual_AtTimeOfClutchIn, not updating based on actual each function.
-                UR5arm_ToolVectorActual_ToBeSet = list(UR5arm_MostRecentDict_ToolVectorActual_AtTimeOfClutchIn)
-
-                ###################################################
-                ###################################################
-                for Index in range(0,3):
-                    UR5arm_ToolVectorActual_ToBeSet[Index] = UR5arm_ToolVectorActual_ToBeSet[Index]  + ZEDasHandController_AddToUR5armCurrentPositionList[Index]
-                ###################################################
-                ###################################################
-
-                UR5arm_PositionControl_NeedsToBeChangedFlag = 1
-
-            else:
-                UR5arm_ToolVectorActual_ToBeSet = list(SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual)
-                ZEDasHandController_AddToUR5armCurrentPositionList = [0.0]*3
-            '''
-            
             GeneralizedControlForPositionInput(Input_RotationMatrixListsOfLists=ZEDasHandController_RotationMatrixListsOfLists,
                                Input_TranslationList=ZEDasHandController_PositionList,
                                Input_TranslationList_AtTimeOfClutchIn=ZEDasHandController_PositionList_AtTimeOfClutchIn,
@@ -4429,7 +4459,7 @@ if __name__ == '__main__':
         if CSVfileForTrajectoryData_SaveFlag == 1:
 
             for Index in range(0, 6):
-                UR5arm_MostRecentDict_ToolVectorActual_MotionFromSnapshotAtTimeOfCreatingCSVfileForTrajectoryData[Index] = SharedGlobals_Teleop_UR5arm.UR5arm_MostRecentDict_ToolVectorActual[Index] - UR5arm_MostRecentDict_ToolVectorActual_SnapshotAtTimeOfCreatingCSVfileForTrajectoryData[Index]
+                UR5arm_MostRecentDict_ToolVectorActual_MotionFromSnapshotAtTimeOfCreatingCSVfileForTrajectoryData[Index] = UR5arm_MostRecentDict_ToolVectorActual[Index] - UR5arm_MostRecentDict_ToolVectorActual_SnapshotAtTimeOfCreatingCSVfileForTrajectoryData[Index]
 
             CSVfileForTrajectoryData_LineToWrite = ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(CurrentTime_CalculatedFromMainThread, 0, 5) + \
                                                     ", " + \

@@ -1519,6 +1519,7 @@ class CameraStreamerClass_ReubenPython2and3Class(Frame): #Subclass the Tkinter F
                     else:
                         self.CVcapture.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25) #https://github.com/opencv/opencv/issues/9738
 
+                    time.sleep(0.030)
                     self.MyPrint_WithoutLogFile("Changed cv2.CAP_PROP_AUTO_exposure to " + str(self.CameraSetting_Autoexposure_TO_BE_SET))
                     self.CameraSetting_Autoexposure = self.CameraSetting_Autoexposure_TO_BE_SET
                     self.CameraSetting_Autoexposure_NeedsToBeChangedFlag = 0

@@ -6,7 +6,7 @@ reuben.brewer@gmail.com
 www.reubotics.com
 
 Apache 2 License
-Software Revision E, 05/10/2023
+Software Revision F, 07/18/2023
 
 Verified working on: Python 3.8 for Windows 10 64-bit, Ubuntu 20.04, and Raspberry Pi Buster (no Mac testing yet).
 '''
@@ -698,6 +698,30 @@ class UR5arm_ReubenPython2and3Class(Frame): #Subclass the Tkinter Frame
 
         #########################################################
         #########################################################
+        if "OutputFlangCoordinateSystem_to_TCPtoolCenterPoint_6DOFposeList_ToBeCommanded" in setup_dict:
+            OutputFlangCoordinateSystem_to_TCPtoolCenterPoint_6DOFposeList_ToBeCommanded_TEMP = setup_dict["OutputFlangCoordinateSystem_to_TCPtoolCenterPoint_6DOFposeList_ToBeCommanded"]
+
+            if self.IsInputListOfNumbers(OutputFlangCoordinateSystem_to_TCPtoolCenterPoint_6DOFposeList_ToBeCommanded_TEMP) == 1:
+                if len(OutputFlangCoordinateSystem_to_TCPtoolCenterPoint_6DOFposeList_ToBeCommanded_TEMP) == 6:
+                    self.OutputFlangCoordinateSystem_to_TCPtoolCenterPoint_6DOFposeList_ToBeCommanded = OutputFlangCoordinateSystem_to_TCPtoolCenterPoint_6DOFposeList_ToBeCommanded_TEMP
+
+                else:
+                    print("UR5arm_ReubenPython2and3Class __init__: ERROR, OutputFlangCoordinateSystem_to_TCPtoolCenterPoint_6DOFposeList_ToBeCommanded must be a list of 6 numbers.")
+                    exit() #return Doesn't work in multiprocessing situation, must use exit() instead.
+
+            else:
+                print("UR5arm_ReubenPython2and3Class __init__: ERROR, OutputFlangCoordinateSystem_to_TCPtoolCenterPoint_6DOFposeList_ToBeCommanded must be a list of 6 numbers.")
+                exit() #return Doesn't work in multiprocessing situation, must use exit() instead.
+
+        else:
+            self.OutputFlangCoordinateSystem_to_TCPtoolCenterPoint_6DOFposeList_ToBeCommanded = [0.0]*6
+
+        print("URarm_ReubenPython2and3Class __init__: OutputFlangCoordinateSystem_to_TCPtoolCenterPoint_6DOFposeList_ToBeCommanded: " + str(self.OutputFlangCoordinateSystem_to_TCPtoolCenterPoint_6DOFposeList_ToBeCommanded))
+        #########################################################
+        #########################################################
+
+        #########################################################
+        #########################################################
         if "Acceleration" in setup_dict:
             self.Acceleration = self.PassThroughFloatValuesInRange_ExitProgramOtherwise("Acceleration", setup_dict["Acceleration"], self.Acceleration_MinValue, self.Acceleration_MaxValue)
 
@@ -858,6 +882,13 @@ class UR5arm_ReubenPython2and3Class(Frame): #Subclass the Tkinter Frame
         print("UR5arm_ReubenPython2and3Class __init__: EnableTx_State_AtStartupFlag: " + str(self.EnableTx_State_AtStartupFlag))
 
         self.EnableTx_State = self.EnableTx_State_AtStartupFlag
+        #########################################################
+        #########################################################
+
+        #########################################################
+        #########################################################
+        #We want to send a bunch of setup/initialization messages at the start of the program and don't want a size limit on the queue initially.
+        self.Enable_DedicatedTxThread_TxMessageToSend_Queue_MaxSize_Flag = 0
         #########################################################
         #########################################################
 
@@ -1454,13 +1485,17 @@ class UR5arm_ReubenPython2and3Class(Frame): #Subclass the Tkinter Frame
     ##########################################################################################################
     def SendTxMessage(self, MessageToSend, IgnoreNewDataIfQueueIsFullFlag = 1):
 
-        if self.DedicatedTxThread_TxMessageToSend_Queue.qsize() < self.DedicatedTxThread_TxMessageToSend_Queue_MaxSize:
-            self.DedicatedTxThread_TxMessageToSend_Queue.put(MessageToSend)
+        if self.Enable_DedicatedTxThread_TxMessageToSend_Queue_MaxSize_Flag == 1:
+
+            if self.DedicatedTxThread_TxMessageToSend_Queue.qsize() < self.DedicatedTxThread_TxMessageToSend_Queue_MaxSize:
+                self.DedicatedTxThread_TxMessageToSend_Queue.put(MessageToSend)
+            else:
+                #print("SendTxMessage queue is full!")
+                if IgnoreNewDataIfQueueIsFullFlag != 1:
+                    dummy = self.DedicatedTxThread_TxMessageToSend_Queue.get() #makes room for one more message
+                    self.DedicatedTxThread_TxMessageToSend_Queue.put(MessageToSend) #backfills that message with new data
         else:
-            #print("SendTxMessage queue is full!")
-            if IgnoreNewDataIfQueueIsFullFlag != 1:
-                dummy = self.DedicatedTxThread_TxMessageToSend_Queue.get() #makes room for one more message
-                self.DedicatedTxThread_TxMessageToSend_Queue.put(MessageToSend) #backfills that message with new data
+            self.DedicatedTxThread_TxMessageToSend_Queue.put(MessageToSend)
     
     ##########################################################################################################
     ##########################################################################################################
@@ -2069,6 +2104,43 @@ class UR5arm_ReubenPython2and3Class(Frame): #Subclass the Tkinter Frame
 
     ##########################################################################################################
     ##########################################################################################################
+    '''
+    Sets the active tcp offset, i.e. the transformation from the output flange coordinate system to the TCP as a pose.
+    Parameters
+    pose: A pose describing the transformation.
+    Example command: set_tcp(p[0.,.2,.3,0.,3.14,0.])
+    Example Parameters:
+    – pose = p[0.,.2,.3,0.,3.14,0.] --> tool center point is set to
+    x=0mm, y=200mm, z=300mm, rotation vector is rx=0 deg,
+    ry=180 deg, rz=0 deg. In tool coordinates.
+    NOTE: When changing TCP on the fly using set_tcp(), only variable waypoints or script lines will be affected by set_tcp().
+    '''
+    def SetTCP_ToolCenterPoint(self, OutputFlangCoordinateSystem_to_TCPtoolCenterPoint_6DOFposeList_ToBeSet = [0.0]*6):
+        try:
+            if self.IsInputListOfNumbers(OutputFlangCoordinateSystem_to_TCPtoolCenterPoint_6DOFposeList_ToBeSet) == 1:
+
+                    if len(OutputFlangCoordinateSystem_to_TCPtoolCenterPoint_6DOFposeList_ToBeSet) == 6:
+
+                        message_set_TCP_ToolCenterPoint_mode = "set_tcp(p" + str(OutputFlangCoordinateSystem_to_TCPtoolCenterPoint_6DOFposeList_ToBeSet)  + ")\n"
+                        #print("message_set_TCP_ToolCenterPoint_mode: " + str(message_set_TCP_ToolCenterPoint_mode))
+
+                        self.SendTxMessage(message_set_TCP_ToolCenterPoint_mode)
+
+                    else:
+                        print("SetTCP_ToolCenterPoint ERROR: OutputFlangCoordinateSystem_to_TCPtoolCenterPoint_6DOFposeList_ToBeSet must be a list of 6 numbers.")
+
+            else:
+                print("SetTCP_ToolCenterPoint ERROR: OutputFlangCoordinateSystem_to_TCPtoolCenterPoint_6DOFposeList_ToBeSet must be a list of 6 numbers.")
+
+        except:
+            exceptions = sys.exc_info()[0]
+            print("SetTCP_ToolCenterPoint, %s" % exceptions)
+            traceback.print_exc()
+    ##########################################################################################################
+    ##########################################################################################################
+
+    ##########################################################################################################
+    ##########################################################################################################
     def DisplayPopupMessage(self, MessageString = "MessageString", TitleString = "TitleString", WarningBooleanInteger = 0, ErrorBooleanInteger = 0, BlockingBooleanInteger = 1):
 
         if WarningBooleanInteger not in [0, 1]:
@@ -2324,6 +2396,16 @@ class UR5arm_ReubenPython2and3Class(Frame): #Subclass the Tkinter Frame
         for i in range(0, 5):
             self.SetPayload(self.Payload_MassKG_ToBeCommanded, self.Payload_CoGmetersList_ToBeCommanded)
             time.sleep(0.25)
+        ###############################################
+
+        ###############################################
+        for i in range(0, 5):
+            self.SetTCP_ToolCenterPoint(self.OutputFlangCoordinateSystem_to_TCPtoolCenterPoint_6DOFposeList_ToBeCommanded)
+            time.sleep(0.25)
+        ###############################################
+
+        ###############################################
+        self.Enable_DedicatedTxThread_TxMessageToSend_Queue_MaxSize_Flag = 1 #Now that arm is initialized, we'll limit the Tx queue size
         ###############################################
 
         self.StartingTime_CalculatedFromDedicatedTxThread = self.getPreciseSecondsTimeStampString()

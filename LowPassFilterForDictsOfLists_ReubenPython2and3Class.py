@@ -156,11 +156,13 @@ class LowPassFilterForDictsOfLists_ReubenPython2and3Class():
     ##########################################################################################################
     def AddDictOfVariableFilterSettingsFromExternalProgram(self, NewDictOfVariableFilterSettings):
 
+        self.DictOfVariableFilterSettings = dict()
+
         for VariableNameString in NewDictOfVariableFilterSettings:
             if VariableNameString not in self.DictOfVariableFilterSettings:
                 self.DictOfVariableFilterSettings[VariableNameString] = deepcopy(NewDictOfVariableFilterSettings[VariableNameString])
 
-        #print("AddDictOfVariableFilterSettingsFromExternalProgram: " + str(self.DictOfVariableFilterSettings))
+        print("AddDictOfVariableFilterSettingsFromExternalProgram: " + str(self.DictOfVariableFilterSettings))
     ##########################################################################################################
     ##########################################################################################################
 

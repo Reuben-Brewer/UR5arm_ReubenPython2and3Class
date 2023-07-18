@@ -6,7 +6,7 @@ SRI International
 reuben.brewer@sri.com
 
 Apache 2 License
-Software Revision D, 05/10/2023
+Software Revision E, 07/18/2023
 
 Verified working on: Python 3.8 for Windows10 64-bit (no testing on Raspberry Pi or Mac testing yet).
 '''
@@ -880,7 +880,7 @@ class ArucoTagDetectionFromCameraFeed_ReubenPython3Class(Frame): #Subclass the T
 
     ##########################################################################################################
     ##########################################################################################################
-    def CreateAndSaveImageOfArucoTagMarker(self, ID_integer, ArucoTag_DictType_EnglishString = "", EdgeLengthInPixels_integer = 100):
+    def CreateAndSaveImageOfArucoTagMarker(self, ID_integer, ArucoTag_DictType_EnglishString = "", EdgeLengthInPixels_integer = 100, WhiteBorderPixelWidth_integer = -1, BlackOutermostBorderPixelWidth_integer = -1):
 
         try:
 
@@ -888,6 +888,14 @@ class ArucoTagDetectionFromCameraFeed_ReubenPython3Class(Frame): #Subclass the T
             ArucoTag_DictType_EnglishString = str(ArucoTag_DictType_EnglishString)
             ID_integer = int(ID_integer)
             EdgeLengthInPixels_integer = int(EdgeLengthInPixels_integer)
+            WhiteBorderPixelWidth_integer = int(WhiteBorderPixelWidth_integer)
+            BlackOutermostBorderPixelWidth_integer = int(BlackOutermostBorderPixelWidth_integer)
+
+            if WhiteBorderPixelWidth_integer == -1:
+                WhiteBorderPixelWidth_integer = round(EdgeLengthInPixels_integer/6.0)
+
+            if BlackOutermostBorderPixelWidth_integer < 0:
+                BlackOutermostBorderPixelWidth_integer = 0
             ##########################################################################################################
 
             ##########################################################################################################
@@ -909,14 +917,27 @@ class ArucoTagDetectionFromCameraFeed_ReubenPython3Class(Frame): #Subclass the T
             ##########################################################################################################
 
             ##########################################################################################################
-            TagImageToBeSaved = numpy.zeros((EdgeLengthInPixels_integer, EdgeLengthInPixels_integer, 1), dtype="uint8")
+            TagImageToBeSaved_NoBorder = numpy.zeros((EdgeLengthInPixels_integer, EdgeLengthInPixels_integer, 1), dtype="uint8")
+
+            Width_TagImageToBeSaved_WithBorder = EdgeLengthInPixels_integer + 2*WhiteBorderPixelWidth_integer + 2*BlackOutermostBorderPixelWidth_integer
+            Height_TagImageToBeSaved_WithBorder = EdgeLengthInPixels_integer + 2*WhiteBorderPixelWidth_integer + 2*BlackOutermostBorderPixelWidth_integer
+            TagImageToBeSaved_WithBorder = 255*numpy.ones((Height_TagImageToBeSaved_WithBorder, Width_TagImageToBeSaved_WithBorder, 1), dtype="uint8")
+
             cv2.aruco.drawMarker(cv2.aruco.Dictionary_get(self.ArucoTag_DictType_AcceptableEnglishStringValuesDictOfDicts[ArucoTag_DictType_EnglishString]["cv2intValue"]),
                                  id=ID_integer,
                                  sidePixels=EdgeLengthInPixels_integer,
-                                 img=TagImageToBeSaved,
+                                 img=TagImageToBeSaved_NoBorder,
                                  borderBits=1) #When boderBits isn't 1, it saves an all-black image
 
-            cv2.imwrite("ArucoTag_Type_" + self.ArucoTag_DictType_EnglishString + "_ID_" + str(ID_integer) + ".png", TagImageToBeSaved)
+            TagImageToBeSaved_WithBorder[WhiteBorderPixelWidth_integer+BlackOutermostBorderPixelWidth_integer:EdgeLengthInPixels_integer+WhiteBorderPixelWidth_integer+BlackOutermostBorderPixelWidth_integer, WhiteBorderPixelWidth_integer+BlackOutermostBorderPixelWidth_integer:EdgeLengthInPixels_integer+WhiteBorderPixelWidth_integer+BlackOutermostBorderPixelWidth_integer] = TagImageToBeSaved_NoBorder
+
+            if BlackOutermostBorderPixelWidth_integer != 0:
+                TagImageToBeSaved_WithBorder[0:Height_TagImageToBeSaved_WithBorder, 0] = 0
+                TagImageToBeSaved_WithBorder[0:Height_TagImageToBeSaved_WithBorder, Width_TagImageToBeSaved_WithBorder - 1] = 0
+                TagImageToBeSaved_WithBorder[0, 0:Width_TagImageToBeSaved_WithBorder] = 0
+                TagImageToBeSaved_WithBorder[Height_TagImageToBeSaved_WithBorder - 1, 0:Width_TagImageToBeSaved_WithBorder] = 0
+
+            cv2.imwrite("ArucoTag_Type_" + self.ArucoTag_DictType_EnglishString + "_ID_" + str(ID_integer) + ".png", TagImageToBeSaved_WithBorder)
             ##########################################################################################################
 
         except:
@@ -1072,7 +1093,7 @@ class ArucoTagDetectionFromCameraFeed_ReubenPython3Class(Frame): #Subclass the T
                             ##########################################################################################################
                             ##########################################################################################################
                             #The actual DETECTION takes place here. Can run on either gray or color images, but the detector will automatically convert color to gray.
-                            self.DetectedArucoTags_CornersList, self.DetectedArucoTags_IDsList, self.DetectedArucoTags_RejectedImagePoints = cv2.aruco.detectMarkers(self.CameraImage_Color_Adjusted,
+                            self.DetectedArucoTags_CornersList_ImageCoordinates, self.DetectedArucoTags_IDsList, self.DetectedArucoTags_RejectedImagePoints = cv2.aruco.detectMarkers(self.CameraImage_Color_Adjusted,
                                                                                         cv2.aruco.Dictionary_get(self.ArucoTag_DictType_cv2Int),
                                                                                         parameters=self.cv2ArucoDetectionParameters,
                                                                                         cameraMatrix=self.CAMERA_MostRecentDict_CameraCalibration_Kmatrix_CameraIntrinsicsMatrix,
@@ -1083,9 +1104,9 @@ class ArucoTagDetectionFromCameraFeed_ReubenPython3Class(Frame): #Subclass the T
 
                             ##########################################################################################################
                             ##########################################################################################################
+                            if len(self.DetectedArucoTags_CornersList_ImageCoordinates) > 0:
 
-
-                            if len(self.DetectedArucoTags_CornersList) > 0:
+                                self.DetectedArucoTags_CenterOfMarker_ImageCoordinates = [-11111.0]*len(self.DetectedArucoTags_CornersList_ImageCoordinates)
 
                                 ##########################################################################################################
                                 CameraImage_Color_ArucoDetected_TEMP = self.CameraImage_Color_Adjusted.copy()
@@ -1108,7 +1129,9 @@ class ArucoTagDetectionFromCameraFeed_ReubenPython3Class(Frame): #Subclass the T
                                     '''
 
                                     #########################################################
-                                    ArucoTag_RotationVectorOfMarkerCenter_RodriguesAxisAngle_NumpyArray, ArucoTag_TranslationVectorOfMarkerCenter_NumpyArray, MarkerPoints = cv2.aruco.estimatePoseSingleMarkers(self.DetectedArucoTags_CornersList[Index],
+                                    self.DetectedArucoTags_CenterOfMarker_ImageCoordinates[Index] = numpy.mean(self.DetectedArucoTags_CornersList_ImageCoordinates[Index][0], 0)
+
+                                    ArucoTag_RotationVectorOfMarkerCenter_RodriguesAxisAngle_NumpyArray, ArucoTag_TranslationVectorOfMarkerCenter_NumpyArray, MarkerPoints = cv2.aruco.estimatePoseSingleMarkers(self.DetectedArucoTags_CornersList_ImageCoordinates[Index],
                                                                                                    self.ArucoTag_MarkerLengthInMillimeters,
                                                                                                    self.CAMERA_MostRecentDict_CameraCalibration_Kmatrix_CameraIntrinsicsMatrix,
                                                                                                    self.CAMERA_MostRecentDict_CameraCalibration_Darray_DistortionCoefficients)
@@ -1129,7 +1152,6 @@ class ArucoTagDetectionFromCameraFeed_ReubenPython3Class(Frame): #Subclass the T
                                     ArucoMarker_ID_Str = str(self.DetectedArucoTags_IDsList[Index][0])
                                     #print("ArucoMarker_ID_Str: " + str(ArucoMarker_ID_Str))
 
-
                                     if ArucoMarker_ID_Str not in self.DetectedArucoTag_InfoDict: #Marker ID hasn't been detected previously
 
                                         LowPassFilter_DictOfVariableFilterSettings = dict([("ArucoTag_TranslationVectorOfMarkerCenter_PythonList", dict([("UseMedianFilterFlag", 1), ("UseExponentialSmoothingFilterFlag", 1),("ExponentialSmoothingFilterLambda", self.ArucoTag_TranslationVectorOfMarkerCenter_ExponentialSmoothingFilterLambda)])),
@@ -1143,6 +1165,8 @@ class ArucoTagDetectionFromCameraFeed_ReubenPython3Class(Frame): #Subclass the T
                                                                         ("ArucoTag_RotationVectorOfMarkerCenter_EulerAnglesXYZrollPitchYawInDegrees_PythonList", ArucoTag_RotationVectorOfMarkerCenter_EulerAnglesXYZrollPitchYawInDegrees_PythonList),
                                                                         ("ArucoTag_RotationVectorOfMarkerCenter_EulerAnglesXYZrollPitchYawInRadians_PythonList", ArucoTag_RotationVectorOfMarkerCenter_EulerAnglesXYZrollPitchYawInRadians_PythonList),
                                                                         ("ArucoTag_DetectionTimeInMilliseconds", int(1000.0*self.CAMERA_MostRecentDict_Time)),
+                                                                        ("ArucoTag_DetectedArucoTags_CornersList_ImageCoordinates", self.DetectedArucoTags_CornersList_ImageCoordinates[Index]),
+                                                                        ("ArucoTag_DetectedArucoTags_CenterOfMarker_ImageCoordinates", self.DetectedArucoTags_CenterOfMarker_ImageCoordinates[Index]),
                                                                         ("LowPassFilterForDictsOfLists_ReubenPython2and3ClassObject", LowPassFilterForDictsOfLists_ReubenPython2and3Class(SetupDict))])
 
                                         #print("self.DetectedArucoTag_InfoDict[ArucoMarker_ID_Str]: " + str(self.DetectedArucoTag_InfoDict[ArucoMarker_ID_Str]))
@@ -1159,15 +1183,14 @@ class ArucoTagDetectionFromCameraFeed_ReubenPython3Class(Frame): #Subclass the T
                                         self.DetectedArucoTag_InfoDict[ArucoMarker_ID_Str]["ArucoTag_RotationVectorOfMarkerCenter_RodriguesAxisAngle_PythonList"] = Results["ArucoTag_RotationVectorOfMarkerCenter_RodriguesAxisAngle_PythonList"]["Filtered_MostRecentValuesList"]
                                         self.DetectedArucoTag_InfoDict[ArucoMarker_ID_Str]["ArucoTag_RotationVectorOfMarkerCenter_EulerAnglesXYZrollPitchYawInDegrees_PythonList"] = Results["ArucoTag_RotationVectorOfMarkerCenter_EulerAnglesXYZrollPitchYawInDegrees_PythonList"]["Filtered_MostRecentValuesList"]
                                         self.DetectedArucoTag_InfoDict[ArucoMarker_ID_Str]["ArucoTag_RotationVectorOfMarkerCenter_EulerAnglesXYZrollPitchYawInRadians_PythonList"] = numpy.deg2rad(numpy.array(Results["ArucoTag_RotationVectorOfMarkerCenter_EulerAnglesXYZrollPitchYawInDegrees_PythonList"]["Filtered_MostRecentValuesList"])).tolist()
-
-
+                                        self.DetectedArucoTag_InfoDict[ArucoMarker_ID_Str]["ArucoTag_DetectedArucoTags_CornersList_ImageCoordinates"] = self.DetectedArucoTags_CornersList_ImageCoordinates[Index]
+                                        self.DetectedArucoTag_InfoDict[ArucoMarker_ID_Str]["ArucoTag_DetectedArucoTags_CenterOfMarker_ImageCoordinates"] = self.DetectedArucoTags_CenterOfMarker_ImageCoordinates[Index]
                                         #print("yahtze, index " + str(str(self.DetectedArucoTags_IDsList[Index])[0]))
                                     #########################################################
 
                                     #########################################################
-                                    cv2.aruco.drawDetectedMarkers(CameraImage_Color_ArucoDetected_TEMP, self.DetectedArucoTags_CornersList) #Render perimeter of tag
-                                    cv2.aruco.drawDetectedMarkers(CameraImage_Gray_ArucoDetected_TEMP, self.DetectedArucoTags_CornersList) #Render perimeter of tag
-
+                                    cv2.aruco.drawDetectedMarkers(CameraImage_Color_ArucoDetected_TEMP, self.DetectedArucoTags_CornersList_ImageCoordinates) #Render perimeter of tag
+                                    cv2.aruco.drawDetectedMarkers(CameraImage_Gray_ArucoDetected_TEMP, self.DetectedArucoTags_CornersList_ImageCoordinates) #Render perimeter of tag
 
                                     cv2.aruco.drawAxis(image=CameraImage_Color_ArucoDetected_TEMP,
                                                        cameraMatrix=self.CAMERA_MostRecentDict_CameraCalibration_Kmatrix_CameraIntrinsicsMatrix,
@@ -1175,7 +1198,6 @@ class ArucoTagDetectionFromCameraFeed_ReubenPython3Class(Frame): #Subclass the T
                                                        rvec=ArucoTag_RotationVectorOfMarkerCenter_RodriguesAxisAngle_NumpyArray,
                                                        tvec=ArucoTag_TranslationVectorOfMarkerCenter_NumpyArray,
                                                        length=self.ArucoTag_AxesToDrawLengthInMillimeters)
-
 
                                     cv2.aruco.drawAxis(image=CameraImage_Gray_ArucoDetected_TEMP,
                                                        cameraMatrix=self.CAMERA_MostRecentDict_CameraCalibration_Kmatrix_CameraIntrinsicsMatrix,
@@ -1195,13 +1217,17 @@ class ArucoTagDetectionFromCameraFeed_ReubenPython3Class(Frame): #Subclass the T
                                 ########################################################################################################## unicorn
                                 self.MostRecentDataDict_BlockFromBeingReadFlag = 1
 
-                                self.MostRecentDataDict = dict([("Time", self.CurrentTime_CalculatedFromMainThread),
+                                self.MostRecentDataDict = dict([("Time", int(1000.0*self.CAMERA_MostRecentDict_Time)),#self.CurrentTime_CalculatedFromMainThread),
                                                                 ("Frequency", self.DataStreamingFrequency_CalculatedFromMainThread),
                                                                 ("DetectedArucoTag_InfoDict", self.DetectedArucoTag_InfoDict),
                                                                 ("SaveImageFlag", self.SaveImageFlag),
                                                                 ("AcceptNewImagesForSavingFlag", self.AcceptNewImagesForSavingFlag),
                                                                 ("ImagesToBeSaveQueue_qsize", self.ImagesToBeSaveQueue.qsize()),
-                                                                ("SavedImageFrameCounter", self.SavedImageFrameCounter)])
+                                                                ("SavedImageFrameCounter", self.SavedImageFrameCounter),
+                                                                ("OriginalImage", self.CAMERA_MostRecentDict_OriginalImage),
+                                                                ("CameraImage_Color_ArucoDetected", self.CameraImage_Color_ArucoDetected),
+                                                                ("CameraCalibration_Kmatrix_CameraIntrinsicsMatrix", self.CAMERA_MostRecentDict_CameraCalibration_Kmatrix_CameraIntrinsicsMatrix),
+                                                                ("CameraCalibration_Darray_DistortionCoefficients", self.CAMERA_MostRecentDict_CameraCalibration_Darray_DistortionCoefficients)])
 
                                 self.MostRecentDataDict_LAST = self.MostRecentDataDict
 

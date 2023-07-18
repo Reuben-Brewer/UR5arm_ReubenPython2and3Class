@@ -6,7 +6,7 @@ reuben.brewer@gmail.com
 www.reubotics.com
 
 Apache 2 License
-Software Revision D, 05/10/2023
+Software Revision F, 07/18/2023
 
 Verified working on: Python 2.7, 3.8 for Windows 8.1, 10 64-bit, Ubuntu 20.04, and Raspberry Pi Buster (no Mac testing yet).
 '''
@@ -122,15 +122,6 @@ class RobotiqGripper2F85_ReubenPython2and3Class(Frame): #Subclass the Tkinter Fr
         self.SlaveIDmin = 1
         self.SlaveIDmax = 247
         self.SlaveIDreceivedFromGripper = -11111
-
-        self.Position_Min = 0
-        self.Position_Max = 255
-
-        self.Speed_Min = 0
-        self.Speed_Max = 255
-
-        self.Force_Min = 0
-        self.Force_Max = 255
 
         self.SendPositionSpeedForceCommandToGripper_Queue = Queue.Queue()
 
@@ -371,11 +362,97 @@ class RobotiqGripper2F85_ReubenPython2and3Class(Frame): #Subclass the Tkinter Fr
 
         #########################################################
         #########################################################
+        if "Position_Min" in setup_dict:
+            self.Position_Min = self.PassThroughFloatValuesInRange_ExitProgramOtherwise("Position_Min", setup_dict["Position_Min"], 0.0, 255.0)
+
+        else:
+            self.Position_Min = 0.0
+
+        self.Position_Min = round(self.Position_Min)
+
+        print("RobotiqGripper2F85_ReubenPython2and3Class: Position_Min: " + str(self.Position_Min))
+        #########################################################
+        #########################################################
+        
+        #########################################################
+        #########################################################
+        if "Speed_Min" in setup_dict:
+            self.Speed_Min = self.PassThroughFloatValuesInRange_ExitProgramOtherwise("Speed_Min", setup_dict["Speed_Min"], 0.0, 255.0)
+
+        else:
+            self.Speed_Min = 0.0
+
+        self.Speed_Min = round(self.Speed_Min)
+
+        print("RobotiqGripper2F85_ReubenPython2and3Class: Speed_Min: " + str(self.Speed_Min))
+        #########################################################
+        #########################################################
+        
+        #########################################################
+        #########################################################
+        if "Force_Min" in setup_dict:
+            self.Force_Min = self.PassThroughFloatValuesInRange_ExitProgramOtherwise("Force_Min", setup_dict["Force_Min"], 0.0, 255.0)
+
+        else:
+            self.Force_Min = 0.0
+
+        self.Force_Min = round(self.Force_Min)
+
+        print("RobotiqGripper2F85_ReubenPython2and3Class: Force_Min: " + str(self.Force_Min))
+        #########################################################
+        #########################################################
+
+        #########################################################
+        #########################################################
+        if "Position_Max" in setup_dict:
+            self.Position_Max = self.PassThroughFloatValuesInRange_ExitProgramOtherwise("Position_Max", setup_dict["Position_Max"], 0.0, 255.0)
+
+        else:
+            self.Position_Max = 255.0
+
+        self.Position_Max = round(self.Position_Max)
+
+        print("RobotiqGripper2F85_ReubenPython2and3Class: Position_Max: " + str(self.Position_Max))
+        #########################################################
+        #########################################################
+        
+        #########################################################
+        #########################################################
+        if "Speed_Max" in setup_dict:
+            self.Speed_Max = self.PassThroughFloatValuesInRange_ExitProgramOtherwise("Speed_Max", setup_dict["Speed_Max"], 0.0, 255.0)
+
+        else:
+            self.Speed_Max = 255.0
+
+        self.Speed_Max = round(self.Speed_Max)
+
+        print("RobotiqGripper2F85_ReubenPython2and3Class: Speed_Max: " + str(self.Speed_Max))
+        #########################################################
+        #########################################################
+        
+        #########################################################
+        #########################################################
+        if "Force_Max" in setup_dict:
+            self.Force_Max = self.PassThroughFloatValuesInRange_ExitProgramOtherwise("Force_Max", setup_dict["Force_Max"], 0.0, 255.0)
+
+        else:
+            self.Force_Max = 255.0
+
+        self.Force_Max = round(self.Force_Max)
+
+        print("RobotiqGripper2F85_ReubenPython2and3Class: Force_Max: " + str(self.Force_Max))
+        #########################################################
+        #########################################################
+
+        #########################################################
+        #########################################################
         if "Position_Starting" in setup_dict:
             self.Position_Starting = self.PassThroughFloatValuesInRange_ExitProgramOtherwise("Position_Starting", setup_dict["Position_Starting"], self.Position_Min, self.Position_Max)
 
         else:
             self.Position_Starting = 0.5*(self.Position_Max - self.Position_Min)
+
+        self.Position_Starting = round(self.Position_Starting)
 
         print("RobotiqGripper2F85_ReubenPython2and3Class: Position_Starting: " + str(self.Position_Starting))
         #########################################################
@@ -389,6 +466,8 @@ class RobotiqGripper2F85_ReubenPython2and3Class(Frame): #Subclass the Tkinter Fr
         else:
             self.Speed_Starting = 0.5*(self.Speed_Max - self.Speed_Min)
 
+        self.Speed_Starting = round(self.Speed_Starting)
+
         print("RobotiqGripper2F85_ReubenPython2and3Class: Speed_Starting: " + str(self.Speed_Starting))
         #########################################################
         #########################################################
@@ -400,6 +479,8 @@ class RobotiqGripper2F85_ReubenPython2and3Class(Frame): #Subclass the Tkinter Fr
 
         else:
             self.Force_Starting = 0.5*(self.Force_Max - self.Force_Min)
+
+        self.Force_Starting = round(self.Force_Starting)
 
         print("RobotiqGripper2F85_ReubenPython2and3Class: Force_Starting: " + str(self.Force_Starting))
         #########################################################
