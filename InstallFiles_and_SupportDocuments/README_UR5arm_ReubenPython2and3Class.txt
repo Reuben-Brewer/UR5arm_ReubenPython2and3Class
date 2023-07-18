@@ -14,7 +14,7 @@ www.reubotics.com
 
 Apache 2 License
 
-Software Revision E, 05/10/2023
+Software Revision F, 07/18/2023
 
 UR5arm_ReubenPython2and3Class.py, test_program_for_UR5arm_ReubenPython2and3Class.py, and Teleop_UR5arm.py verified working on:
 Python 3.8.
@@ -49,10 +49,10 @@ or
 sudo python Teleop_UR5arm.py "software_launch_method":"BATfile"
 (In Ubuntu, may need to run as sudo to get the keyboard module to work properly. Definitely need to run as sudo to get the ftd2xx module to work.)
 
-Teleop_UR5arm.py, ListOfModuleDependencies: ['ArucoTagDetectionFromCameraFeed_ReubenPython3Class', 'GetPIDsByProcessEnglishNameAndOptionallyKill_ReubenPython2and3', 'JoystickHID_ReubenPython2and3Class', 'keyboard', 'LowPassFilter_ReubenPython2and3Class', 'MyPlotterPureTkinterStandAloneProcess_ReubenPython2and3Class', 'MyPrint_ReubenPython2and3Class', 'numpy', 'RobotiqGripper2F85_ReubenPython2and3Class', 'scipy.spatial.transform', 'SharedGlobals_Teleop_UR5arm', 'UR5arm_ReubenPython2and3Class', 'ZEDasHandController_ReubenPython2and3Class']
+Teleop_UR5arm.py, ListOfModuleDependencies: ['ArucoTagDetectionFromCameraFeed_ReubenPython3Class', 'GetPIDsByProcessEnglishNameAndOptionallyKill_ReubenPython2and3', 'JoystickHID_ReubenPython2and3Class', 'keyboard', 'LowPassFilter_ReubenPython2and3Class', 'MyPlotterPureTkinterStandAloneProcess_ReubenPython2and3Class', 'MyPrint_ReubenPython2and3Class', 'numpy', 'RobotiqGripper2F85_ReubenPython2and3Class', 'scipy.spatial.transform', 'UR5arm_ReubenPython2and3Class', 'ZEDasHandController_ReubenPython2and3Class']
 Teleop_UR5arm.py, ListOfModuleDependencies_TestProgram: []
 Teleop_UR5arm.py, ListOfModuleDependencies_NestedLayers: ['CameraStreamerClass_ReubenPython2and3Class', 'cv2', 'ftd2xx', 'future.builtins', 'Joystick2DdotDisplay_ReubenPython2and3Class', 'LowPassFilter_ReubenPython2and3Class', 'LowPassFilterForDictsOfLists_ReubenPython2and3Class', 'numpy', 'pexpect', 'psutil', 'pygame', 'pyzed.sl', 'scipy.spatial.transform', 'serial', 'serial.tools']
-Teleop_UR5arm.py, ListOfModuleDependencies_All:['ArucoTagDetectionFromCameraFeed_ReubenPython3Class', 'CameraStreamerClass_ReubenPython2and3Class', 'cv2', 'ftd2xx', 'future.builtins', 'GetPIDsByProcessEnglishNameAndOptionallyKill_ReubenPython2and3', 'Joystick2DdotDisplay_ReubenPython2and3Class', 'JoystickHID_ReubenPython2and3Class', 'keyboard', 'LowPassFilter_ReubenPython2and3Class', 'LowPassFilterForDictsOfLists_ReubenPython2and3Class', 'MyPlotterPureTkinterStandAloneProcess_ReubenPython2and3Class', 'MyPrint_ReubenPython2and3Class', 'numpy', 'pexpect', 'psutil', 'pygame', 'pyzed.sl', 'RobotiqGripper2F85_ReubenPython2and3Class', 'scipy.spatial.transform', 'serial', 'serial.tools', 'SharedGlobals_Teleop_UR5arm', 'UR5arm_ReubenPython2and3Class', 'ZEDasHandController_ReubenPython2and3Class']
+Teleop_UR5arm.py, ListOfModuleDependencies_All:['ArucoTagDetectionFromCameraFeed_ReubenPython3Class', 'CameraStreamerClass_ReubenPython2and3Class', 'cv2', 'ftd2xx', 'future.builtins', 'GetPIDsByProcessEnglishNameAndOptionallyKill_ReubenPython2and3', 'Joystick2DdotDisplay_ReubenPython2and3Class', 'JoystickHID_ReubenPython2and3Class', 'keyboard', 'LowPassFilter_ReubenPython2and3Class', 'LowPassFilterForDictsOfLists_ReubenPython2and3Class', 'MyPlotterPureTkinterStandAloneProcess_ReubenPython2and3Class', 'MyPrint_ReubenPython2and3Class', 'numpy', 'pexpect', 'psutil', 'pygame', 'pyzed.sl', 'RobotiqGripper2F85_ReubenPython2and3Class', 'scipy.spatial.transform', 'serial', 'serial.tools', 'UR5arm_ReubenPython2and3Class', 'ZEDasHandController_ReubenPython2and3Class']
 
 sudo apt-get install python3-tk (only if there's an error about tkinter not being found)
 pip install pygame
