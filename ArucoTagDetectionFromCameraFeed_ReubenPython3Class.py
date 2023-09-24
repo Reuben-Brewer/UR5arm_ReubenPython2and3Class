@@ -2,13 +2,13 @@
 
 '''
 Reuben Brewer, Ph.D.
-SRI International
-reuben.brewer@sri.com
+reuben.brewer@gmail.com
+www.reubotics.com
 
 Apache 2 License
-Software Revision E, 07/18/2023
+Software Revision F, 09/24/2023
 
-Verified working on: Python 3.8 for Windows10 64-bit (no testing on Raspberry Pi or Mac testing yet).
+Verified working on: Python 3.8 for Windows 10 64-bit, Ubuntu 20.04, and Raspberry Pi Buster (no Mac testing yet).
 '''
 
 __author__ = 'reuben.brewer'
@@ -1793,7 +1793,7 @@ class ArucoTagDetectionFromCameraFeed_ReubenPython3Class(Frame): #Subclass the T
     
     ##########################################################################################################
     ##########################################################################################################
-    def LimitTextEntryInput(self, min_val, max_val, test_val, TextEntryObject, NumberOfDecimalPlaces = 3):
+    def LimitTextEntryInput(self, min_val, max_val, test_val, TextEntryObject):
 
         try:
             test_val = float(test_val)  # MUST HAVE THIS LINE TO CATCH STRINGS PASSED INTO THE FUNCTION
@@ -1805,17 +1805,19 @@ class ArucoTagDetectionFromCameraFeed_ReubenPython3Class(Frame): #Subclass the T
             else:
                 test_val = test_val
 
+        except:
+            pass
+
+        try:
             if TextEntryObject != "":
                 if isinstance(TextEntryObject, list) == 1:  # Check if the input 'TextEntryObject' is a list or not
-                    TextEntryObject[0].set(self.ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(test_val, 0, NumberOfDecimalPlaces))  # Reset the text, overwriting the bad value that was entered.
+                    TextEntryObject[0].set(str(test_val))  # Reset the text, overwriting the bad value that was entered.
                 else:
-                    TextEntryObject.set(self.ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(test_val, 0, NumberOfDecimalPlaces))  # Reset the text, overwriting the bad value that was entered.
-
-            return test_val
-
+                    TextEntryObject.set(str(test_val))  # Reset the text, overwriting the bad value that was entered.
         except:
-            exceptions = sys.exc_info()[0]
-            print("LimitTextEntryInput: Exceptions: %s" % exceptions)
+            pass
+
+        return test_val
     ##########################################################################################################
     ##########################################################################################################
 
@@ -2025,12 +2027,12 @@ class ArucoTagDetectionFromCameraFeed_ReubenPython3Class(Frame): #Subclass the T
             ##########################################################################################################
             if isinstance(DictToPrint[Key], dict): #RECURSION
                 ProperlyFormattedStringForPrinting = ProperlyFormattedStringForPrinting + \
-                                                     Key + ":\n" + \
+                                                     str(Key) + ":\n" + \
                                                      self.ConvertDictToProperlyFormattedStringForPrinting(DictToPrint[Key], NumberOfDecimalsPlaceToUse, NumberOfEntriesPerLine, NumberOfTabsBetweenItems)
 
             else:
                 ProperlyFormattedStringForPrinting = ProperlyFormattedStringForPrinting + \
-                                                     Key + ": " + \
+                                                     str(Key) + ": " + \
                                                      self.ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(DictToPrint[Key], 0, NumberOfDecimalsPlaceToUse)
             ##########################################################################################################
 

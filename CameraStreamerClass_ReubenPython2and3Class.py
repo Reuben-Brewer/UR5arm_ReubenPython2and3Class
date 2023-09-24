@@ -6,7 +6,7 @@ reuben.brewer@gmail.com
 www.reubotics.com
 
 Apache 2 License
-Software Revision G, 05/10/2023
+Software Revision H, 09/22/2023
 
 Verified working on: Python 3.8 for Windows10 64-bit (no testing on Raspberry Pi or Mac testing yet).
 '''
@@ -1032,7 +1032,7 @@ class CameraStreamerClass_ReubenPython2and3Class(Frame): #Subclass the Tkinter F
             ####
 
             ####
-            CameraCalibration_Kmatrix_CameraIntrinsicsMatrix = numpy.zeros((3,3), numpy.float)
+            CameraCalibration_Kmatrix_CameraIntrinsicsMatrix = numpy.zeros((3,3), float)
             CameraCalibration_Kmatrix_CameraIntrinsicsMatrix[0, 0] = float(fx)
             CameraCalibration_Kmatrix_CameraIntrinsicsMatrix[1, 1] = float(fy)
             CameraCalibration_Kmatrix_CameraIntrinsicsMatrix[2, 2] = 1.0
@@ -1041,7 +1041,7 @@ class CameraStreamerClass_ReubenPython2and3Class(Frame): #Subclass the Tkinter F
             ####
 
             ####
-            CameraCalibration_Darray_DistortionCoefficients = numpy.zeros((1,4), numpy.float)
+            CameraCalibration_Darray_DistortionCoefficients = numpy.zeros((1,4), float)
             CameraCalibration_Darray_DistortionCoefficients[0, 0] = float(k1)
             CameraCalibration_Darray_DistortionCoefficients[0, 1] = float(k2)
             CameraCalibration_Darray_DistortionCoefficients[0, 2] = float(p1)
@@ -1066,8 +1066,8 @@ class CameraStreamerClass_ReubenPython2and3Class(Frame): #Subclass the Tkinter F
         #OPENCV: https://docs.opencv.org/3.4/db/d58/group__calib3d__fisheye.html
         #COULD TRY THIS CODE NEXT: https://github.com/smidm/opencv-python-fisheye-example/blob/master/fisheye_example.py
 
-        FisheyeWarpage_Map1 = numpy.zeros((image_height, image_width, 3), numpy.float)
-        FisheyeWarpage_Map2 = numpy.zeros((image_height, image_width, 3), numpy.float)
+        FisheyeWarpage_Map1 = numpy.zeros((image_height, image_width, 3), float)
+        FisheyeWarpage_Map2 = numpy.zeros((image_height, image_width, 3), float)
 
         try:
 
@@ -1519,7 +1519,6 @@ class CameraStreamerClass_ReubenPython2and3Class(Frame): #Subclass the Tkinter F
                     else:
                         self.CVcapture.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25) #https://github.com/opencv/opencv/issues/9738
 
-                    time.sleep(0.030)
                     self.MyPrint_WithoutLogFile("Changed cv2.CAP_PROP_AUTO_exposure to " + str(self.CameraSetting_Autoexposure_TO_BE_SET))
                     self.CameraSetting_Autoexposure = self.CameraSetting_Autoexposure_TO_BE_SET
                     self.CameraSetting_Autoexposure_NeedsToBeChangedFlag = 0

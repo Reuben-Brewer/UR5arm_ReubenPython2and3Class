@@ -6,7 +6,7 @@ reuben.brewer@gmail.com
 www.reubotics.com
 
 Apache 2 License
-Software Revision G, 05/10/2023
+Software Revision H, 09/22/2023
 
 Verified working on: Python 2.7, 3.8 for Windows 8.1, 10 64-bit, Ubuntu 20.04, and Raspberry Pi Buster (no Mac testing yet).
 '''
@@ -66,19 +66,19 @@ class Joystick2DdotDisplay_ReubenPython2and3Class(Frame): #Subclass the Tkinter 
 
         print("#################### Joystick2DdotDisplay_ReubenPython2and3Class __init__ starting. ####################")
 
-        #################################################
-        #################################################
+        #########################################################
+        #########################################################
         self.GUI_ready_to_be_updated_flag = 0
         self.OBJECT_CREATED_SUCCESSFULLY_FLAG = -1
 
         self.Input_Xvalue = 0
         self.Input_Yvalue = 0
         self.DotHighlightedLikeButtonPress_State = 0
-        #################################################
-        #################################################
+        #########################################################
+        #########################################################
 
-        #################################################
-        #################################################
+        #########################################################
+        #########################################################
         if platform.system() == "Linux":
 
             if "raspberrypi" in platform.uname(): #os.uname() doesn't work in windows
@@ -96,11 +96,11 @@ class Joystick2DdotDisplay_ReubenPython2and3Class(Frame): #Subclass the Tkinter 
             self.my_platform = "other"
 
         print("Joystick2DdotDisplay_ReubenPython2and3Class __init__: The OS platform is: " + self.my_platform)
-        #################################################
-        #################################################
+        #########################################################
+        #########################################################
 
-        #################################################
-        #################################################
+        #########################################################
+        #########################################################
         if "GUIparametersDict" in setup_dict:
             self.GUIparametersDict = setup_dict["GUIparametersDict"]
 
@@ -181,11 +181,33 @@ class Joystick2DdotDisplay_ReubenPython2and3Class(Frame): #Subclass the Tkinter 
             print("Joystick2DdotDisplay_ReubenPython2and3Class __init__: No GUIparametersDict present, setting USE_GUI_FLAG: " + str(self.USE_GUI_FLAG))
 
         #print("GUIparametersDict = " + str(self.GUIparametersDict))
-        #################################################
-        #################################################
+        #########################################################
+        #########################################################
 
-        #################################################
-        #################################################
+        #########################################################
+        #########################################################
+        if "JoystickXYboxCanvas_HeightAndWidth" in setup_dict:
+            self.JoystickXYboxCanvas_HeightAndWidth = int(self.PassThroughFloatValuesInRange_ExitProgramOtherwise("JoystickXYboxCanvas_HeightAndWidth", setup_dict["JoystickXYboxCanvas_HeightAndWidth"], 100.0, 1000.0))
+        else:
+            self.JoystickXYboxCanvas_HeightAndWidth = 150
+
+        print("JoystickHID_ReubenPython2and3Class __init__: JoystickXYboxCanvas_HeightAndWidth: " + str(self.JoystickXYboxCanvas_HeightAndWidth))
+        #########################################################
+        #########################################################
+
+        #########################################################
+        #########################################################
+        if "DisplayZeroCrosshairsFlag" in setup_dict:
+            self.DisplayZeroCrosshairsFlag = self.PassThrough0and1values_ExitProgramOtherwise("DisplayZeroCrosshairsFlag", setup_dict["DisplayZeroCrosshairsFlag"])
+        else:
+            self.DisplayZeroCrosshairsFlag = 0
+
+        print("Joystick2DdotDisplay_ReubenPython2and3Class __init__: DisplayZeroCrosshairsFlag: " + str(self.DisplayZeroCrosshairsFlag))
+        #########################################################
+        #########################################################
+    
+        #########################################################
+        #########################################################
         self.myFrame = Frame(self.root)
 
         self.myFrame.grid(row = self.GUI_ROW,
@@ -195,12 +217,11 @@ class Joystick2DdotDisplay_ReubenPython2and3Class(Frame): #Subclass the Tkinter 
                           rowspan = self.GUI_ROWSPAN,
                           columnspan= self.GUI_COLUMNSPAN,
                           sticky = self.GUI_STICKY)
-        #################################################
-        #################################################
+        #########################################################
+        #########################################################
 
-        #################################################
-        #################################################
-        self.JoystickXYboxCanvas_HeightAndWidth = 150
+        #########################################################
+        #########################################################
         self.JoystickXYboxCanvas_BorderWidth = 1
 
         ### Create and draw canvas
@@ -228,21 +249,21 @@ class Joystick2DdotDisplay_ReubenPython2and3Class(Frame): #Subclass the Tkinter 
         self.JoystickXYboxCanvas_PointerCircle = self.CreateAndDrawCircleOnCanvas_CanvasCoord(self.JoystickXYboxCanvas, 0, 0, self.JoystickXYboxCanvas_PointerCircle_Radius, "red")
         ###
 
-        #################################################
-        #################################################
+        #########################################################
+        #########################################################
 
-        #################################################
-        #################################################
+        #########################################################
+        #########################################################
         time.sleep(0.1)
-        #################################################
-        #################################################
+        #########################################################
+        #########################################################
 
-        #################################################
-        #################################################
+        #########################################################
+        #########################################################
         self.GUI_ready_to_be_updated_flag = 1
         self.OBJECT_CREATED_SUCCESSFULLY_FLAG = 1
-        #################################################
-        #################################################
+        #########################################################
+        #########################################################
 
     #######################################################################################################################
     #######################################################################################################################
@@ -460,6 +481,7 @@ class Joystick2DdotDisplay_ReubenPython2and3Class(Frame): #Subclass the Tkinter 
                     #PointCoords_CanvasCoord = self.ConvertMathPointToJoystickCanvasCoordinates([1, 1])
                     ### Debug drawing functions
 
+                    #######################################################
                     PointCoords_CanvasCoord = self.ConvertMathPointToJoystickCanvasCoordinates([self.Input_Xvalue, self.Input_Yvalue])
 
                     CircleBoundingBoxCoordinates_CanvasCoord = self.GetCircleBoundingBoxCoordinatesListOnCanvas_CanvasCoord(PointCoords_CanvasCoord[0],
@@ -471,12 +493,36 @@ class Joystick2DdotDisplay_ReubenPython2and3Class(Frame): #Subclass the Tkinter 
                                                        CircleBoundingBoxCoordinates_CanvasCoord[1],
                                                        CircleBoundingBoxCoordinates_CanvasCoord[2],
                                                        CircleBoundingBoxCoordinates_CanvasCoord[3])
-
+                    #######################################################
+                    
+                    #######################################################
                     if self.DotHighlightedLikeButtonPress_State == 1:
                         self.JoystickXYboxCanvas.itemconfig(self.JoystickXYboxCanvas_PointerCircle, fill='green', outline="green")
                     else:
                         self.JoystickXYboxCanvas.itemconfig(self.JoystickXYboxCanvas_PointerCircle, fill='red', outline="red")
-
+                    #######################################################
+                    
+                    #######################################################
+                    if self.DisplayZeroCrosshairsFlag == 1:
+                        
+                        HorizontalLineCoords_BottomOfLine_CanvasCoord = self.ConvertMathPointToJoystickCanvasCoordinates([-1.0, 0.0])
+                        HorizontalLineCoords_TopOfLine_CanvasCoord = self.ConvertMathPointToJoystickCanvasCoordinates([1.0, 0.0])
+                        
+                        VerticalLineCoords_BottomOfLine_CanvasCoord = self.ConvertMathPointToJoystickCanvasCoordinates([0.0, -1.0])
+                        VerticalLineCoords_TopOfLine_CanvasCoord = self.ConvertMathPointToJoystickCanvasCoordinates([0.0, 1.0])
+                        
+                        self.JoystickXYboxCanvas.create_line(HorizontalLineCoords_BottomOfLine_CanvasCoord[0],
+                                                             HorizontalLineCoords_BottomOfLine_CanvasCoord[1],
+                                                             HorizontalLineCoords_TopOfLine_CanvasCoord[0],
+                                                             HorizontalLineCoords_TopOfLine_CanvasCoord[1],
+                                                             fill="black", width=1) #dash=(10)
+                        
+                        self.JoystickXYboxCanvas.create_line(VerticalLineCoords_BottomOfLine_CanvasCoord[0],
+                                                             VerticalLineCoords_BottomOfLine_CanvasCoord[1],
+                                                             VerticalLineCoords_TopOfLine_CanvasCoord[0],
+                                                             VerticalLineCoords_TopOfLine_CanvasCoord[1],
+                                                             fill="black", width=1) #dash=(10)
+                    #######################################################
 
                 except:
                     exceptions = sys.exc_info()[0]

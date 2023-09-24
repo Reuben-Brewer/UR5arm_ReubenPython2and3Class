@@ -1,7 +1,7 @@
 {
     "ControlLawParameters_UserNotes": "Use Teleop_UR5arm_MainThread_TimeToSleepEachLoop = 0.008 without ZED, 0.006 with ZED",
-    "ControlType_StartingValue":"KeyboardControl",
-    "ControlType_AcceptableValues": ["KeyboardControl", "JoystickControl", "ArucoTagControl","ZEDcontrol"],
+    "ControlType_StartingValue":"JoystickControl",
+    "ControlType_AcceptableValues": ["GUIandFreeDrive","File","KeyboardControl", "JoystickControl", "ArucoTagControl","ZEDcontrol"],
     "Teleop_UR5arm_MainThread_TimeToSleepEachLoop":0.006
 }
 

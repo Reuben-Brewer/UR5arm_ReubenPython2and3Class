@@ -6,7 +6,7 @@ reuben.brewer@gmail.com
 www.reubotics.com
 
 Apache 2 License
-Software Revision G, 05/10/2023
+Software Revision H, 09/22/2023
 
 Verified working on: Python 2.7, 3.8 for Windows 8.1, 10 64-bit, Ubuntu 20.04*, and Raspberry Pi Buster (no Mac testing yet).
 
@@ -258,6 +258,17 @@ class JoystickHID_ReubenPython2and3Class(Frame): #Subclass the Tkinter Frame
 
         #########################################################
         #########################################################
+        if "Joystick_SearchAllJoysticksFlag" in setup_dict:
+            self.Joystick_SearchAllJoysticksFlag = self.PassThrough0and1values_ExitProgramOtherwise("Joystick_SearchAllJoysticksFlag", setup_dict["Joystick_SearchAllJoysticksFlag"])
+        else:
+            self.Joystick_SearchAllJoysticksFlag = 0
+
+        print("JoystickHID_ReubenPython2and3Class __init__: Joystick_SearchAllJoysticksFlag: " + str(self.Joystick_SearchAllJoysticksFlag))
+        #########################################################
+        #########################################################
+
+        #########################################################
+        #########################################################
         if "Joystick_NameDesired" in setup_dict:
             self.Joystick_NameDesired = str(setup_dict["Joystick_NameDesired"])
         else:
@@ -465,9 +476,23 @@ class JoystickHID_ReubenPython2and3Class(Frame): #Subclass the Tkinter Frame
 
             #########################################################
             #########################################################
-            for IntegerID_TempIndex in range(0, self.Joystick_NumberOfJoysticksDetected):
+
+            #########################################################
+            if self.Joystick_SearchAllJoysticksFlag == 1:
+                ListOfJoysticksToSearch = range(0, self.Joystick_NumberOfJoysticksDetected)
+            else:
+                if IntegerIDdesired != -1:
+                    ListOfJoysticksToSearch = [IntegerIDdesired]
+                else:
+                    ListOfJoysticksToSearch = []
+            #########################################################
+                
+            for IntegerID_TempIndex in ListOfJoysticksToSearch: #In this first loop, discover and print details of each joystick.
 
                 #########################################################
+                #IsJoystickInitializedFlag = pygame.joystick.get_init()
+                #print("Joystick ID " + str(IntegerID_TempIndex) + " get_init() = " + str(IsJoystickInitializedFlag))
+
                 Joystick_Object = pygame.joystick.Joystick(IntegerID_TempIndex)
                 Joystick_Object.init()
 
@@ -477,6 +502,8 @@ class JoystickHID_ReubenPython2and3Class(Frame): #Subclass the Tkinter Frame
                 Joystick_NumberOfButtonsDetected = Joystick_Object.get_numbuttons()
                 Joystick_NumberOfHatsDetected = Joystick_Object.get_numhats()
                 Joystick_NumberOfBallsDetected = Joystick_Object.get_numballs()
+
+                Joystick_Object.quit()
 
                 ###########################
                 if PrintInfoForAllDetectedJoysticksFlag == 1:
@@ -489,6 +516,29 @@ class JoystickHID_ReubenPython2and3Class(Frame): #Subclass the Tkinter Frame
                     self.MyPrint_WithoutLogFile("AnalyzeAndInitializeJoystick, Joystick_NumberOfBallsDetected: " + str(Joystick_NumberOfBallsDetected))
                     self.MyPrint_WithoutLogFile("********************************************")
                 ###########################
+
+                #########################################################
+
+            #########################################################
+            #########################################################
+
+            #########################################################
+            #########################################################
+            for IntegerID_TempIndex in ListOfJoysticksToSearch: #In this second loop, open only the desired joystick.
+
+                #########################################################
+                Joystick_Object = pygame.joystick.Joystick(IntegerID_TempIndex)
+
+                Joystick_Object.init()
+
+                Joystick_NameDetected = Joystick_Object.get_name()
+                Joystick_IntegerIDdetected = Joystick_Object.get_id()
+                Joystick_NumberOfAxesDetected = Joystick_Object.get_numaxes()
+                Joystick_NumberOfButtonsDetected = Joystick_Object.get_numbuttons()
+                Joystick_NumberOfHatsDetected = Joystick_Object.get_numhats()
+                Joystick_NumberOfBallsDetected = Joystick_Object.get_numballs()
+
+                Joystick_Object.quit()
 
                 NameMatchFlag = -1
                 IntegerIDmatchFlag = -1
@@ -516,6 +566,9 @@ class JoystickHID_ReubenPython2and3Class(Frame): #Subclass the Tkinter Frame
                 ###########################
                 if NameMatchFlag == 1 and IntegerIDmatchFlag == 1:
 
+                    Joystick_Object = pygame.joystick.Joystick(Joystick_IntegerIDdetected)
+                    Joystick_Object.init()
+
                     JoystickDictToReturn = dict([("Joystick_FoundAndOpenedFlag", 1),
                                                 ("Joystick_Object", Joystick_Object),
                                                 ("Joystick_NameDetected", Joystick_NameDetected),
@@ -536,6 +589,7 @@ class JoystickHID_ReubenPython2and3Class(Frame): #Subclass the Tkinter Frame
         except:
             exceptions = sys.exc_info()[0]
             print("AnalyzeAndInitializeJoystick, Exceptions: %s" % exceptions)
+            traceback.print_exc()
             return JoystickDictToReturn
 
         #########################################################
@@ -664,6 +718,64 @@ class JoystickHID_ReubenPython2and3Class(Frame): #Subclass the Tkinter Frame
         ts = time.time()
 
         return ts
+    ##########################################################################################################
+    ##########################################################################################################
+
+    ##########################################################################################################
+    ##########################################################################################################
+    def LimitNumber_IntOutputOnly(self, min_val, max_val, test_val):
+        if test_val > max_val:
+            test_val = max_val
+
+        elif test_val < min_val:
+            test_val = min_val
+
+        else:
+            test_val = test_val
+
+        test_val = int(test_val)
+
+        return test_val
+    ##########################################################################################################
+    ##########################################################################################################
+
+    ##########################################################################################################
+    ##########################################################################################################
+    def LimitNumber_FloatOutputOnly(self, min_val, max_val, test_val):
+        if test_val > max_val:
+            test_val = max_val
+
+        elif test_val < min_val:
+            test_val = min_val
+
+        else:
+            test_val = test_val
+
+        test_val = float(test_val)
+
+        return test_val
+    ##########################################################################################################
+    ##########################################################################################################
+
+    ##########################################################################################################
+    ##########################################################################################################
+    def Rumble(self, Rumble_LowFrequencyMotor_Strength0to1, Rumble_HighFrequencyMotor_Strength0to1, Rumble_DurationMilliseconds):
+
+        try:
+
+            if self.Joystick_FoundAndOpenedFlag == 1:
+                Rumble_LowFrequencyMotor_Strength0to1 = self.LimitNumber_FloatOutputOnly(0.0, 1.0, Rumble_LowFrequencyMotor_Strength0to1)
+                Rumble_HighFrequencyMotor_Strength0to1 = self.LimitNumber_FloatOutputOnly(0.0, 1.0, Rumble_HighFrequencyMotor_Strength0to1)
+                Rumble_DurationMilliseconds = self.LimitNumber_IntOutputOnly(0.0, 1000000.0, Rumble_DurationMilliseconds)
+
+                self.Joystick_Object.rumble(Rumble_LowFrequencyMotor_Strength0to1, Rumble_HighFrequencyMotor_Strength0to1, Rumble_DurationMilliseconds)
+
+                #print("Rumble event issued!")
+
+        except:
+            exceptions = sys.exc_info()[0]
+            print("Rumble, Exceptions: %s" % exceptions)
+            traceback.print_exc()
     ##########################################################################################################
     ##########################################################################################################
 

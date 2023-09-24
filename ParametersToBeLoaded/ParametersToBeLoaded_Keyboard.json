@@ -7,46 +7,52 @@
                 {"KeyName":"a",
                 "OnPressCallbackFunctionNameString": "KeyPressResponse_IncrementURtoolTipInX_START",
                 "OnReleaseCallbackFunctionNameString": "KeyPressResponse_IncrementURtoolTipInX_STOP",
-                "IncrementSize": 0.020},
+                "TranslationIncrementSize": 0.020,
+                "RotationIncrementSize": 0.080},
 
             "Xdecrement":
                 {"KeyName":"z",
                 "OnPressCallbackFunctionNameString": "KeyPressResponse_DecrementURtoolTipInX_START",
                 "OnReleaseCallbackFunctionNameString": "KeyPressResponse_DecrementURtoolTipInX_STOP",
-                "IncrementSize": -0.020},
+                "TranslationIncrementSize": 0.020,
+                "RotationIncrementSize": 0.080},
 
             "Yincrement":
                 {"KeyName":"x",
                 "OnPressCallbackFunctionNameString": "KeyPressResponse_IncrementURtoolTipInY_START",
                 "OnReleaseCallbackFunctionNameString": "KeyPressResponse_IncrementURtoolTipInY_STOP",
-                "IncrementSize": 0.020},
+                "TranslationIncrementSize": 0.020,
+                "RotationIncrementSize": 0.240},
 
             "Ydecrement":
                 {"KeyName":"s",
                 "OnPressCallbackFunctionNameString": "KeyPressResponse_DecrementURtoolTipInY_START",
                 "OnReleaseCallbackFunctionNameString": "KeyPressResponse_DecrementURtoolTipInY_STOP",
-                "IncrementSize": -0.020},
+                "TranslationIncrementSize": 0.020,
+                "RotationIncrementSize": 0.240},
 
             "Zincrement":
                 {"KeyName":"d",
                 "OnPressCallbackFunctionNameString": "KeyPressResponse_IncrementURtoolTipInZ_START",
                 "OnReleaseCallbackFunctionNameString": "KeyPressResponse_IncrementURtoolTipInZ_STOP",
-                "IncrementSize": 0.020},
+                "TranslationIncrementSize": 0.020,
+                "RotationIncrementSize": 0.080},
 
             "Zdecrement":
                 {"KeyName":"c",
                 "OnPressCallbackFunctionNameString": "KeyPressResponse_DecrementURtoolTipInZ_START",
                 "OnReleaseCallbackFunctionNameString": "KeyPressResponse_DecrementURtoolTipInZ_STOP",
-                "IncrementSize": -0.020},
+                "TranslationIncrementSize": 0.020,
+                "RotationIncrementSize": 0.080},
 
             "OpenRobotiqGripper2F85":
-                {"KeyName":"v",
+                {"KeyName":"f",
                 "OnPressCallbackFunctionNameString": "KeyPressResponse_OpenRobotiqGripper2F85_START",
                 "OnReleaseCallbackFunctionNameString": "KeyPressResponse_OpenRobotiqGripper2F85_STOP",
-                "IncrementSize": 3.00},
+                "IncrementSize": 1.00},
 
             "CloseRobotiqGripper2F85":
-                {"KeyName":"f",
+                {"KeyName":"v",
                 "OnPressCallbackFunctionNameString": "KeyPressResponse_CloseRobotiqGripper2F85_START",
                 "OnReleaseCallbackFunctionNameString": "KeyPressResponse_CloseRobotiqGripper2F85_STOP",
                 "IncrementSize": -3.00},

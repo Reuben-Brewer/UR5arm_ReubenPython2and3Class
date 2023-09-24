@@ -6,7 +6,7 @@ reuben.brewer@gmail.com
 www.reubotics.com
 
 Apache 2 License
-Software Revision F, 07/18/2023
+Software Revision G, 09/24/2023
 
 Verified working on: Python 3.8 for Windows 10 64-bit, Ubuntu 20.04, and Raspberry Pi Buster (no Mac testing yet).
 '''
@@ -667,12 +667,12 @@ def ConvertDictToProperlyFormattedStringForPrinting(DictToPrint, NumberOfDecimal
 
         if isinstance(DictToPrint[Key], dict): #RECURSION
             ProperlyFormattedStringForPrinting = ProperlyFormattedStringForPrinting + \
-                                                 Key + ":\n" + \
+                                                 str(Key) + ":\n" + \
                                                  ConvertDictToProperlyFormattedStringForPrinting(DictToPrint[Key], NumberOfDecimalsPlaceToUse, NumberOfEntriesPerLine, NumberOfTabsBetweenItems)
 
         else:
             ProperlyFormattedStringForPrinting = ProperlyFormattedStringForPrinting + \
-                                                 Key + ": " + \
+                                                 str(Key) + ": " + \
                                                  ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(DictToPrint[Key], 0, NumberOfDecimalsPlaceToUse)
 
         if ItemsPerLineCounter < NumberOfEntriesPerLine - 1:
@@ -847,20 +847,28 @@ def LimitNumber_IntOutputOnly(min_val, max_val, test_val):
 #######################################################################################################################
 def LimitTextEntryInput(min_val, max_val, test_val, TextEntryObject):
 
-    test_val = float(test_val)  # MUST HAVE THIS LINE TO CATCH STRINGS PASSED INTO THE FUNCTION
+    try:
+        test_val = float(test_val)  # MUST HAVE THIS LINE TO CATCH STRINGS PASSED INTO THE FUNCTION
 
-    if test_val > max_val:
-        test_val = max_val
-    elif test_val < min_val:
-        test_val = min_val
-    else:
-        test_val = test_val
-
-    if TextEntryObject != "":
-        if isinstance(TextEntryObject, list) == 1:  # Check if the input 'TextEntryObject' is a list or not
-            TextEntryObject[0].set(str(test_val))  # Reset the text, overwriting the bad value that was entered.
+        if test_val > max_val:
+            test_val = max_val
+        elif test_val < min_val:
+            test_val = min_val
         else:
-            TextEntryObject.set(str(test_val))  # Reset the text, overwriting the bad value that was entered.
+            test_val = test_val
+
+    except:
+        pass
+
+    try:
+        if TextEntryObject != "":
+            if isinstance(TextEntryObject, list) == 1:  # Check if the input 'TextEntryObject' is a list or not
+                TextEntryObject[0].set(str(test_val))  # Reset the text, overwriting the bad value that was entered.
+            else:
+                TextEntryObject.set(str(test_val))  # Reset the text, overwriting the bad value that was entered.
+
+    except:
+        pass
 
     return test_val
 #######################################################################################################################

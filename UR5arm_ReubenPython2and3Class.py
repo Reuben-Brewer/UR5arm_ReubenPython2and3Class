@@ -6,7 +6,7 @@ reuben.brewer@gmail.com
 www.reubotics.com
 
 Apache 2 License
-Software Revision F, 07/18/2023
+Software Revision G, 09/24/2023
 
 Verified working on: Python 3.8 for Windows 10 64-bit, Ubuntu 20.04, and Raspberry Pi Buster (no Mac testing yet).
 '''
@@ -3535,12 +3535,12 @@ class UR5arm_ReubenPython2and3Class(Frame): #Subclass the Tkinter Frame
             ##########################################################################################################
             if isinstance(DictToPrint[Key], dict): #RECURSION
                 ProperlyFormattedStringForPrinting = ProperlyFormattedStringForPrinting + \
-                                                     Key + ":\n" + \
+                                                     str(Key) + ":\n" + \
                                                      self.ConvertDictToProperlyFormattedStringForPrinting(DictToPrint[Key], NumberOfDecimalsPlaceToUse, NumberOfEntriesPerLine, NumberOfTabsBetweenItems)
 
             else:
                 ProperlyFormattedStringForPrinting = ProperlyFormattedStringForPrinting + \
-                                                     Key + ": " + \
+                                                     str(Key) + ": " + \
                                                      self.ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(DictToPrint[Key], 0, NumberOfDecimalsPlaceToUse)
             ##########################################################################################################
 

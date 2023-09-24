@@ -37,8 +37,9 @@
 
     "UR5arm_IPV4_NumberOfRxMessagesToBuffers": 50,
     "UR5arm_DedicatedTxThread_TxMessageToSend_Queue_MaxSize": 1,
-    "UR5arm_Payload_MassKG_ToBeCommanded": 1.661,
-    "UR5arm_Payload_CoGmetersList_ToBeCommanded": [0.001, 0.019, 0.199],
+    "UR5arm_Payload_MassKG_ToBeCommanded": 0.000,
+    "UR5arm_Payload_CoGmetersList_ToBeCommanded": [0.000, 0.000, 0.000],
+    "UR5arm_OutputFlangCoordinateSystem_to_TCPtoolCenterPoint_6DOFposeList_ToBeCommanded": [0.0, 0.0, 0.254, 0.0, 0.0, 0.0],
     "UR5arm_Velocity":1.25,
     "UR5arm_Acceleration":1.05,
     "UR5arm_MultiprocessingQueue_Rx_MaxSize": 1,
@@ -50,7 +51,7 @@
 
     "UR5arm_PositionControl_ServoJ_MoveThroughListOfPoses_SafeReturnToStartingPoseFromAnywhere":
         [
-            {"JointAngleList_Deg": [90.00, -75.00, 102.50, -30.00, 84.200, 40.00], "TimeDurationSec": 5.0}
+            {"JointAngleList_Deg": [90.00, -75.00, 102.50, -30.00, 84.200, 225.00], "TimeDurationSec": 5.0}
         ],
 
     "UR5arm_EnableTx_State_AtStartupFlag": 1,
